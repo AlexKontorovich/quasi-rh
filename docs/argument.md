@@ -25,3 +25,36 @@ The exposition should emphasize why each transformation is introduced, while
 the Lean source records the local conditions, conductors, coprimality
 hypotheses, smooth weights, and uniformity of constants in full.
 
+## 1. The family and its mean square
+
+We use a fixed smooth weight `W : ℝ → ℂ` supported on `[1, 2]`. Thus
+`W (norm n / N)` restricts the column variable to `norm n ∼ N`. A second,
+nonnegative smooth weight `V : ℝ → ℝ`, also supported on `[1, 2]`, restricts
+the row variable to `norm u ∼ H`.
+
+The corresponding Lean definitions are:
+
+```lean
+noncomputable def A (data : SexticMobiusData 𝒪)
+    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ := by
+  classical
+  exact ∑ n ∈ data.normBall (2 * N),
+    if data.admissible n then
+      data.coefficient u n * W ((data.norm n : ℝ) / (N : ℝ))
+    else 0
+
+noncomputable def S (data : SexticMobiusData 𝒪)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+    (N H : ℕ) : ℝ :=
+  ∑ u ∈ data.normBall (2 * H),
+    V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
+```
+
+Here `data.coefficient u n` expands to
+
+```lean
+(data.mobius n : ℂ) * data.heckeChar n * data.sexticTwist u n
+```
+
+The `normBall` bounds do not impose a sharp analytic cutoff: they merely give
+Lean a finite ambient set. The actual localization is supplied by `W` and `V`.
