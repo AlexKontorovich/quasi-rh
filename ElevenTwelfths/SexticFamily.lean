@@ -8,40 +8,18 @@ import Mathlib.Tactic.Positivity
 
 This file defines the two quantities used throughout the argument:
 
-* `A data W u N`, the smoothly localized sextically twisted Mobius sum;
-* `S data W V N H`, its smoothly localized mean square over the row `u`.
+* `A`, the smoothly localized sextically twisted Mobius sum;
+* `S`, its smoothly localized mean square over the row `u`.
 
-The arithmetic is packaged in `SexticMobiusData`.  This lets us fix the analytic
-shape of the proof before constructing primary Eisenstein generators, ideal
-Mobius, and the sextic residue symbol.
+The defining sum deliberately displays its four mathematical ingredients:
+the primary condition, Mobius coefficient, sextic twist, and smooth cutoff.
 -/
 
 namespace ElevenTwelfths
 
 open scoped BigOperators
 
-/-- Arithmetic input for the sextically twisted Mobius family.
-
-The type `𝒪` will eventually be the primary Eisenstein integers.  The field
-`normBall` supplies finite truncations when compact support turns a `tsum`
-into a finite sum; `mem_normBall` says that it enumerates exactly the elements
-of bounded norm.
--/
-structure SexticMobiusData (𝒪 : Type*) [DecidableEq 𝒪] where
-  norm : 𝒪 → ℕ
-  normBall : ℕ → Finset 𝒪
-  mem_normBall : ∀ {B : ℕ} {x : 𝒪}, x ∈ normBall B ↔ norm x ≤ B
-  admissible : 𝒪 → Prop
-  mobius : 𝒪 → ℤ
-  sexticTwist : 𝒪 → 𝒪 → ℂ
-
-namespace SexticMobiusData
-
-variable {𝒪 : Type*} [DecidableEq 𝒪]
-
-/-- The summand in `A_u(N)`, before applying the smooth dyadic weight. -/
-def coefficient (data : SexticMobiusData 𝒪) (u n : 𝒪) : ℂ :=
-  (data.mobius n : ℂ) * data.sexticTwist u n
+variable {𝒪 : Type*}
 
 /--
 The smooth dyadic sextically twisted Mobius sum
@@ -51,12 +29,13 @@ The smooth dyadic sextically twisted Mobius sum
 Because `W` is supported on `[1/2, 1]`, only `N/2 ≤ norm(n) ≤ N` contributes.
 The ambient `normBall N` makes this a finite sum from the outset.
 -/
-noncomputable def A (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
-    (u : 𝒪) (N : ℕ) : ℂ := by
+noncomputable def A (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
+    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ := by
   classical
-  exact ∑ n ∈ data.normBall N,
-    if data.admissible n then
-      data.coefficient u n * W ((data.norm n : ℝ) / (N : ℝ))
+  exact ∑ n ∈ normBall N,
+    if primary n then
+      (mobius n : ℂ) * sexticTwist u n * W ((norm n : ℝ) / (N : ℝ))
     else 0
 
 /--
@@ -69,55 +48,64 @@ version of a sum over rows with norm comparable to `H`.  It is definitionally
 a finite sum; `S_eq_tsum` supplies the whole-lattice form used by Poisson
 summation.
 -/
-noncomputable def S (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
-    (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
-  ∑ u ∈ data.normBall H,
-    V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
+noncomputable def S (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
+  ∑ u ∈ normBall H,
+    V ((norm u : ℝ) / (H : ℝ)) *
+      ‖A norm normBall primary mobius sexticTwist W u N‖ ^ 2
 
 /-- Immediately before Poisson summation, compact support lets us regard the
 finite mean square as a `tsum` over the whole row lattice. -/
-theorem S_eq_tsum (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
-    (V : SmoothDyadicCutoff) (N H : ℕ) :
-    data.S W V N H = ∑' u : 𝒪,
-      V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2 := by
+theorem S_eq_tsum (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (mem_normBall : ∀ {B : ℕ} {x : 𝒪}, x ∈ normBall B ↔ norm x ≤ B)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
+    S norm normBall primary mobius sexticTwist W V N H = ∑' u : 𝒪,
+      V ((norm u : ℝ) / (H : ℝ)) *
+        ‖A norm normBall primary mobius sexticTwist W u N‖ ^ 2 := by
   classical
   unfold S
-  rw [tsum_eq_sum (s := data.normBall H)]
+  rw [tsum_eq_sum (s := normBall H)]
   intro u hu
-  have hnorm : H < data.norm u :=
-    Nat.lt_of_not_ge (fun hle ↦ hu (data.mem_normBall.mpr hle))
+  have hnorm : H < norm u :=
+    Nat.lt_of_not_ge (fun hle ↦ hu (mem_normBall.mpr hle))
   by_cases hH : H = 0
   · have hV : V 0 = 0 := V.toSmoothDyadicWeight.eq_zero_of_lt_half (by norm_num)
     simp [hH, hV]
   · have hHpos : (0 : ℝ) < H := by exact_mod_cast Nat.pos_of_ne_zero hH
-    have hratio : (1 : ℝ) < (data.norm u : ℝ) / (H : ℝ) := by
+    have hratio : (1 : ℝ) < (norm u : ℝ) / (H : ℝ) := by
       rw [lt_div_iff₀ hHpos]
-      have hnorm' : (H : ℝ) < data.norm u := by exact_mod_cast hnorm
+      have hnorm' : (H : ℝ) < norm u := by exact_mod_cast hnorm
       simpa using hnorm'
     rw [V.toSmoothDyadicWeight.eq_zero_of_one_lt hratio, zero_mul]
 
-theorem S_nonnegative (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
-    (V : SmoothDyadicCutoff) (N H : ℕ) : 0 ≤ data.S W V N H := by
+theorem S_nonnegative (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
+    0 ≤ S norm normBall primary mobius sexticTwist W V N H := by
   unfold S
   apply Finset.sum_nonneg
   intro u hu
   exact mul_nonneg (V.apply_nonnegative _) (sq_nonneg _)
 
 @[simp]
-theorem A_zero_scale (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ) (u : 𝒪) :
-    data.A W u 0 = 0 := by
+theorem A_zero_scale (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
+    (W : SmoothDyadicWeight ℂ) (u : 𝒪) :
+    A norm normBall primary mobius sexticTwist W u 0 = 0 := by
   classical
   have hW : W 0 = 0 := W.eq_zero_of_lt_half (by norm_num)
   simp [A, hW]
 
 @[simp]
-theorem S_zero_row_scale (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
-    (V : SmoothDyadicCutoff) (N : ℕ) : data.S W V N 0 = 0 := by
+theorem S_zero_row_scale (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N : ℕ) :
+    S norm normBall primary mobius sexticTwist W V N 0 = 0 := by
   classical
   have hV : V 0 = 0 :=
     V.toSmoothDyadicWeight.eq_zero_of_lt_half (by norm_num)
   simp [S, hV]
-
-end SexticMobiusData
 
 end ElevenTwelfths

@@ -35,26 +35,30 @@ restricts the row variable to `H/2 ≤ norm u ≤ H`.
 The corresponding Lean definitions are:
 
 ```lean
-noncomputable def A (data : SexticMobiusData 𝒪)
+noncomputable def A (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ)
+    (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ := by
   classical
-  exact ∑ n ∈ data.normBall N,
-    if data.admissible n then
-      data.coefficient u n * W ((data.norm n : ℝ) / (N : ℝ))
+  exact ∑ n ∈ normBall N,
+    if primary n then
+      (mobius n : ℂ) * sexticTwist u n * W ((norm n : ℝ) / (N : ℝ))
     else 0
 
-noncomputable def S (data : SexticMobiusData 𝒪)
+noncomputable def S (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
+    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ)
+    (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
-  ∑ u ∈ data.normBall H,
-    V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
+  ∑ u ∈ normBall H,
+    V ((norm u : ℝ) / (H : ℝ)) *
+      ‖A norm normBall primary mobius sexticTwist W u N‖ ^ 2
 ```
 
-Here `data.coefficient u n` expands to
-
-```lean
-(data.mobius n : ℂ) * data.sexticTwist u n
-```
+For Eisenstein integers, `primary n` will mean the standard congruence
+`lambda ^ 2 ∣ n - 1`.  Keeping it visible in the summation records that we
+sum over the distinguished primary generator of each admissible ideal rather
+than over all six associates.
 
 Both quantities are definitionally finite: the column sum uses `normBall N`
 and the mean square uses `normBall H`. Immediately before Poisson summation,
@@ -62,8 +66,9 @@ compact support gives the checked identity
 
 ```lean
 theorem S_eq_tsum ... :
-    data.S W V N H = ∑' u : 𝒪,
-      V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
+    S norm normBall primary mobius sexticTwist W V N H = ∑' u : 𝒪,
+      V ((norm u : ℝ) / (H : ℝ)) *
+        ‖A norm normBall primary mobius sexticTwist W u N‖ ^ 2
 ```
 
 This isolates `tsum` at exactly the point where the Poisson API requires it,
