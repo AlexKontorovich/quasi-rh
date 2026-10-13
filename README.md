@@ -6,8 +6,8 @@ This repository develops a Lean proof of the zero-free half-plane
   \operatorname{Re}(s) > \frac{11}{12}
 \]
 
-for the Riemann zeta function and, more generally, finite-order Hecke
-\(L\)-functions over \(\mathbb{Q}(\sqrt{-3})\).
+for the Riemann zeta function.  We work with the untwisted ideal-Mobius sum
+over \(\mathbb{Q}(\sqrt{-3})\); no auxiliary Hecke character is included.
 
 The project has two equally important outputs:
 
@@ -18,18 +18,17 @@ The project has two equally important outputs:
 
 ## The argument in one page
 
-For a fixed finite-order Hecke character \(\nu\), begin with a smoothly
-truncated ideal-Mobius sum
+Begin with a smoothly truncated ideal-Mobius sum
 
 \[
-  A_1(N)=\sum_{\mathfrak n}\mu_K(\mathfrak n)\nu(\mathfrak n)
+  A_1(N)=\sum_{\mathfrak n}\mu_K(\mathfrak n)
   W\!\left(\frac{N\mathfrak n}{N}\right).
 \]
 
 Embed it into the sextically twisted family
 
 \[
-  A_u(N)=\sum_{\mathfrak n}\mu_K(\mathfrak n)\nu(\mathfrak n)
+  A_u(N)=\sum_{\mathfrak n}\mu_K(\mathfrak n)
   \left(\frac{u}{n}\right)_6
   W\!\left(\frac{N\mathfrak n}{N}\right).
 \]
@@ -71,9 +70,8 @@ cubic Gauss-sum coefficients, which are recognized as Fourier coefficients of
 Kubota's cubic theta function. Its transformation law supplies the dual
 estimate, after the cube-divisor terms are separated and controlled.
 
-Finally, the power saving for the Mobius sums implies analytic continuation of
-the reciprocal \(1/L_K(s,\nu)\) into \(\operatorname{Re}(s)>11/12\), hence
-nonvanishing there.
+Finally, the power saving for the Mobius sums gives the required zeta
+nonvanishing in \(\operatorname{Re}(s)>11/12\).
 
 ## Planned correspondence between prose and Lean
 

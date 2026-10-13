@@ -19,7 +19,7 @@ section will contain:
 6. Cubic theta coefficients and the reflection estimate.
 7. Closing the mean-square recurrence.
 8. Extracting the exponent \(11/12\).
-9. Passing from the Mobius estimate to \(L_K(s,\nu)\ne0\).
+9. Passing from the Mobius estimate to zeta nonvanishing.
 
 The exposition should emphasize why each transformation is introduced, while
 the Lean source records the local conditions, conductors, coprimality
@@ -53,7 +53,7 @@ noncomputable def S (data : SexticMobiusData 𝒪)
 Here `data.coefficient u n` expands to
 
 ```lean
-(data.mobius n : ℂ) * data.heckeChar n * data.sexticTwist u n
+(data.mobius n : ℂ) * data.sexticTwist u n
 ```
 
 Both quantities are definitionally finite: the column sum uses `normBall N`

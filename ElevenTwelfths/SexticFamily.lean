@@ -13,7 +13,7 @@ This file defines the two quantities used throughout the argument:
 
 The arithmetic is packaged in `SexticMobiusData`.  This lets us fix the analytic
 shape of the proof before constructing primary Eisenstein generators, ideal
-Mobius, Hecke characters, and the sextic residue symbol.
+Mobius, and the sextic residue symbol.
 -/
 
 namespace ElevenTwelfths
@@ -33,7 +33,6 @@ structure SexticMobiusData (𝒪 : Type*) [DecidableEq 𝒪] where
   mem_normBall : ∀ {B : ℕ} {x : 𝒪}, x ∈ normBall B ↔ norm x ≤ B
   admissible : 𝒪 → Prop
   mobius : 𝒪 → ℤ
-  heckeChar : 𝒪 → ℂ
   sexticTwist : 𝒪 → 𝒪 → ℂ
 
 namespace SexticMobiusData
@@ -42,12 +41,12 @@ variable {𝒪 : Type*} [DecidableEq 𝒪]
 
 /-- The summand in `A_u(N)`, before applying the smooth dyadic weight. -/
 def coefficient (data : SexticMobiusData 𝒪) (u n : 𝒪) : ℂ :=
-  (data.mobius n : ℂ) * data.heckeChar n * data.sexticTwist u n
+  (data.mobius n : ℂ) * data.sexticTwist u n
 
 /--
 The smooth dyadic sextically twisted Mobius sum
 
-`A_u(N) = sum_n mu_K(n) nu(n) chi_n(u) W(norm(n) / N)`.
+`A_u(N) = sum_n mu_K(n) chi_n(u) W(norm(n) / N)`.
 
 Because `W` is supported on `[1/2, 1]`, only `N/2 ≤ norm(n) ≤ N` contributes.
 The ambient `normBall N` makes this a finite sum from the outset.
