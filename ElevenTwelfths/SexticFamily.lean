@@ -66,19 +66,20 @@ The smooth dyadic mean square
 `S(N,H) = sum_u V(norm(u) / H) * |A_u(N)|^2`.
 
 The nonnegative row cutoff `V` is supported on `[1/2, 1]`, so this is a smooth
-version of a sum over rows with norm comparable to `H`.  It is stated as a
-`tsum` over the whole row lattice, which is the form used by Poisson summation.
+version of a sum over rows with norm comparable to `H`.  It is definitionally
+a finite sum; `S_eq_tsum` supplies the whole-lattice form used by Poisson
+summation.
 -/
 noncomputable def S (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
     (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
-  ∑' u : 𝒪,
+  ∑ u ∈ data.normBall H,
     V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
 
-/-- Compact support turns the Poisson-facing `tsum` into a sum over the clean
-norm ball `norm u ≤ H`. -/
-theorem S_eq_sum_normBall (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
+/-- Immediately before Poisson summation, compact support lets us regard the
+finite mean square as a `tsum` over the whole row lattice. -/
+theorem S_eq_tsum (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
     (V : SmoothDyadicCutoff) (N H : ℕ) :
-    data.S W V N H = ∑ u ∈ data.normBall H,
+    data.S W V N H = ∑' u : 𝒪,
       V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2 := by
   classical
   unfold S
@@ -99,8 +100,8 @@ theorem S_eq_sum_normBall (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight
 theorem S_nonnegative (data : SexticMobiusData 𝒪) (W : SmoothDyadicWeight ℂ)
     (V : SmoothDyadicCutoff) (N H : ℕ) : 0 ≤ data.S W V N H := by
   unfold S
-  apply tsum_nonneg
-  intro u
+  apply Finset.sum_nonneg
+  intro u hu
   exact mul_nonneg (V.apply_nonnegative _) (sq_nonneg _)
 
 @[simp]

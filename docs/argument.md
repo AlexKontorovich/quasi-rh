@@ -46,7 +46,7 @@ noncomputable def A (data : SexticMobiusData 𝒪)
 noncomputable def S (data : SexticMobiusData 𝒪)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
-  ∑' u : 𝒪,
+  ∑ u ∈ data.normBall H,
     V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
 ```
 
@@ -56,15 +56,15 @@ Here `data.coefficient u n` expands to
 (data.mobius n : ℂ) * data.heckeChar n * data.sexticTwist u n
 ```
 
-The column sum is definitionally finite over `normBall N`.  The mean square is
-instead a `tsum` over the whole row lattice, which is the form needed for
-Poisson summation.  Compact support gives the checked identity
+Both quantities are definitionally finite: the column sum uses `normBall N`
+and the mean square uses `normBall H`. Immediately before Poisson summation,
+compact support gives the checked identity
 
 ```lean
-theorem S_eq_sum_normBall ... :
-    data.S W V N H = ∑ u ∈ data.normBall H,
+theorem S_eq_tsum ... :
+    data.S W V N H = ∑' u : 𝒪,
       V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
 ```
 
-Thus the analytic cutoff remains smooth, while the upper endpoints of its
-finite realization are the clean parameters `N` and `H`.
+This isolates `tsum` at exactly the point where the Poisson API requires it,
+while the basic definitions retain the clean finite bounds `N` and `H`.
