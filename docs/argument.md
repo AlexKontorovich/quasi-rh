@@ -27,10 +27,10 @@ hypotheses, smooth weights, and uniformity of constants in full.
 
 ## 1. The family and its mean square
 
-We use a fixed smooth weight `W : ℝ → ℂ` supported on `[1, 2]`. Thus
-`W (norm n / N)` restricts the column variable to `norm n ∼ N`. A second,
-nonnegative smooth weight `V : ℝ → ℝ`, also supported on `[1, 2]`, restricts
-the row variable to `norm u ∼ H`.
+We use a fixed smooth weight `W : ℝ → ℂ` supported on `[1/2, 1]`. Thus
+`W (norm n / N)` restricts the column variable to `N/2 ≤ norm n ≤ N`. A
+second, nonnegative smooth weight `V : ℝ → ℝ`, also supported on `[1/2, 1]`,
+restricts the row variable to `H/2 ≤ norm u ≤ H`.
 
 The corresponding Lean definitions are:
 
@@ -38,7 +38,7 @@ The corresponding Lean definitions are:
 noncomputable def A (data : SexticMobiusData 𝒪)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ := by
   classical
-  exact ∑ n ∈ data.normBall (2 * N),
+  exact ∑ n ∈ data.normBall N,
     if data.admissible n then
       data.coefficient u n * W ((data.norm n : ℝ) / (N : ℝ))
     else 0
@@ -46,7 +46,7 @@ noncomputable def A (data : SexticMobiusData 𝒪)
 noncomputable def S (data : SexticMobiusData 𝒪)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
-  ∑ u ∈ data.normBall (2 * H),
+  ∑' u : 𝒪,
     V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
 ```
 
@@ -56,5 +56,15 @@ Here `data.coefficient u n` expands to
 (data.mobius n : ℂ) * data.heckeChar n * data.sexticTwist u n
 ```
 
-The `normBall` bounds do not impose a sharp analytic cutoff: they merely give
-Lean a finite ambient set. The actual localization is supplied by `W` and `V`.
+The column sum is definitionally finite over `normBall N`.  The mean square is
+instead a `tsum` over the whole row lattice, which is the form needed for
+Poisson summation.  Compact support gives the checked identity
+
+```lean
+theorem S_eq_sum_normBall ... :
+    data.S W V N H = ∑ u ∈ data.normBall H,
+      V ((data.norm u : ℝ) / (H : ℝ)) * ‖data.A W u N‖ ^ 2
+```
+
+Thus the analytic cutoff remains smooth, while the upper endpoints of its
+finite realization are the clean parameters `N` and `H`.
