@@ -1,149 +1,323 @@
 # The 11/12 argument, with Lean landmarks
 
-The [side-by-side blueprint](../blueprint/index.html) is our working guide.
-We will expand it together, one mathematical step at a time, pairing natural
-language with the actual Lean definitions and statements.
+The separate [ideal-family notes](ideal-family.md) and
+[HTML blueprint](../blueprint/index.html) develop the ideal-indexed exposition.
 
-## 1. Basic arithmetic objects
-
-Let \(\omega\) be a primitive cube root of unity. We work with
-\(K=\mathbb Q(\omega)=\mathbb Q(\sqrt{-3})\) and its ring of integers
-\(\mathcal O=\mathbb Z[\omega]\). Lean uses `CyclotomicField 3 ℚ` and
-`NumberField.RingOfIntegers K`, with a fixed complex embedding.
-
-There are two kinds of norms:
-
-- For a nonzero integral ideal, \(\mathrm N\mathfrak n=\#(\mathcal O/\mathfrak n)\).
-- For an element \(u=a+b\omega\),
-  \(\mathrm N(u)=u\bar u=|u|^2=a^2-ab+b^2\).
-
-They agree on principal ideals: \(\mathrm N((u))=\mathrm N(u)\).
-We use mathlib's `Ideal.absNorm` directly, without a project wrapper. Its
-underlying function is `Submodule.cardQuot`, the cardinality of the quotient. `elementNorm` is the norm of
-`Ideal.span {u}`; `elementNorm_eq` and `complex_norm_sq` prove its compatibility
-with the algebraic norm and squared complex absolute value. The explicit
-coordinate identification with \(a+b\omega\) remains to be formalized.
-
-For a nonzero ideal \(\mathfrak n=\prod_{j=1}^r\mathfrak p_j^{e_j}\), define
-\(\mu_K(\mathfrak n)=(-1)^r\) if all exponents are one, and zero otherwise.
-Thus \(\mu_K(\mathcal O)=1\). `mobiusK` uses squarefreeness and the multiset
-of prime-ideal factors. Its value at the zero ideal is defined as zero.
-It is not the integer Möbius function applied to the ideal norm.
-
-These definitions are in [Arithmetic.lean](../ElevenTwelfths/Arithmetic.lean).
-
-## 2. Sextic characters and the two summation variables
-
-The [OpenAI source, Sections 2–4](https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026/build/paper2.tex)
-uses column ideals prime to a fixed set of primes containing those above 2 and
-3 and the conductor of its auxiliary Hecke character. We omit that auxiliary
-character and take the excluded primes to be those above 6.
-
-For a nonzero prime ideal \(\mathfrak p\nmid(6)\), let
-\(q=\mathrm N\mathfrak p\). If \(u\in\mathfrak p\), set
-\(\chi_{\mathfrak p}(u)=0\). Otherwise \(\chi_{\mathfrak p}(u)\) is the unique
-sixth root of unity congruent to \(u^{(q-1)/6}\) modulo \(\mathfrak p\).
-For \(\mathfrak n\) prime to \((6)\), define
+The proof has one conceptual spine:
 
 \[
-\chi_{\mathfrak n}(u)=\left(\frac{u}{\mathfrak n}\right)_6
- =\prod_{\mathfrak p^{e_{\mathfrak p}}\parallel\mathfrak n}
-   \chi_{\mathfrak p}(u)^{e_{\mathfrak p}}.
+  \text{sextic family}
+  \longrightarrow \text{mean square}
+  \longrightarrow \text{sixth-power amplification}
+  \longrightarrow \text{weighted Möbius bound}
+  \longrightarrow \zeta(s)\ne0.
 \]
 
-The unit ideal gives the empty product, so \(\chi_{\mathcal O}(u)=1\),
-including for \(u=0\). For other admissible ideals, the character is zero
-when \((u)+\mathfrak n\ne\mathcal O\). We define it to be zero outside the
-admissible denominator domain, which is excluded from the sums anyway.
+The long analytic middle is reused from OpenAI's formalization below its
+packaged zero-free theorem. The new assembly keeps the mean-square radius
+symbolic, chooses it as a function of the requested epsilon, and derives
+`11 / 12` directly. It does not invoke
+`OAI.NumberTheory.DirichletL.RowCompletion.ZeroFreeRegion` and does not use a
+stronger `7 / 8` theorem as a black box.
 
-`primeSextic` implements the residue-field rule by summing the matching root
-among the six powers of `-omega`; `chi` multiplies over prime-ideal factors
-with multiplicity. The unique-root property and character identities remain
-proof obligations, not axioms.
+## 1. The visible Eisenstein sum
 
-**Columns are ideals; rows are elements.** The paper sometimes writes the
-column ideal as its unique primary generator \(n\equiv1\pmod{3\mathcal O}\).
-In that notation, \(\mu_K(n)=\mu_K((n))\) and \(\chi_n=\chi_{(n)}\), and each
-ideal is counted once. `Primary` records this congruence, but our ideal sums
-do not require a generator choice. The generator correspondence is a future
-arithmetic lemma.
+Write `O` for the Eisenstein integers. The public weight structures in
+`ElevenTwelfths.SmoothDyadic` are smooth and supported in `[1 / 2, 1]`.
+Consequently `W (N(n) / N)` restricts the column variable to
+`N / 2 <= N(n) <= N`, and the analogous row cutoff has the clean upper bound
+`H`, not `2 * H`.
 
-The row variable \(u\) ranges over all of \(\mathcal O\), not just primary,
-squarefree, or coprime elements. All six associates occur as distinct lattice
-points. This is the full lattice used for Poisson summation.
-
-## 3. The Möbius partial sums and their mean square
-
-Fix a smooth complex weight \(W\) supported on \([1/2,1]\), and a nonnegative
-real smooth weight \(V\) with the same support. We use \(M\) for Möbius partial
-sums throughout this project:
-
-\[
-M_u(N)=\sum_{\substack{0\ne\mathfrak n\subseteq\mathcal O\\
-                      (\mathfrak n,(6))=1}}
- \mu_K(\mathfrak n)\chi_{\mathfrak n}(u)
- W\!\left(\frac{\mathrm N\mathfrak n}{N}\right),
-\qquad
-S(N,H)=\sum_{u\in\mathcal O}
- V\!\left(\frac{\mathrm N(u)}H\right)|M_u(N)|^2.
-\]
-
-For positive scales only \(N/2\le\mathrm N\mathfrak n\le N\) and
-\(H/2\le\mathrm N(u)\le H\) contribute. The zero row contributes zero since
-\(V(0)=0\). The weight structures stay in the implementation; they do not
-need their own definition entries in the blueprint.
+The arithmetic is concrete:
 
 ```lean
-noncomputable def M (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
-  ∑ n ∈ idealBall N,
-    (mobiusK n : ℂ) * chi n u * W ((Ideal.absNorm n : ℝ) / (N : ℝ))
+def primary (n : 𝒪) : Prop := lambda ^ 2 ∣ n - 1
 
-noncomputable def S (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+noncomputable def eisensteinNorm (n : 𝒪) : ℕ :=
+  Ideal.absNorm (Ideal.span {n})
+
+noncomputable def eisensteinMobius (n : 𝒪) : ℤ :=
+  UniqueFactorizationMonoid.moebius (Ideal.span {n})
+```
+
+Thus the readable element sum and the ideal-indexed analytic core use
+literally the same Möbius coefficient. Primaryness selects the distinguished
+generator rather than summing over all six associates.
+
+For a finite set `S` of excluded bad prime ideals, `outsidePrimaryBall S N`
+contains the canonical primary generators of the admissible ideals of norm
+at most `N`. The actual twisted sum is
+
+```lean
+noncomputable def outsideA ... (W : SmoothDyadicWeight ℂ)
+    (u : 𝒪) (N : ℕ) : ℂ :=
+  ∑ n ∈ outsidePrimaryBall S N,
+    if primary n then
+      (eisensteinMobius n : ℂ) * outsideSexticTwist S hbad N u n *
+        W ((eisensteinNorm n : ℝ) / (N : ℝ))
+    else 0
+```
+
+This is the promised explicit expression: primary, Möbius, sextic twist, and
+smooth cutoff all remain visible.
+
+## 2. A finite mean square until Poisson
+
+The public mean square is definitionally a `Finset` sum:
+
+```lean
+noncomputable def outsideS ...
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
-  ∑ u ∈ rowBall H, V ((elementNorm u : ℝ) / (H : ℝ)) * ‖M W u N‖ ^ 2
+  ∑ u ∈ exactRowBall H,
+    V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+      ‖outsideA S hbad W u N‖ ^ 2
 ```
 
-`idealBall N` is the finite set of admissible ideals of norm at most `N`.
-`rowBall H` contains every lattice element of norm at most `H`; its finiteness
-is proved for the actual ring, rather than supplied as an input. No norm,
-Möbius function, or character is passed into `M`.
-
-In [SexticFamily.lean](../ElevenTwelfths/SexticFamily.lean), compact support
-proves the whole-lattice form:
+Columns and rows deliberately use different finite balls. Columns are
+admissible ideals represented by primary generators; Poisson summation runs
+over every Eisenstein integer in the row lattice. The two bridge theorems are
 
 ```lean
-theorem S_eq_tsum (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
-    (N H : ℕ) : S W V N H =
-      ∑' u : 𝒪, V ((elementNorm u : ℝ) / (H : ℝ)) * ‖M W u N‖ ^ 2
+theorem outsideA_eq_idealRowSum ... :
+    outsideA S hbad W u N = idealRowSum ... u
+
+theorem outsideS_eq_idealRowSum_tsum ... :
+    outsideS S hbad W V N H = ∑' u : 𝒪,
+      V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+        ‖idealRowSum ... u‖ ^ 2
 ```
 
-The reference paper's Poisson argument uses a Schwartz majorant for the full
-row ball; our dyadic cutoff is a localization convention. Relating the desired
-ball estimate to these smooth localizations remains part of the analytic work.
-When opening the square introduces a row coprimality indicator, the paper uses
-inclusion–exclusion and then applies Poisson on lattice residue classes.
-The ideal-denominator restriction does not remove rows from the lattice.
+The second equality is used at the interface to Poisson summation. Compact
+support proves that every row outside `exactRowBall H` contributes zero, so
+the initial definitions retain finite sums while the Fourier-analytic API
+receives a whole-lattice `tsum`.
 
-## 4. The omitted Euler factors
+## 3. What the reused analytic core proves
 
-For \(\operatorname{Re}(s)>1\), the untwisted ideal series is
+After opening the square in the row variable, the formalized argument follows
+these main beats:
+
+1. Eisenstein Poisson summation produces sextic Gauss sums.
+2. Local Gauss and Jacobi identities reorganize Möbius and the sextic phases
+   into cubic Gauss-sum coefficients.
+3. Those coefficients are completed to the cubic theta series.
+4. Its reflection law, itself built from the lower Poisson and Gauss-sum
+   layers, transfers the sum to the dual side.
+5. A second Poisson passage exposes quadratic characters, and the quadratic
+   sieve controls the remaining dual family.
+
+The lower-level fixed-shell construction is exposed in this repository as
+
+```lean
+theorem ActualFixedShellModels.actual_fixedShellModels ... :
+    HasFixedShellModels ...
+```
+
+It imports `RowCompletion.BranchDecoding`, not the packaged
+`RowCompletion.ZeroFreeRegion`. The resulting canonical theta models feed the
+mean-square endpoint
+
+```lean
+theorem outside_mean_square_of_theta_models_pos ...
+    (theta epsilon : ℝ) (htheta : 0 < theta) (hepsilon : 0 < epsilon) :
+    ∃ C > 0, ∀ D Z, 1 ≤ Z → ... → ∀ T : Finset 𝒪,
+      (∀ z ∈ T, N(z) ≤ Z ^ (1 + theta)) →
+      (∀ z ∈ T, z ≠ 0) →
+      ∑ z ∈ T, ‖idealRowSum ... z‖ ^ 2
+        ≤ C * Z * Z ^ (1 + theta) * Z ^ epsilon
+```
+
+The displayed signature suppresses only conductors, fixed bad primes, and
+smoothness hypotheses. The important point is that `theta` may be any
+positive real number.
+
+## 4. Removing the fixed 1/20 reserve
+
+The original descent encoded a reciprocal step `1 / 1000` and an initial
+reserve `1 / 20`. Those values were conveniences for a finite combinatorial
+descent, not a conceptual analytic barrier. They are replaced locally by
+
+```lean
+class CanonicalDescentScale where
+  denominator : ℕ
+  denominator_pos : 0 < denominator
+  reserve : ℝ
+  reserve_pos : 0 < reserve
+  short_budget : 50 ≤ reserve * denominator
+```
+
+The last field is precisely the numerical budget needed by the short-cube
+argument: twenty-five factors of size `Z ^ (1 / denominator)` consume at most
+half of the reserve. For any `kappa > 0`,
+
+```lean
+CanonicalDescentScale.ofReserve kappa hkappa
+```
+
+chooses `denominator = ceil (50 / kappa) + 1`. To prove the mean square at
+radius `theta > 0`, the new entry point installs the local scale with
+`kappa = theta / 2`. Every descent remains finite; only its finite depth is
+allowed to depend on `theta`.
+
+The historical `denominator = 1000`, `reserve = 1 / 20` theorem is retained
+as a compatibility entry point. It is not used in the direct `11 / 12`
+assembly.
+
+## 5. Sixth-power amplification
+
+For the actual Eisenstein sextic row, the local identity is
 
 \[
-\sum_{(\mathfrak n,(6))=1}\frac{\mu_K(\mathfrak n)}{(\mathrm N\mathfrak n)^s}
- =\frac{1}{\zeta_K(s)(1-4^{-s})(1-3^{-s})}.
+  \chi_I(b^6)=\mathbf 1_{(b,I)=1}.
 \]
 
-The prime above 2 has norm 4 and the prime above 3 has norm 3. The omitted
-factors are nonzero in \(\operatorname{Re}(s)>0\). Their restoration and the
-passage from ideal Möbius cancellation to zeta nonvanishing are still to be
-formalized; they are not consequences of the definitions alone.
+It appears in Lean as `idealSexticRow_sixth_mask`. The public algebraic layer
+also records that `b ↦ b ^ 6` has fibers of size at most six:
 
-## Proposed next steps
+```lean
+theorem sixthPowerFiber_card (s : Finset R) (z : R) :
+    (s.filter fun b ↦ b ^ 6 = z).card ≤ 6
+```
 
-1. Prove the arithmetic identities needed for the sextic characters.
-2. Extract the sixth-power rows and establish amplification.
-3. Open the mean square and apply Poisson summation.
-4. Establish the Gauss–Jacobi conversion.
-5. Identify cubic theta coefficients and prove the dual estimate.
-6. Close the mean-square bound and extract the exponent \(11/12\).
-7. Use the Mellin transform and restore local factors to deduce nonvanishing.
+The final proof intentionally averages over all `b` in a smooth annulus,
+rather than restricting `b` to primes. Prime sixth powers illustrate the same
+amplification mechanism, but the all-`b` average is the chosen simplification:
+it is already strong enough and avoids importing a separate prime-counting
+argument.
+
+Put
+
+\[
+  Y=Z^\alpha,
+  \qquad
+  \alpha=\frac{1+\theta}{6}.
+\]
+
+Then `N(b ^ 6) <= Z ^ (1 + theta)`, so every amplified row lies inside the
+mean-square range. Averaging the coprimality mask over `b` has the deliberate
+main term
+
+\[
+  \operatorname{totientDensity}(I)
+  =\prod_{P\mid I}\left(1-\frac1{N(P)}\right).
+\]
+
+Accordingly, the theorem produced by the amplifier bounds the intentionally
+totient-weighted Möbius sum, rather than pretending at this stage to recover
+the raw Möbius sum:
+
+```lean
+theorem outside_totient_moebius_bound_of_mean_square ... :
+    ∃ C > 0, ∀ D Z, ... →
+      ‖∑ I ∈ outsideIdealsUpTo S D,
+        baseChangeWeight chi I * W (N(I) / Z) * totientDensity I‖
+      ≤ C * Z ^ ((11 + 5 * theta) / 12 + eta)
+```
+
+## 6. The exponent 11/12
+
+Suppose the mean square is written with loss `2 * eta`:
+
+\[
+  \sum_z |A_z(Z)|^2\ll Z^{2+\theta+2\eta}.
+\]
+
+Cauchy--Schwarz applied to an amplifier of mass `Y` gives a numerator bounded
+by
+
+\[
+  \sqrt{Y Z^{2+\theta+2\eta}}.
+\]
+
+Dividing by the main-term mass `Y` therefore gives
+
+\[
+  Z^{(2+\theta-\alpha)/2+\eta}.
+\]
+
+Substituting `alpha = (1 + theta) / 6` yields
+
+\[
+  \frac{2+\theta-\alpha}{2}
+  =\frac{11+5\theta}{12}.
+\]
+
+Given the final requested loss `epsilon > 0`, the assembly takes
+
+\[
+  \theta=\frac{6\varepsilon}{5},
+  \qquad
+  \eta=\frac{\varepsilon}{2}.
+\]
+
+Then
+
+\[
+  \frac{11+5\theta}{12}+\eta
+  =\frac{11}{12}+\varepsilon.
+\]
+
+This calculation is carried out by
+`smoothedWeightedMobiusBound_of_theta_models_pos`; it is the point at which
+the symbolic mean square becomes the desired exponent.
+
+## 7. Euler correction and inverse Mellin
+
+The property passed to the final analytic bridge is
+
+```lean
+def SmoothedWeightedMobiusBound ... (sigma : ℝ) : Prop :=
+  ∀ W, ContDiff ℝ ∞ W →
+    Function.support W ⊆ Set.Icc (1 / 2 : ℝ) 1 →
+    ∀ epsilon > 0,
+      (fun Z ↦ ∑' I, outsideWeight chi S I * W (N(I) / Z))
+        =O[atTop] (fun Z ↦ Z ^ (sigma + epsilon))
+```
+
+Here `outsideWeight` contains the Möbius factor, the Dirichlet character, the
+totient density, and the removal of finitely many bad Euler factors. This is
+intentional. The density contributes an Euler product that is analytic and
+nonvanishing in the relevant half-plane; `Nonvanishing.lean` restores it as
+`eulerCorrection`, while `finiteEulerFactor` restores the omitted local
+factors.
+
+The Mellin layer expects an auxiliary cutoff supported in `[1, 2]`. The
+public `[1 / 2, 1]` convention is converted by the explicit dilation
+`U x = W (2 * x)` and the simultaneous scale change `Z ↦ 2 * Z`; a fixed
+dilation does not change the power exponent. Inverse Mellin then gives
+analytic continuation of the corrected reciprocal `L`-factor to
+`re s > sigma`.
+
+The last two assembled statements are
+
+```lean
+theorem actual_smoothedWeightedMobiusBound
+    (q : ℕ) [NeZero q] (chi : DirichletCharacter ℂ q) :
+    SmoothedWeightedMobiusBound chi (reflectionExcludedPrimes q)
+      (11 / 12 : ℝ)
+
+theorem riemannZeta_ne_zero_of_re_gt_elevenTwelfths
+    (z : ℂ) (hz : (11 / 12 : ℝ) < z.re) :
+    riemannZeta z ≠ 0
+```
+
+The first is the complete analytic estimate assembled from the actual theta
+models, arbitrary-positive-radius mean square, and all-`b` sixth-power
+average. The second specializes the per-character nonvanishing theorem to the
+trivial character modulo one and rewrites its `LFunction` as `riemannZeta`.
+
+## 8. Reproducing the build
+
+Fetch cached `.olean` files before asking Lake to compile the project:
+
+```sh
+lake exe cache get
+lake build
+```
+
+The `lakefile.lean` configuration automatically applies OpenAI's vendored
+Lean 4.34.1 compatibility patch to the pinned `rellich-kondrachov` dependency
+before dependency resolution. It verifies the dependency origin and commit,
+recognizes an already-applied patch, and repeats the check after
+`lake update`; no manual patch command is required.
