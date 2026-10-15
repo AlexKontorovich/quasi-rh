@@ -68,7 +68,7 @@ when \((u)+\mathfrak n\ne\mathcal O\). We define it to be zero outside the
 admissible denominator domain, which is excluded from the sums anyway.
 
 `primeSextic` implements the residue-field rule by summing the matching root
-among the six powers of `-omega`; `chi` multiplies over prime-ideal factors
+among the six powers of `-ω`; `chi` multiplies over prime-ideal factors
 with multiplicity. The unique-root property and character identities remain
 proof obligations, not axioms.
 

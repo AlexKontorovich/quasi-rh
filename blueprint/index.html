@@ -353,8 +353,8 @@
     <main class="main">
       <div class="main-inner">
         <header class="hero">
-          <p class="eyebrow">The direct proof architecture</p>
-          <h2>From Möbius cancellation to <em>\(\Re(s)>11/12\)</em></h2>
+          <p class="eyebrow">Reading OpenAI’s proof side by side with a Lean formalization</p>
+          <h2>A quasi-Riemann Hypothesis in <em>\(\Re(s)>11/12\)</em></h2>
           <p class="hero-lede">
             The proof deforms the smoothed Eisenstein Möbius sum by sextic
             characters, transforms the resulting second moment twice by
@@ -364,7 +364,6 @@
           </p>
           <div class="status-row" aria-label="Formalization status">
             <div class="status"><strong>Public endpoint</strong><span><code>riemannZeta z ≠ 0</code> for \(11/12&lt;\Re z\)</span></div>
-            <div class="status"><strong>Direct assembly</strong><span>No dependency on the packaged 23/24 zero-free theorem</span></div>
             <div class="status"><strong>Proof objects</strong><span>The linked declarations compile; proof bodies remain in source</span></div>
           </div>
         </header>
@@ -391,31 +390,30 @@
             <p>Work in the Eisenstein integers \(\mathcal O=\mathbb Z[\omega]\). The sum is written over elements because that is the notation we want to read, but every coefficient is the coefficient of the principal ideal \((n)\).</p>
             <div class="math-card">\[
               N(n)=N((n)),\qquad \mu_K(n)=\mu_K((n)),\qquad
-              n\text{ primary}\iff n\equiv1\pmod{\lambda^2}.
+              n\text{ primary}\iff n\equiv1\pmod{3}.
             \]</div>
-            <p>The predicate <code>primary</code> verifies the congruence. The upstream <code>primaryGenerator</code>, used by <code>outsidePrimaryBall</code>, chooses one associate. This is not a second Möbius theory on elements: Lean’s coefficient is literally mathlib’s ideal Möbius function evaluated at <code>Ideal.span {n}</code>.</p>
-            <p class="plain-note"><strong>What to verify.</strong> The norm and Möbius definitions use the same principal ideal, and <code>primary</code> is an explicit predicate on \(\mathcal O\).</p>
+            <p>For elements coprime to \(3\), the primary condition selects exactly one representative among the six unit associates.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Definitions</p><h4 class="formal-title">The public arithmetic vocabulary</h4></div>
-              <div class="source-links"><a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Arithmetic.lean#L24">Arithmetic.lean</a></div>
+              <div class="source-links"><a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Arithmetic.lean#L24">Arithmetic.lean</a></div>
             </div>
             <pre><code>abbrev K := CyclotomicField 3 ℚ
 
 abbrev 𝒪 := NumberField.RingOfIntegers K
 
-noncomputable def omega : 𝒪 :=
+noncomputable def ω : 𝒪 :=
   (IsCyclotomicExtension.zeta_spec 3 ℚ K).toInteger
 
-noncomputable def lambda : 𝒪 := omega - 1
+def primary (n : 𝒪) : Prop := (3 : 𝒪) ∣ n - 1
 
-def primary (n : 𝒪) : Prop := lambda ^ 2 ∣ n - 1
-
-noncomputable def eisensteinNorm (n : 𝒪) : ℕ :=
+-- The absolute norm of an Eisenstein integer.
+noncomputable def 𝒩 (n : 𝒪) : ℕ :=
   Ideal.absNorm (Ideal.span {n})
 
-noncomputable def eisensteinMobius (n : 𝒪) : ℤ :=
+-- The Eisenstein Mobius function.
+noncomputable def μ_K (n : 𝒪) : ℤ :=
   UniqueFactorizationMonoid.moebius (Ideal.span {n})</code></pre>
           </section>
         </article>
@@ -432,14 +430,13 @@ noncomputable def eisensteinMobius (n : 𝒪) : ℤ :=
               S(N,H)=\sum_{N(u)\le H}V\!\left(\frac{N(u)}H\right)|A_u(N)|^2.
             \]</div>
             <p>The public \(S\) is deliberately a <em>finite</em> sum. At the precise boundary where Poisson is needed, compact support proves it equal to a whole-lattice <code>tsum</code>.</p>
-            <p class="plain-note"><strong>What to verify.</strong> The definitions below show the four requested factors. The bridge theorem replaces both the finite row ball and the element notation by the exact ideal row consumed upstream.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Definitions + bridge</p><h4 class="formal-title">Finite first, <code>tsum</code> at Poisson</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/SmoothDyadic.lean#L17">SmoothDyadic.lean</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ConcreteFamily.lean#L88">ConcreteFamily.lean</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/SmoothDyadic.lean#L17">SmoothDyadic.lean</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ConcreteFamily.lean#L88">ConcreteFamily.lean</a>
               </div>
             </div>
             <pre><code>structure SmoothDyadicWeight (E : Type*)
@@ -466,9 +463,9 @@ noncomputable def outsideA
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
   ∑ n ∈ outsidePrimaryBall S N,
     if primary n then
-      (eisensteinMobius n : ℂ) *
+      (μ_K n : ℂ) *
         outsideSexticTwist S hbad N u n *
-        W ((eisensteinNorm n : ℝ) / (N : ℝ))
+        W ((𝒩 n : ℝ) / (N : ℝ))
     else 0
 
 noncomputable def outsideS
@@ -476,7 +473,7 @@ noncomputable def outsideS
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
   ∑ u ∈ exactRowBall H,
-    V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+    V ((𝒩 u : ℝ) / (H : ℝ)) *
       ‖outsideA S hbad W u N‖ ^ 2</code></pre>
             <details>
               <summary>The exact element-to-ideal and finite-to-lattice statements</summary>
@@ -497,7 +494,7 @@ theorem outsideS_eq_idealRowSum_tsum
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) :
     outsideS S hbad W V N H = ∑' u : 𝒪,
-      V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+      V ((𝒩 u : ℝ) / (H : ℝ)) *
         ‖idealRowSum (outsideIdealsUpTo S N)
           (outsideIdealsUpTo_ne_bot S N)
           (outside_good S N hbad)
@@ -522,14 +519,13 @@ theorem outsideS_eq_idealRowSum_tsum
               \sum_{h\in\mathcal O}\mathcal K_{I,J,D}(h).
             \]</div>
             <p>The zero frequency and the nonzero tail are tracked separately. The important structural fact is that the original moment has become a dual-frequency sum carrying finite Gauss factors.</p>
-            <p class="plain-note"><strong>What to verify.</strong> The left side of <code>canonicalPair_first_poisson</code> is the whole-lattice masked character pair. The right side is the Möbius inclusion–exclusion sum over dual modes.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">First transform</p><h4 class="formal-title">Masked radial Poisson, pair by pair</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L80">moment source</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L475">pair Poisson</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L80">moment source</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L475">pair Poisson</a>
               </div>
             </div>
             <pre><code><span class="comment">-- Exact central equality; parameters encode the two columns.</span>
@@ -574,14 +570,13 @@ theorem canonicalPair_first_poisson
               =\left(\prod_{i\ne j}\chi_{p_i}^{\,e_i}(p_j)\right)
               \prod_i G_i^{\rm converted}.
             \]</div>
-            <p class="plain-note"><strong>What to verify.</strong> The theorem’s left side contains the ideal Möbius factor and canonical product Gauss sum. Its right side contains only cross-character phases and converted local coefficients.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Local arithmetic</p><h4 class="formal-title">Möbius–Gauss conversion</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/MixedConversion.lean#L162">MixedConversion.lean</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CubicNormalization.lean#L611">Gauss–Jacobi identity</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/MixedConversion.lean#L162">MixedConversion.lean</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CubicNormalization.lean#L611">Gauss–Jacobi identity</a>
               </div>
             </div>
             <pre><code>theorem moebius_mixed_gauss_conversion
@@ -619,14 +614,13 @@ theorem canonicalPair_first_poisson
               V^\ast\!\left(\frac{N(I)N(J)^3}{X}\right).
             \]</div>
             <p>The cube \(N(J)^3\) is the structural feature that later lets Möbius inversion reopen the completed series at cube scales.</p>
-            <p class="plain-note"><strong>What to verify.</strong> <code>completedT</code> is an honest double <code>tsum</code>. The reopening identity says a Möbius-weighted copy at \(X/N(H)^3\) equals the expanded three-ideal term.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Completion</p><h4 class="formal-title">The object that is reflected</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Arithmetic/IdealMobius.lean#L442">definitions</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CompletedExpansion.lean#L128">reopening</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Arithmetic/IdealMobius.lean#L442">definitions</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CompletedExpansion.lean#L128">reopening</a>
               </div>
             </div>
             <pre><code>def cubeWeight (Ψ : O →* ℂ) : Ideal O →* ℂ where
@@ -691,8 +685,8 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
             <div class="formal-head">
               <div><p class="formal-kicker">Theta transformation</p><h4 class="formal-title">Actual fixed-shell models</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L104">fiber identity</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L137">model theorem</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L104">fiber identity</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L137">model theorem</a>
               </div>
             </div>
             <pre><code>def actualReflectionScale : ℂ :=
@@ -751,14 +745,13 @@ theorem completedT_eq_reflectedFiber_idealValue_local
               {\rm GaussRow}_{S,T}(k).
             \]</div>
             <p>The theorem keeps the conductor, coprimality mask, Fourier scale, and active Gauss-row factor explicit.</p>
-            <p class="plain-note"><strong>What to verify.</strong> The first Lean equality identifies the cube with mathlib’s quadratic character. The second has the original lattice <code>tsum</code> on the left and the dual \(k\)-sum on the right.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Second transform</p><h4 class="formal-title">Sextic cubes become quadratic rows</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/SexticNormalization.lean#L40">sextic cube</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83">second Poisson</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/SexticNormalization.lean#L40">sextic cube</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83">second Poisson</a>
               </div>
             </div>
             <pre><code>theorem canonicalSextic_pow_three_quadratic
@@ -798,12 +791,11 @@ theorem completedT_eq_reflectedFiber_idealValue_local
               \ \ll\ (M+N^2)\sum_{I\in F}|a_I|^2.
             \]</div>
             <p>This is the main analytic estimate after the second Poisson passage. Everything later is bookkeeping, descent, and choosing scales so that this gain survives.</p>
-            <p class="plain-note"><strong>What to verify.</strong> The Lean conclusion below is already an ideal-indexed finite family bound, with squarefree and good-prime hypotheses explicit.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Large sieve</p><h4 class="formal-title">The quadratic energy bound</h4></div>
-              <div class="source-links"><a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/InitialBound.lean#L473">InitialBound.lean</a></div>
+              <div class="source-links"><a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/InitialBound.lean#L473">InitialBound.lean</a></div>
             </div>
             <pre><code>theorem ideal_initial_quadratic_sieve
     (F : Finset (Ideal O))
@@ -838,15 +830,14 @@ theorem completedT_eq_reflectedFiber_idealValue_local
               \sum_{\substack{z\in T\\N(z)\le Z^{1+\theta}}}|A_z(Z)|^2
               \ \ll_{\theta,\varepsilon}\ Z\cdot Z^{1+\theta}\cdot Z^\varepsilon.
             \]</div>
-            <p>Being able to make \(\theta\) arbitrarily small is what lets the later sixth-power average reach \(11/12+\varepsilon\), rather than stopping at the historical \(23/24\).</p>
-            <p class="plain-note"><strong>What to verify.</strong> <code>ofReserve</code> constructs valid finite-descent data for any positive reserve. The mean-square theorem quantifies over every positive \(\sigma\).</p>
+            <p>Being able to make \(\theta\) arbitrarily small is what lets the later sixth-power average reach \(11/12+\varepsilon\).</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Density closure</p><h4 class="formal-title">A movable descent scale</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/DescentScale.lean#L15">DescentScale.lean</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L274">ThetaDensity.lean</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/DescentScale.lean#L15">DescentScale.lean</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L274">ThetaDensity.lean</a>
               </div>
             </div>
             <pre><code>class CanonicalDescentScale where
@@ -918,16 +909,15 @@ def CanonicalDescentScale.ofReserve
               |M(Z)|\ll Z^{(11+5\theta)/12+\eta}.
             \]</div>
             <p>Choose \(\theta=6\varepsilon/5\) and \(\eta=\varepsilon/2\). Then \((11+5\theta)/12+\eta=11/12+\varepsilon\).</p>
-            <p class="plain-note"><strong>What to verify.</strong> The mask identity is exact. The symbolic theorem displays the exponent before specialization, and the public theorem makes the two parameter choices in its proof.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Amplification</p><h4 class="formal-title">All sixth powers, then the exponent calculation</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L555">row mask</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Mellin/SixthPowerAverage.lean#L147">coprime sum</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/SixthPowerMeanSquare.lean#L44">symbolic bound</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L43">11/12 choice</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L555">row mask</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Mellin/SixthPowerAverage.lean#L147">coprime sum</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/SixthPowerMeanSquare.lean#L44">symbolic bound</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L43">11/12 choice</a>
               </div>
             </div>
             <pre><code>def totientDensity (I : Ideal O) : ℂ :=
@@ -977,15 +967,14 @@ let averageLoss : ℝ := epsilon / 2</code></pre>
               (E_S(s)E_{\rm dens}(s)\,\mathcal M(s))
               =\widehat W(s).
             \]</div>
-            <p class="plain-note"><strong>What to verify.</strong> The bound is a quantified proposition over every smooth dyadic weight. Its Mellin transform is analytic on the desired half-plane, and the corrected identity names every restored factor.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Analytic bridge</p><h4 class="formal-title">Weighted Möbius → analytic reciprocal</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Nonvanishing.lean#L30">Nonvanishing.lean</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Hecke/MobiusEulerCorrection.lean#L262">Euler correction</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/RowCompletion/ThetaNonvanishing.lean#L85">corrected identity</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Nonvanishing.lean#L30">Nonvanishing.lean</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Hecke/MobiusEulerCorrection.lean#L262">Euler correction</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/RowCompletion/ThetaNonvanishing.lean#L85">corrected identity</a>
               </div>
             </div>
             <pre><code>def SmoothedWeightedMobiusBound
@@ -1056,15 +1045,14 @@ theorem corrected_weighted_mellin_identity
             <div class="math-card">\[
               \boxed{\ \Re(s)>\frac{11}{12}\quad\Longrightarrow\quad\zeta(s)\ne0\ }.
             \]</div>
-            <p class="plain-note"><strong>What to verify.</strong> The endpoint has no model, mean-square, or Mellin hypothesis: all of them have been discharged by <code>actual_smoothedWeightedMobiusBound</code>.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
               <div><p class="formal-kicker">Endpoint</p><h4 class="formal-title">The unconditional theorem</h4></div>
               <div class="source-links">
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L109">assembly</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L130">Dirichlet theorem</a>
-                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L141">zeta theorem</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L109">assembly</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L130">Dirichlet theorem</a>
+                <a href="https://github.com/AlexKontorovich/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L141">zeta theorem</a>
               </div>
             </div>
             <pre><code>theorem actual_smoothedWeightedMobiusBound
@@ -1093,7 +1081,7 @@ theorem riemannZeta_ne_zero_of_re_gt_elevenTwelfths
           <div class="provenance">
             <div><strong>Public layer</strong><code>ElevenTwelfths/*</code> fixes notation, the \([1/2,1]\) cutoff, the amplifier, and the final direct assembly.</div>
             <div><strong>Reused core</strong><code>OAI/NumberTheory/DirichletL/*</code> supplies the Poisson, Gauss, theta, descent, and sieve machinery.</div>
-            <div><strong>Dependency boundary</strong>The endpoint is assembled from <code>BranchDecoding</code> and lower layers, not by weakening a previously packaged \(7/8\) or \(23/24\) theorem.</div>
+            <div><strong>Dependency boundary</strong>The endpoint is assembled from <code>BranchDecoding</code> and lower layers.</div>
           </div>
         </section>
         <footer>

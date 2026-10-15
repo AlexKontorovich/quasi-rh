@@ -6,9 +6,7 @@ namespace ElevenTwelfths
 # From the `11 / 12` Eisenstein--Möbius estimate to zeta nonvanishing
 
 This file isolates the final analytic bridge.  Its hypothesis is the smoothed
-weighted ideal sum produced by the sixth-power amplifier; unlike the OpenAI
-`23 / 24` route, it does not assume canonical theta models or import an
-already-proved zero-free region.
+weighted ideal sum produced by the sixth-power amplifier.
 -/
 
 noncomputable section

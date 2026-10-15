@@ -21,8 +21,8 @@ noncomputable def eisensteinA
   classical
   exact ∑ n ∈ normBall N,
     if primary n then
-      (eisensteinMobius n : ℂ) * sexticTwist u n *
-        W ((eisensteinNorm n : ℝ) / (N : ℝ))
+      (μ_K n : ℂ) * sexticTwist u n *
+        W ((𝒩 n : ℝ) / (N : ℝ))
     else 0
 
 /-- The actual smooth second moment over Eisenstein rows. -/
@@ -30,19 +30,19 @@ noncomputable def eisensteinS
     (columnBall rowBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
   ∑ u ∈ rowBall H,
-    V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+    V ((𝒩 u : ℝ) / (H : ℝ)) *
       ‖eisensteinA columnBall sexticTwist W u N‖ ^ 2
 
 theorem eisensteinA_eq_A
     (normBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) :
     eisensteinA normBall sexticTwist W u N =
-      A eisensteinNorm normBall primary eisensteinMobius sexticTwist W u N := rfl
+      A 𝒩 normBall primary μ_K sexticTwist W u N := rfl
 
 theorem eisensteinS_eq_S
     (columnBall rowBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
     eisensteinS columnBall rowBall sexticTwist W V N H =
-      S eisensteinNorm columnBall rowBall primary eisensteinMobius sexticTwist W V N H := rfl
+      S 𝒩 columnBall rowBall primary μ_K sexticTwist W V N H := rfl
 
 end ElevenTwelfths

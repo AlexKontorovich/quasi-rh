@@ -93,7 +93,7 @@ def Admissible (n : Ideal 𝒪) : Prop :=
   n ≠ ⊥ ∧ n ⊔ Ideal.span {(6 : 𝒪)} = ⊤
 
 /-- The six roots, enumerated without choosing a primary generator. -/
-noncomputable def sixthRoot (j : Fin 6) : 𝒪 := (-omega) ^ (j : ℕ)
+noncomputable def sixthRoot (j : Fin 6) : 𝒪 := (-ω) ^ (j : ℕ)
 
 /-- For a nonzero prime ideal away from `(6)`, select the sixth root whose
 residue is `u ^ ((N p - 1) / 6)`; return zero when `u ∈ p`.

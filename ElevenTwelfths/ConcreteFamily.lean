@@ -35,20 +35,20 @@ noncomputable def exactRowBall (H : ℕ) : Finset 𝒪 :=
   insert 0 (rowNormDisk H)
 
 theorem mem_exactRowBall {H : ℕ} {u : 𝒪} :
-    u ∈ exactRowBall H ↔ eisensteinNorm u ≤ H := by
+    u ∈ exactRowBall H ↔ 𝒩 u ≤ H := by
   classical
   rw [exactRowBall, Finset.mem_insert]
   constructor
   · rintro (rfl | hu)
-    · simp [eisensteinNorm]
-    · simpa only [eisensteinNorm] using (mem_rowNormDisk.mp hu).2
+    · simp [𝒩]
+    · simpa only [𝒩] using (mem_rowNormDisk.mp hu).2
   · intro hu
     by_cases hzero : u = 0
     · exact Or.inl hzero
     · apply Or.inr
       apply mem_rowNormDisk.mpr
-      simpa only [eisensteinNorm] using
-        ⟨Nat.pos_of_ne_zero (eisensteinNorm_ne_zero hzero), hu⟩
+      simpa only [𝒩] using
+        ⟨Nat.pos_of_ne_zero (𝒩_ne_zero hzero), hu⟩
 
 /-- Admissible columns of norm at most `N`, represented by their canonical
 primary Eisenstein generators. -/
@@ -72,7 +72,8 @@ theorem outsidePrimaryBall_primary
   classical
   obtain ⟨I, hI, rfl⟩ := Finset.mem_image.mp hn
   have hgen := outside_primaryGenerator_ne_zero S hbad N hI
-  simpa [primary, lambda, omega, ActualEisensteinCubic.lambda,
+  apply (primary_iff_ramified _).mpr
+  simpa [𝔓, ω, ActualEisensteinCubic.lambda,
     ActualEisensteinCubic.omega] using (primaryGenerator_spec I hgen).2
 
 /-- The actual product of local sextic characters attached to the column
@@ -93,8 +94,8 @@ noncomputable def outsideA
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
   ∑ n ∈ outsidePrimaryBall S N,
     if primary n then
-      (eisensteinMobius n : ℂ) * outsideSexticTwist S hbad N u n *
-        W ((eisensteinNorm n : ℝ) / (N : ℝ))
+      (μ_K n : ℂ) * outsideSexticTwist S hbad N u n *
+        W ((𝒩 n : ℝ) / (N : ℝ))
     else 0
 
 theorem outsideA_eq_eisensteinA
@@ -124,10 +125,11 @@ theorem outsideA_eq_idealRowSum
     have hgen := outside_primaryGenerator_ne_zero S hbad N hI
     have hspan := (primaryGenerator_spec I hgen).1
     have hprimary : primary (primaryGenerator I) := by
-      simpa [primary, lambda, omega, ActualEisensteinCubic.lambda,
+      apply (primary_iff_ramified _).mpr
+      simpa [𝔓, ω, ActualEisensteinCubic.lambda,
         ActualEisensteinCubic.omega] using (primaryGenerator_spec I hgen).2
     rw [ite_eq_left hprimary]
-    simp only [eisensteinMobius, eisensteinNorm, outsideSexticTwist, hspan]
+    simp only [μ_K, 𝒩, outsideSexticTwist, hspan]
     have hchar :
         (1 : DirichletCharacter ℂ 1) (Ideal.absNorm I) = 1 :=
       MulChar.one_apply (isUnit_of_subsingleton _)
@@ -145,7 +147,7 @@ noncomputable def outsideS
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
   ∑ u ∈ exactRowBall H,
-    V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+    V ((𝒩 u : ℝ) / (H : ℝ)) *
       ‖outsideA S hbad W u N‖ ^ 2
 
 /-- Immediately before Poisson summation, the finite row sum becomes a
@@ -155,22 +157,22 @@ theorem outsideS_eq_tsum
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
     outsideS S hbad W V N H = ∑' u : 𝒪,
-      V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+      V ((𝒩 u : ℝ) / (H : ℝ)) *
         ‖outsideA S hbad W u N‖ ^ 2 := by
   classical
   unfold outsideS
   rw [tsum_eq_sum (s := exactRowBall H)]
   intro u hu
-  have hnorm : H < eisensteinNorm u :=
+  have hnorm : H < 𝒩 u :=
     Nat.lt_of_not_ge (fun hle ↦ hu (mem_exactRowBall.mpr hle))
   by_cases hH : H = 0
   · have hV : V 0 = 0 :=
       V.toSmoothDyadicWeight.eq_zero_of_lt_half (by norm_num)
     simp [hH, hV]
   · have hHpos : (0 : ℝ) < H := by exact_mod_cast Nat.pos_of_ne_zero hH
-    have hratio : (1 : ℝ) < (eisensteinNorm u : ℝ) / (H : ℝ) := by
+    have hratio : (1 : ℝ) < (𝒩 u : ℝ) / (H : ℝ) := by
       rw [lt_div_iff₀ hHpos]
-      simpa only [one_mul] using (show (H : ℝ) < eisensteinNorm u by exact_mod_cast hnorm)
+      simpa only [one_mul] using (show (H : ℝ) < 𝒩 u by exact_mod_cast hnorm)
     rw [V.toSmoothDyadicWeight.eq_zero_of_one_lt hratio, zero_mul]
 
 /-- The same conversion, now with the ideal row exposed in exactly the form
@@ -180,7 +182,7 @@ theorem outsideS_eq_idealRowSum_tsum
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
     outsideS S hbad W V N H = ∑' u : 𝒪,
-      V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+      V ((𝒩 u : ℝ) / (H : ℝ)) *
         ‖idealRowSum (outsideIdealsUpTo S N)
           (outsideIdealsUpTo_ne_bot S N) (outside_good S N hbad)
           (1 : DirichletCharacter ℂ 1)

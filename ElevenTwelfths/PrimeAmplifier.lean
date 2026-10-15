@@ -9,9 +9,8 @@ Set
 `alpha = (1 + theta) / 6`.
 
 The amplifying primes have norm about `N ^ alpha`, so their sixth powers fit
-inside the row range `N ^ (1 + theta)`.  The theorem below deliberately keeps
-`theta` symbolic: the constants `11 / 60`, `21 / 10`, and `23 / 24` in the
-source formalization are exactly the specialization `theta = 1 / 10`.
+inside the row range `N ^ (1 + theta)`. The theorem below keeps `theta`
+symbolic throughout the exponent calculation.
 -/
 
 namespace ElevenTwelfths

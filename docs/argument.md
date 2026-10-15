@@ -32,12 +32,12 @@ Consequently `W (N(n) / N)` restricts the column variable to
 The arithmetic is concrete:
 
 ```lean
-def primary (n : 𝒪) : Prop := lambda ^ 2 ∣ n - 1
+def primary (n : 𝒪) : Prop := (3 : 𝒪) ∣ n - 1
 
-noncomputable def eisensteinNorm (n : 𝒪) : ℕ :=
+noncomputable def 𝒩 (n : 𝒪) : ℕ :=
   Ideal.absNorm (Ideal.span {n})
 
-noncomputable def eisensteinMobius (n : 𝒪) : ℤ :=
+noncomputable def μ_K (n : 𝒪) : ℤ :=
   UniqueFactorizationMonoid.moebius (Ideal.span {n})
 ```
 
@@ -54,8 +54,8 @@ noncomputable def outsideA ... (W : SmoothDyadicWeight ℂ)
     (u : 𝒪) (N : ℕ) : ℂ :=
   ∑ n ∈ outsidePrimaryBall S N,
     if primary n then
-      (eisensteinMobius n : ℂ) * outsideSexticTwist S hbad N u n *
-        W ((eisensteinNorm n : ℝ) / (N : ℝ))
+      (μ_K n : ℂ) * outsideSexticTwist S hbad N u n *
+        W ((𝒩 n : ℝ) / (N : ℝ))
     else 0
 ```
 
@@ -71,7 +71,7 @@ noncomputable def outsideS ...
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
   ∑ u ∈ exactRowBall H,
-    V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+    V ((𝒩 u : ℝ) / (H : ℝ)) *
       ‖outsideA S hbad W u N‖ ^ 2
 ```
 
@@ -85,7 +85,7 @@ theorem outsideA_eq_idealRowSum ... :
 
 theorem outsideS_eq_idealRowSum_tsum ... :
     outsideS S hbad W V N H = ∑' u : 𝒪,
-      V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+      V ((𝒩 u : ℝ) / (H : ℝ)) *
         ‖idealRowSum ... u‖ ^ 2
 ```
 

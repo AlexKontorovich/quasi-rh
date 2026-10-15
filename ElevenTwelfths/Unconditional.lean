@@ -10,9 +10,6 @@ This file assembles three independent pieces:
 * the actual fixed-shell models copied at the lower `BranchDecoding` layer;
 * the arbitrary-positive-radius mean square;
 * the direct sixth-power average and Mellin nonvanishing bridge.
-
-It does not import OpenAI's packaged `ZeroFreeRegion` module and does not use
-its `23 / 24` `DirichletTarget`.
 -/
 
 namespace ElevenTwelfths

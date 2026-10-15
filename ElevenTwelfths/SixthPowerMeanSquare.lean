@@ -4,9 +4,7 @@ import OAI.NumberTheory.DirichletL.Mellin.SixthPowerAverage
 # From the sextic mean square to the `11 / 12` Möbius bound
 
 This module is the direct sixth-power amplifier used after the analytic
-mean-square argument.  The mean-square estimate is an explicit hypothesis;
-in particular, this file does not invoke OpenAI's hard-coded `23 / 24`
-specialization or any zero-free theorem.
+mean-square argument. The mean-square estimate is an explicit hypothesis.
 
 For `alpha = (1 + theta) / 6`, average the rows `A (b ^ 6)` over
 `Norm b \asymp N ^ alpha`.  Cauchy--Schwarz costs the square root of the
