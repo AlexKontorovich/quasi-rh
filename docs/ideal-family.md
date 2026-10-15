@@ -11,9 +11,9 @@ the public proof uses an all-element, totient-weighted amplifier.
 
 # The 11/12 argument, with Lean landmarks
 
-The [side-by-side blueprint](../blueprint/index.html) is our working guide.
-We will expand it together, one mathematical step at a time, pairing natural
-language with the actual Lean definitions and statements.
+The [side-by-side blueprint](../blueprint/index.html) now presents the complete
+twelve-beat proof spine. This document preserves the earlier ideal-indexed
+prototype, pairing its own definitions with the corresponding mathematics.
 
 ## 1. Basic arithmetic objects
 

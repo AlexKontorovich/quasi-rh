@@ -1,7 +1,8 @@
 # The 11/12 argument, with Lean landmarks
 
-The separate [ideal-family notes](ideal-family.md) and
-[HTML blueprint](../blueprint/index.html) develop the ideal-indexed exposition.
+The [HTML blueprint](../blueprint/index.html) presents this proof in twelve
+side-by-side mathematical and Lean beats. The separate
+[ideal-family notes](ideal-family.md) preserve an earlier prototype.
 
 The proof has one conceptual spine:
 

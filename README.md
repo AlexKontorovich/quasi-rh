@@ -135,20 +135,19 @@ The short mathematical guide is in [`docs/argument.md`](docs/argument.md).
 
 ## Side-by-side blueprint
 
-The [HTML blueprint](blueprint/index.html) develops the ideal-indexed family
-`M` and its mean square in `ElevenTwelfths.IdealFamily`, with exposition beside
-Lean declarations. Its [companion notes](docs/ideal-family.md) preserve the
-step-by-step development. The field, ring of integers, and root of unity are
-shared with the public proof; the ideal-family character selector and its
-remaining character identities are a separate development, not yet a checked
-bridge to `ConcreteFamily`.
+The [HTML blueprint](blueprint/index.html) presents the complete direct proof
+in twelve mathematical beats, from the explicit Eisenstein family through the
+two Poisson passages, cubic theta reflection, quadratic sieve, sixth-power
+amplifier, Mellin continuation, and zeta nonvanishing. Each beat pairs a short
+natural-language explanation with the definitions and theorem boundary that
+Lean checks. The [ideal-family notes](docs/ideal-family.md) preserve an earlier
+standalone prototype; they are not the proof spine shown in the blueprint.
 
 Open `blueprint/index.html` directly, or run `python3 -m http.server 8000`
 and visit <http://localhost:8000/blueprint/>. MathJax requires internet access.
 Edit the HTML directly and keep excerpts synchronized with their linked Lean
-sources. Use existing mathlib definitions where available. Add motivation,
-precise hypotheses, and meaningful statements as the blueprint grows, with
-missing proofs explicitly marked.
+sources. Use existing mathlib definitions where available, and keep the
+readable mathematical invariant separate from the longer formal interface.
 
 ## Building
 

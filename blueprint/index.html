@@ -1,424 +1,1123 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quasi-RH at 11/12 · Blueprint</title>
-<style>:root {
-  --text: #222222;
-  --muted: #6b7280;
-  --border: #d8dee8;
-  --border-strong: #c7d2e0;
-  --page: #ffffff;
-  --nav-bg: #f7f8fb;
-  --panel-bg: #f8fafc;
-  --target-bg: #f1f5f9;
-  --link: #2563eb;
-  --kind: #475569;
-}
-
-* { box-sizing: border-box; }
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  color: var(--text);
-  background: var(--page);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.6;
-}
-
-a {
-  color: var(--link);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-code {
-  font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
-  font-size: 0.92em;
-}
-
-.page {
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 0;
-  max-width: 1500px;
-  margin: 0 auto;
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  height: 100vh;
-  overflow-y: auto;
-  background: var(--nav-bg);
-  border-right: 1px solid var(--border);
-  padding: 24px 22px 28px;
-}
-
-.sidebar h1 {
-  margin: 0 0 12px;
-  font-size: 1.35rem;
-  line-height: 1.2;
-  font-weight: 700;
-}
-
-.sidebar p {
-  margin: 0 0 18px;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.nav-title {
-  margin: 20px 0 10px;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.nav {
-  margin: 0;
-  padding-left: 18px;
-}
-
-.nav li {
-  margin: 0 0 8px;
-}
-
-.content {
-  display: grid;
-  padding: 28px 34px 60px;
-}
-
-.main-text {
-  max-width: 72rem;
-}
-
-.main-text h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.main-text p,
-.main-text li {
-  color: var(--muted);
-  font-size: 1rem;
-}
-
-.main-text ul,
-.main-text ol {
-  margin-left: 1.4rem;
-}
-
-.site-header {
-  margin-bottom: 1.6rem;
-}
-
-.site-header p {
-  max-width: 68rem;
-}
-
-.module-list {
-  display: grid;
-  gap: 14px;
-}
-
-.module-card {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px 18px;
-  background: #fff;
-}
-
-.module-card h2 {
-  margin: 0 0 0.5rem;
-  font-size: 1.15rem;
-}
-
-.module-meta {
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.module-section {
-  display: grid;
-  gap: 18px;
-  margin-bottom: 34px;
-}
-
-.section-label {
-  color: var(--muted);
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.module-entries {
-  display: grid;
-  gap: 14px;
-}
-
-.thm_wrapper {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(340px, 0.95fr);
-  gap: 22px;
-  align-items: start;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  overflow: hidden;
-  background: #fff;
-}
-
-.lemma_thm_wrapper {
-  padding: 20px 24px;
-}
-
-.entry-label {
-  color: var(--muted);
-  font-size: 0.85rem;
-  margin-bottom: 0.8rem;
-}
-
-.lemma_thmcontent p,
-.lemma_thmcontent li {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.05rem;
-  color: #202020;
-}
-
-.lemma_thmcontent p {
-  margin: 0 0 0.8rem;
-}
-
-.lemma_thmcontent ul,
-.lemma_thmcontent ol {
-  margin: 0.3rem 0 0.9rem 1.4rem;
-}
-
-.display-math {
-  overflow-x: auto;
-  margin: 0.8rem 0 1rem;
-}
-
-.thm_side_panel {
-  background: var(--panel-bg);
-  border-left: 1px solid var(--border);
-  padding: 14px;
-  min-width: 0;
-}
-
-.lean-decl-box {
-  position: relative;
-  background: var(--target-bg);
-  border-left: 4px solid #94a3b8;
-  border-radius: 0 6px 6px 0;
-  padding: 34px 14px 14px 16px;
-  overflow: hidden;
-}
-
-.lean-decl-links {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  display: flex;
-  gap: 12px;
-  font-size: 0.82rem;
-}
-
-.lean-doc-link,
-.lean-src-link {
-  color: var(--muted);
-}
-
-pre {
-  margin: 0;
-  overflow-x: auto;
-  padding: 0.75rem;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid var(--border-strong);
-  color: #0f172a;
-  font-size: 0.84rem;
-  line-height: 1.45;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.proof-fold {
-  margin-top: 0.75rem;
-}
-
-.proof-fold > summary {
-  cursor: pointer;
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.footer-note {
-  color: var(--muted);
-  font-size: 0.92rem;
-  margin-top: 2rem;
-}
-
-@media (max-width: 1080px) {
-  .page {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    position: static;
-    height: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-@media (max-width: 980px) {
-  .thm_wrapper {
-    grid-template-columns: 1fr;
-  }
-
-  .thm_side_panel {
-    border-left: 0;
-    border-top: 1px solid var(--border);
-  }
-}
-.content { min-width: 0; }
-section, article { scroll-margin-top: 20px; }
-h2 { font-size: 1.35rem; }
-a:focus-visible, summary:focus-visible { outline: 2px solid #2563eb; outline-offset: 4px; }
-@media print { .page { display: block; } .sidebar { display: none; } .content { padding: 0; } }
-</style>
-<script>
-window.MathJax = {tex: {inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']]}};
-</script>
-<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A twelve-beat blueprint of the Lean proof that the Riemann zeta function is nonzero for Re(s) > 11/12.">
+  <title>The 11/12 argument · Lean blueprint</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f6f3ec;
+      --paper-2: #fffdf8;
+      --ink: #17201d;
+      --muted: #66716c;
+      --line: #d9d7cc;
+      --line-strong: #bbbdb3;
+      --navy: #172f3b;
+      --teal: #0d756a;
+      --teal-soft: #dceee8;
+      --amber: #be6a2c;
+      --amber-soft: #f4e7d8;
+      --blue: #315d92;
+      --blue-soft: #e3eaf3;
+      --code: #101b20;
+      --code-ink: #e7eee9;
+      --code-muted: #91a49c;
+      --shadow: 0 18px 52px rgba(23, 32, 29, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 79% -5%, rgba(190, 106, 44, 0.10), transparent 28rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.58;
+    }
+    a { color: inherit; }
+    code, pre { font-family: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace; }
+    .shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+    .rail {
+      position: sticky;
+      inset: 0 auto 0 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 26px 22px 34px;
+      background: var(--navy);
+      color: #f6f8f7;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .rail-kicker {
+      margin: 0 0 8px;
+      color: #9fc8bd;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    .rail h1 {
+      margin: 0;
+      max-width: 12ch;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.72rem;
+      font-weight: 500;
+      line-height: 1.08;
+    }
+    .rail-intro { margin: 13px 0 24px; color: #b9c8c6; font-size: 0.88rem; }
+    .rail-group {
+      margin: 20px 0 8px;
+      color: #7fa69e;
+      font-size: 0.67rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .rail ol { margin: 0; padding: 0; list-style: none; }
+    .rail li { margin: 2px 0; }
+    .rail nav a {
+      display: grid;
+      grid-template-columns: 25px 1fr;
+      gap: 8px;
+      align-items: start;
+      padding: 7px 9px;
+      border-radius: 9px;
+      color: #d5dfdc;
+      font-size: 0.81rem;
+      line-height: 1.32;
+      text-decoration: none;
+      transition: background 120ms ease, color 120ms ease;
+    }
+    .rail nav a:hover, .rail nav a.active { background: rgba(255,255,255,0.09); color: #fff; }
+    .nav-number { color: #8fc5b8; font-variant-numeric: tabular-nums; font-weight: 800; }
+    .rail-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px 12px;
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,0.13);
+      color: #b9c8c6;
+      font-size: 0.76rem;
+    }
+    .main { min-width: 0; padding: 34px clamp(24px, 4.4vw, 76px) 80px; }
+    .main-inner { max-width: 1320px; margin: 0 auto; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 5vw, 64px);
+      border: 1px solid var(--line);
+      border-radius: 26px;
+      background: rgba(255,253,248,0.86);
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      right: -140px;
+      bottom: -190px;
+      border: 42px solid rgba(13,117,106,0.07);
+      border-radius: 50%;
+      content: "";
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 18px;
+      color: var(--teal);
+      font-size: 0.72rem;
+      font-weight: 850;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { width: 26px; height: 2px; background: currentColor; content: ""; }
+    .hero h2 {
+      margin: 0;
+      max-width: 880px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.45rem, 5.8vw, 5.25rem);
+      font-weight: 500;
+      letter-spacing: -0.045em;
+      line-height: 0.98;
+    }
+    .hero h2 em { color: var(--amber); font-style: normal; white-space: nowrap; }
+    .hero-lede {
+      max-width: 790px;
+      margin: 25px 0 0;
+      color: #4e5a55;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.1rem, 1.7vw, 1.32rem);
+      line-height: 1.55;
+    }
+    .status-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px; }
+    .status { padding: 15px 17px; border: 1px solid var(--line); border-radius: 13px; background: rgba(246,243,236,0.62); }
+    .status strong { display: block; margin-bottom: 4px; font-size: 0.8rem; letter-spacing: 0.02em; }
+    .status span { color: var(--muted); font-size: 0.82rem; }
+    .route { margin: 30px 0 46px; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,253,248,0.74); }
+    .route-head { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; margin-bottom: 15px; }
+    .route h3 { margin: 0; font-size: 0.9rem; }
+    .route p { margin: 0; color: var(--muted); font-size: 0.79rem; }
+    .route-grid { display: grid; grid-template-columns: repeat(12, minmax(44px, 1fr)); gap: 5px; }
+    .route-grid a {
+      display: grid;
+      place-items: center;
+      min-height: 44px;
+      border-radius: 10px;
+      color: white;
+      font-size: 0.77rem;
+      font-weight: 850;
+      text-decoration: none;
+    }
+    .route-grid a:nth-child(-n+2) { background: var(--teal); }
+    .route-grid a:nth-child(n+3):nth-child(-n+8) { background: var(--blue); }
+    .route-grid a:nth-child(n+9) { background: var(--amber); }
+    .route-grid a:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .section-break { display: grid; grid-template-columns: 120px 1fr; gap: 18px; align-items: center; margin: 54px 0 20px; }
+    .section-break span { color: var(--muted); font-size: 0.72rem; font-weight: 850; letter-spacing: 0.13em; text-transform: uppercase; }
+    .section-break::after { height: 1px; background: var(--line-strong); content: ""; }
+    .beat {
+      display: grid;
+      grid-template-columns: minmax(290px, 0.82fr) minmax(460px, 1.18fr);
+      margin: 0 0 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper-2);
+      box-shadow: 0 8px 28px rgba(23,32,29,0.045);
+      overflow: hidden;
+      scroll-margin-top: 24px;
+    }
+    .story { padding: clamp(24px, 3vw, 38px); }
+    .formal { min-width: 0; padding: clamp(20px, 2.6vw, 32px); background: #edf0eb; border-left: 1px solid var(--line); }
+    .beat-topline { display: flex; gap: 9px; align-items: center; margin-bottom: 15px; }
+    .beat-number {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: white;
+      font-size: 0.78rem;
+      font-weight: 850;
+      flex: 0 0 auto;
+    }
+    .phase { padding: 5px 9px; border-radius: 999px; background: var(--teal-soft); color: #075f56; font-size: 0.66rem; font-weight: 850; letter-spacing: 0.07em; text-transform: uppercase; }
+    .phase.transform { background: var(--blue-soft); color: #315d92; }
+    .phase.close { background: var(--amber-soft); color: #8f4c1e; }
+    .story h3 {
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.5rem, 2.5vw, 2.08rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.14;
+    }
+    .story p { margin: 0 0 15px; color: #3d4944; }
+    .story p:last-child { margin-bottom: 0; }
+    .math-card { margin: 19px 0; padding: 14px 16px; border-left: 3px solid var(--amber); background: #f7efe5; overflow-x: auto; color: #302b26; font-size: 0.96rem; }
+    .plain-note { margin-top: 19px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.83rem; }
+    .plain-note strong { color: var(--ink); }
+    .formal-head { display: flex; justify-content: space-between; align-items: start; gap: 18px; margin-bottom: 13px; }
+    .formal-kicker { margin: 0 0 3px; color: var(--muted); font-size: 0.67rem; font-weight: 850; letter-spacing: 0.11em; text-transform: uppercase; }
+    .formal-title { margin: 0; font-size: 0.91rem; }
+    .source-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+    .source-links a {
+      padding: 5px 8px;
+      border: 1px solid #c7cec8;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.65);
+      color: #46534d;
+      font-size: 0.69rem;
+      font-weight: 750;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .source-links a:hover { border-color: var(--teal); color: var(--teal); }
+    pre {
+      margin: 0;
+      padding: 17px 18px;
+      border: 1px solid #26383d;
+      border-radius: 13px;
+      background: var(--code);
+      color: var(--code-ink);
+      font-size: clamp(0.72rem, 0.92vw, 0.82rem);
+      line-height: 1.55;
+      overflow: auto;
+      white-space: pre;
+      tab-size: 2;
+    }
+    pre + pre, pre + details, details + pre { margin-top: 10px; }
+    .comment { color: var(--code-muted); }
+    details { margin-top: 10px; border: 1px solid #cad0ca; border-radius: 11px; background: rgba(255,255,255,0.52); overflow: hidden; }
+    summary { cursor: pointer; padding: 11px 13px; color: #46534d; font-size: 0.76rem; font-weight: 800; list-style-position: inside; }
+    details pre { border: 0; border-radius: 0; }
+    .formal-note { margin: 12px 2px 0; color: var(--muted); font-size: 0.76rem; }
+    .formal-note code { padding: 1px 4px; border-radius: 4px; background: rgba(23,47,59,0.08); color: #263c43; }
+    .endpoint { margin-top: 48px; padding: clamp(28px, 5vw, 58px); border-radius: 24px; background: var(--navy); color: white; box-shadow: var(--shadow); }
+    .endpoint .eyebrow { color: #9fd5c7; }
+    .endpoint h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem, 4vw, 3.9rem); font-weight: 500; line-height: 1.08; }
+    .endpoint p { max-width: 780px; margin: 19px 0 0; color: #cbd8d5; }
+    .endpoint code { color: #fff; }
+    .provenance { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 26px; }
+    .provenance div { padding: 15px; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; background: rgba(255,255,255,0.05); color: #d5dfdc; font-size: 0.78rem; }
+    .provenance strong { display: block; margin-bottom: 4px; color: white; }
+    footer { display: flex; justify-content: space-between; gap: 24px; margin-top: 24px; padding: 18px 2px 0; color: var(--muted); font-size: 0.77rem; }
+    :focus-visible { outline: 3px solid #d99253; outline-offset: 3px; }
+    @media (max-width: 1120px) {
+      .shell { grid-template-columns: 1fr; }
+      .rail { position: relative; height: auto; }
+      .rail h1 { max-width: none; }
+      .rail nav ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px 8px; }
+      .rail-group { grid-column: 1 / -1; }
+      .rail-links { margin-top: 18px; }
+    }
+    @media (max-width: 900px) {
+      .beat { grid-template-columns: 1fr; }
+      .formal { border-left: 0; border-top: 1px solid var(--line); }
+      .status-row, .provenance { grid-template-columns: 1fr; }
+      .route-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .main { padding: 18px 13px 52px; }
+      .hero { padding: 26px 21px; border-radius: 18px; }
+      .rail nav ol { grid-template-columns: 1fr; }
+      .route { padding: 15px; }
+      .route-head { display: block; }
+      .route-head p { margin-top: 4px; }
+      .route-grid { grid-template-columns: repeat(4, 1fr); }
+      .story, .formal { padding: 21px 17px; }
+      .formal-head { display: block; }
+      .source-links { justify-content: flex-start; margin-top: 10px; }
+      footer { display: block; }
+    }
+    @media print {
+      body { background: white; }
+      .shell { display: block; }
+      .rail, .route { display: none; }
+      .main { padding: 0; }
+      .hero, .beat, .endpoint { break-inside: avoid; box-shadow: none; }
+      .beat { grid-template-columns: 42% 58%; }
+      details > * { display: block; }
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 </head>
 <body>
-<p style="margin: 1rem 2rem">This blueprint develops the ideal-indexed family in
-<code>ElevenTwelfths.IdealFamily</code>. Its character identities and connection
-to the public proof remain to be established. See the
-<a href="../docs/argument.md">current proof guide</a> for the GitHub proof
-assembly, which uses an all-element, totient-weighted amplifier, and the
-<a href="../docs/ideal-family.md">ideal-family notes</a> for this development.</p>
-<div class="page"><aside class="sidebar"><h1>Quasi-RH at 11/12</h1>
-<p>Mathematical objects and their Lean definitions.</p><nav aria-label="Blueprint sections"><ul class="nav"><li><a href="#field">1 · The field K</a></li>
-<li><a href="#integers">2 · The ring of integers</a></li>
-<li><a href="#norms">3 · Ideal and element norms</a></li>
-<li><a href="#mobius">4 · The ideal Möbius function</a></li>
-<li><a href="#indices">5 · Ideals, primary generators, and rows</a></li>
-<li><a href="#character">6 · The sextic character χ</a></li>
-<li><a href="#family">7 · The Möbius partial sums Mᵤ(N)</a></li>
-<li><a href="#mean-square">8 · The mean square and the full lattice</a></li><li><a href="#roadmap">To develop together</a></li></ul></nav>
-<p><a href="../README.md">README</a> · <a href="../docs/ideal-family.md">Ideal-family notes</a></p></aside>
-<main class="content"><header class="site-header main-text"><div class="section-label">Work in progress</div><h1>The 11/12 argument</h1>
-<p>We will build this page little by little as we work through the argument. We begin with the basic objects: the field, its integers, ideals and norms, the Möbius function, the sextic character, and the sums. Connecting this ideal-indexed construction to the analytic estimates and final nonvanishing theorem remains a goal of this blueprint.</p>
-<p>Left: mathematics. Right: declarations from the Lean source. Smooth weights are background conventions, not separate blueprint definitions.</p>
-<p>Conventions follow Sections 2–4 of the <a href="https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026/build/paper2.tex">OpenAI reference</a>, with the auxiliary Hecke character omitted. The paper’s family is denoted <strong>M</strong> throughout this blueprint.</p></header>
-<section class="module-section" aria-label="Mathematics and Lean"><article class="thm_wrapper" id="field">
-<div class="lemma_thm_wrapper"><h2>1 · The field K</h2><div class="lemma_thmcontent"><p>Let \(\omega\) be a primitive cube root of unity. We work in the quadratic number field</p><div class="display-math">\[K=\mathbb Q(\omega)=\mathbb Q(\sqrt{-3}),\qquad \omega^2+\omega+1=0.\]</div><p>Lean uses the third cyclotomic field as its model of \(K\). A single complex embedding is fixed throughout.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#field" aria-label="Link to 1 · The field K">¶</a><a href="../ElevenTwelfths/Arithmetic.lean">source</a> <a href="../ElevenTwelfths/IdealArithmetic.lean">embedding source</a></div><pre><code>abbrev K := CyclotomicField 3 ℚ
+  <div class="shell">
+    <aside class="rail">
+      <p class="rail-kicker">Lean blueprint</p>
+      <h1>Quasi-RH at 11/12</h1>
+      <p class="rail-intro">Twelve mathematical beats. The readable argument is on the left; the compiled Lean interfaces are on the right.</p>
+      <nav aria-label="Proof beats">
+        <p class="rail-group">Set up</p>
+        <ol>
+          <li><a href="#beat-1"><span class="nav-number">01</span><span>Eisenstein arithmetic</span></a></li>
+          <li><a href="#beat-2"><span class="nav-number">02</span><span>The sextic family</span></a></li>
+        </ol>
+        <p class="rail-group">Transform</p>
+        <ol start="3">
+          <li><a href="#beat-3"><span class="nav-number">03</span><span>First Poisson</span></a></li>
+          <li><a href="#beat-4"><span class="nav-number">04</span><span>Gauss–Jacobi</span></a></li>
+          <li><a href="#beat-5"><span class="nav-number">05</span><span>Complete theta</span></a></li>
+          <li><a href="#beat-6"><span class="nav-number">06</span><span>Reflect theta</span></a></li>
+          <li><a href="#beat-7"><span class="nav-number">07</span><span>Second Poisson</span></a></li>
+          <li><a href="#beat-8"><span class="nav-number">08</span><span>Quadratic sieve</span></a></li>
+        </ol>
+        <p class="rail-group">Close</p>
+        <ol start="9">
+          <li><a href="#beat-9"><span class="nav-number">09</span><span>Mean-square closure</span></a></li>
+          <li><a href="#beat-10"><span class="nav-number">10</span><span>Sixth-power amplifier</span></a></li>
+          <li><a href="#beat-11"><span class="nav-number">11</span><span>Mellin + Euler factors</span></a></li>
+          <li><a href="#beat-12"><span class="nav-number">12</span><span>Zeta nonvanishing</span></a></li>
+        </ol>
+      </nav>
+      <div class="rail-links">
+        <a href="../README.md">README</a>
+        <a href="../docs/argument.md">proof guide</a>
+        <a href="../ElevenTwelfths/Unconditional.lean">final assembly</a>
+      </div>
+    </aside>
+    <main class="main">
+      <div class="main-inner">
+        <header class="hero">
+          <p class="eyebrow">The direct proof architecture</p>
+          <h2>From Möbius cancellation to <em>\(\Re(s)>11/12\)</em></h2>
+          <p class="hero-lede">
+            The proof deforms the smoothed Eisenstein Möbius sum by sextic
+            characters, transforms the resulting second moment twice by
+            Poisson summation, and uses the sixth powers inside the family as
+            an amplifier. These are the twelve points where the mathematics
+            changes shape.
+          </p>
+          <div class="status-row" aria-label="Formalization status">
+            <div class="status"><strong>Public endpoint</strong><span><code>riemannZeta z ≠ 0</code> for \(11/12&lt;\Re z\)</span></div>
+            <div class="status"><strong>Direct assembly</strong><span>No dependency on the packaged 23/24 zero-free theorem</span></div>
+            <div class="status"><strong>Proof objects</strong><span>The linked declarations compile; proof bodies remain in source</span></div>
+          </div>
+        </header>
+        <section class="route" aria-label="Twelve-beat route map">
+          <div class="route-head">
+            <h3>The whole route</h3>
+            <p>setup → two transforms → density estimate → amplification → analytic continuation</p>
+          </div>
+          <div class="route-grid">
+            <a href="#beat-1" aria-label="Beat 1">01</a><a href="#beat-2" aria-label="Beat 2">02</a>
+            <a href="#beat-3" aria-label="Beat 3">03</a><a href="#beat-4" aria-label="Beat 4">04</a>
+            <a href="#beat-5" aria-label="Beat 5">05</a><a href="#beat-6" aria-label="Beat 6">06</a>
+            <a href="#beat-7" aria-label="Beat 7">07</a><a href="#beat-8" aria-label="Beat 8">08</a>
+            <a href="#beat-9" aria-label="Beat 9">09</a><a href="#beat-10" aria-label="Beat 10">10</a>
+            <a href="#beat-11" aria-label="Beat 11">11</a><a href="#beat-12" aria-label="Beat 12">12</a>
+          </div>
+        </section>
+        <div class="section-break"><span>Set up</span></div>
 
-noncomputable def complexEmbedding : K →+* ℂ := Classical.choice inferInstance</code></pre></div></div></article>
-<article class="thm_wrapper" id="integers">
-<div class="lemma_thm_wrapper"><h2>2 · The ring of integers</h2><div class="lemma_thmcontent"><p>The ring \(\mathcal O=\mathcal O_K=\mathbb Z[\omega]\) consists of the Eisenstein integers \(a+b\omega\), with \(a,b\in\mathbb Z\). Under the fixed complex embedding it is a triangular lattice.</p><p>Lean takes the full ring of integers of \(K\), and obtains \(\omega\) as an algebraic integer. Rows will be elements of this ring; columns will be its integral ideals.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#integers" aria-label="Link to 2 · The ring of integers">¶</a><a href="../ElevenTwelfths/Arithmetic.lean">source</a> <a href="../ElevenTwelfths/IdealArithmetic.lean">embedding source</a></div><pre><code>abbrev 𝒪 := NumberField.RingOfIntegers K
+        <article class="beat" id="beat-1">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">01</span><span class="phase">Set up</span></div>
+            <h3>Fix the Eisenstein arithmetic</h3>
+            <p>Work in the Eisenstein integers \(\mathcal O=\mathbb Z[\omega]\). The sum is written over elements because that is the notation we want to read, but every coefficient is the coefficient of the principal ideal \((n)\).</p>
+            <div class="math-card">\[
+              N(n)=N((n)),\qquad \mu_K(n)=\mu_K((n)),\qquad
+              n\text{ primary}\iff n\equiv1\pmod{\lambda^2}.
+            \]</div>
+            <p>The predicate <code>primary</code> verifies the congruence. The upstream <code>primaryGenerator</code>, used by <code>outsidePrimaryBall</code>, chooses one associate. This is not a second Möbius theory on elements: Lean’s coefficient is literally mathlib’s ideal Möbius function evaluated at <code>Ideal.span {n}</code>.</p>
+            <p class="plain-note"><strong>What to verify.</strong> The norm and Möbius definitions use the same principal ideal, and <code>primary</code> is an explicit predicate on \(\mathcal O\).</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Definitions</p><h4 class="formal-title">The public arithmetic vocabulary</h4></div>
+              <div class="source-links"><a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Arithmetic.lean#L24">Arithmetic.lean</a></div>
+            </div>
+            <pre><code>abbrev K := CyclotomicField 3 ℚ
+
+abbrev 𝒪 := NumberField.RingOfIntegers K
 
 noncomputable def omega : 𝒪 :=
   (IsCyclotomicExtension.zeta_spec 3 ℚ K).toInteger
 
-noncomputable def toComplex : 𝒪 →+* ℂ :=
-  complexEmbedding.comp (algebraMap 𝒪 K)</code></pre></div></div></article>
-<article class="thm_wrapper" id="norms">
-<div class="lemma_thm_wrapper"><h2>3 · Ideal and element norms</h2><div class="lemma_thmcontent"><p>For a nonzero integral ideal \(\mathfrak n\), its absolute norm is the finite index</p><div class="display-math">\[\mathrm N\mathfrak n=\#(\mathcal O/\mathfrak n).\]</div><p>In Lean we use mathlib’s <code>Ideal.absNorm</code> directly. Its underlying function <code>Submodule.cardQuot</code> is the cardinality of the quotient, as recorded by <code>Submodule.cardQuot_apply</code>.</p><p>For an element \(u=a+b\omega\), its norm is</p><div class="display-math">\[\mathrm N(u)=u\overline u=|u|^2=a^2-ab+b^2.\]</div><p>These conventions agree: \(\mathrm N((u))=\mathrm N(u)\). In particular \(\mathrm N(0)=0\). The Lean element norm is defined through the principal ideal and proved equal to the squared complex absolute value. The coordinate description \(a+b\omega\) remains to be connected explicitly to the abstract model.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#norms" aria-label="Link to 3 · Ideal and element norms">¶</a><a href="../ElevenTwelfths/IdealArithmetic.lean">source</a></div><p><a href="https://github.com/leanprover-community/mathlib4/blob/d13f23b723b8a846827a245b89c10fc7d3f11612/Mathlib/RingTheory/Ideal/Norm/AbsNorm.lean">Mathlib definition: Ideal.absNorm</a></p><pre><code>noncomputable def Ideal.absNorm [IsDedekindDomain S] [Module.Free ℤ S] :
-    Ideal S →*₀ ℕ where
-  toFun := Submodule.cardQuot
-  map_mul&#x27; I J := by rw [cardQuot_mul]
-  map_one&#x27; := by rw [Ideal.one_eq_top, cardQuot_top]
-  map_zero&#x27; := by
-    have : Infinite S := Module.Free.infinite ℤ S
-    rw [Ideal.zero_eq_bot, cardQuot_bot]</code></pre><p>Project element-norm convention and compatibility lemmas:</p><pre><code>noncomputable def elementNorm (u : 𝒪) : ℕ := Ideal.absNorm (Ideal.span {u})
+noncomputable def lambda : 𝒪 := omega - 1
 
-theorem elementNorm_eq (u : 𝒪) : elementNorm u = (Algebra.norm ℤ u).natAbs :=
-  Ideal.absNorm_span_singleton u
+def primary (n : 𝒪) : Prop := lambda ^ 2 ∣ n - 1
 
-theorem complex_norm_sq (u : 𝒪) (φ : K →+* ℂ) : ‖φ (u : K)‖ ^ 2 = (elementNorm u : ℝ)</code></pre></div></div></article>
-<article class="thm_wrapper" id="mobius">
-<div class="lemma_thm_wrapper"><h2>4 · The ideal Möbius function</h2><div class="lemma_thmcontent"><p>Factor a nonzero integral ideal uniquely as \(\mathfrak n=\prod_{j=1}^r\mathfrak p_j^{e_j}\), with distinct prime ideals. Define</p><div class="display-math">\[\mu_K(\mathfrak n)=\begin{cases}(-1)^r&amp;\text{if every }e_j=1,\\0&amp;\text{if some }e_j\ge2.\end{cases}\]</div><p>The unit ideal has \(\mu_K(\mathcal O)=1\). We extend the function by zero at the zero ideal, which never enters the column sums.</p><p>This is an ideal function, not the ordinary integer Möbius function evaluated at the norm. Lean counts prime-ideal factors with <code>normalizedFactors</code>, after testing squarefreeness.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#mobius" aria-label="Link to 4 · The ideal Möbius function">¶</a><a href="../ElevenTwelfths/IdealArithmetic.lean">source</a></div><pre><code>noncomputable def mobiusK (n : Ideal 𝒪) : ℤ := by
-  classical
-  exact if n = ⊥ then 0 else
-    if Squarefree n then (-1) ^ (normalizedFactors n).card else 0</code></pre></div></div></article>
-<article class="thm_wrapper" id="indices">
-<div class="lemma_thm_wrapper"><h2>5 · Ideals, primary generators, and rows</h2><div class="lemma_thmcontent"><p>In the original family, \(\mathfrak n\) runs over <strong>nonzero integral ideals coprime to \((6)\)</strong>. This matches the reference paper with its auxiliary Hecke character omitted and its excluded set chosen to be the primes above \(2\) and \(3\).</p><p>When we need an element representing a column ideal, the paper uses its unique primary generator \(n\equiv1\pmod{3\mathcal O}\), so \(\mathfrak n=(n)\), \(\mu_K(n)\) means \(\mu_K((n))\), and \(\chi_n\) means \(\chi_{(n)}\). This counts each ideal once, not its six associates. The correspondence with primary generators is not yet formalized.</p><p><strong>The row variable \(u\) runs over every element of \(\mathcal O\).</strong> There is no primary, squarefree, or coprimality restriction on rows in the definition of the mean square. Thus the full lattice is available for Poisson summation.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#indices" aria-label="Link to 5 · Ideals, primary generators, and rows">¶</a><a href="../ElevenTwelfths/IdealArithmetic.lean">source</a></div><pre><code>def Admissible (n : Ideal 𝒪) : Prop :=
-  n ≠ ⊥ ∧ n ⊔ Ideal.span {(6 : 𝒪)} = ⊤
+noncomputable def eisensteinNorm (n : 𝒪) : ℕ :=
+  Ideal.absNorm (Ideal.span {n})
 
-def Primary (n : 𝒪) : Prop := (3 : 𝒪) ∣ n - 1</code></pre></div></div></article>
-<article class="thm_wrapper" id="character">
-<div class="lemma_thm_wrapper"><h2>6 · The sextic character χ</h2><div class="lemma_thmcontent"><p>For a nonzero prime ideal \(\mathfrak p\nmid(6)\), put \(q=\mathrm N\mathfrak p\). If \(u\in\mathfrak p\), set \(\chi_{\mathfrak p}(u)=0\). Otherwise it is the unique \(\zeta\in\mu_6\) satisfying</p><div class="display-math">\[\zeta\equiv u^{(q-1)/6}\pmod{\mathfrak p}.\]</div><p>Here \(\mu_6=\{(-\omega)^j:0\le j&lt;6\}\). For \(\mathfrak n=\prod\mathfrak p^{e_{\mathfrak p}}\) prime to \((6)\), extend in the denominator:</p><div class="display-math">\[\chi_{\mathfrak n}(u)=\left(\frac{u}{\mathfrak n}\right)_6=\prod_{\mathfrak p\mid\mathfrak n}\chi_{\mathfrak p}(u)^{e_{\mathfrak p}}.\]</div><p>In particular, it vanishes if \((u)+\mathfrak n\ne\mathcal O\); the unit ideal gives the empty product \(\chi_{\mathcal O}(u)=1\), even for \(u=0\). Nonadmissible denominators are assigned zero and excluded from our sums.</p><p>The Lean definition selects the root by a sum of six indicators. Proving that exactly one matches at a good prime, and deriving the character identities, are next arithmetic steps; these facts are not being assumed as axioms.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#character" aria-label="Link to 6 · The sextic character χ">¶</a><a href="../ElevenTwelfths/IdealArithmetic.lean">source</a></div><pre><code>noncomputable def sixthRoot (j : Fin 6) : 𝒪 := (-omega) ^ (j : ℕ)
+noncomputable def eisensteinMobius (n : 𝒪) : ℤ :=
+  UniqueFactorizationMonoid.moebius (Ideal.span {n})</code></pre>
+          </section>
+        </article>
 
-noncomputable def primeSextic (p : Ideal 𝒪) (u : 𝒪) : ℂ := by
-  classical
-  exact if u ∈ p then 0 else
-    ∑ j : Fin 6,
-      if Ideal.Quotient.mk p (sixthRoot j) =
-          Ideal.Quotient.mk p u ^ ((Ideal.absNorm p - 1) / 6)
-      then toComplex (sixthRoot j) else 0
+        <article class="beat" id="beat-2">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">02</span><span class="phase">Set up</span></div>
+            <h3>Build \(A_u(N)\) and its finite second moment</h3>
+            <p>Now make every ingredient visible in the summand: primaryness, Möbius, the actual sextic twist, and a smooth cutoff supported in \([1/2,1]\). Thus only \(N/2\leq N(n)\leq N\) contributes.</p>
+            <div class="math-card">\[
+              A_u(N)=\sum_{\substack{n\ {\rm primary}\\N(n)\le N}}
+                \mu_K(n)\chi_n(u)W\!\left(\frac{N(n)}N\right),
+              \quad
+              S(N,H)=\sum_{N(u)\le H}V\!\left(\frac{N(u)}H\right)|A_u(N)|^2.
+            \]</div>
+            <p>The public \(S\) is deliberately a <em>finite</em> sum. At the precise boundary where Poisson is needed, compact support proves it equal to a whole-lattice <code>tsum</code>.</p>
+            <p class="plain-note"><strong>What to verify.</strong> The definitions below show the four requested factors. The bridge theorem replaces both the finite row ball and the element notation by the exact ideal row consumed upstream.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Definitions + bridge</p><h4 class="formal-title">Finite first, <code>tsum</code> at Poisson</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/SmoothDyadic.lean#L17">SmoothDyadic.lean</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ConcreteFamily.lean#L88">ConcreteFamily.lean</a>
+              </div>
+            </div>
+            <pre><code>structure SmoothDyadicWeight (E : Type*)
+    [NormedAddCommGroup E] [NormedSpace ℝ E] where
+  toFun : ℝ → E
+  contDiff : ContDiff ℝ ∞ toFun
+  support_subset : Function.support toFun ⊆ Set.Icc (1 / 2) 1
 
-noncomputable def chi (n : Ideal 𝒪) (u : 𝒪) : ℂ := by
-  classical
-  exact if Admissible n then
-    ((normalizedFactors n).map (fun p ↦ primeSextic p u)).prod
-  else 0</code></pre></div></div></article>
-<article class="thm_wrapper" id="family">
-<div class="lemma_thm_wrapper"><h2>7 · The Möbius partial sums Mᵤ(N)</h2><div class="lemma_thmcontent"><p>Fix a smooth complex weight \(W\) supported on \([1/2,1]\). For \(u\in\mathcal O\) and positive \(N\), define</p><div class="display-math">\[M_u(N)=\sum_{\substack{0\ne\mathfrak n\subseteq\mathcal O\\(\mathfrak n,(6))=1}}\mu_K(\mathfrak n)\chi_{\mathfrak n}(u)W\!\left(\frac{\mathrm N\mathfrak n}{N}\right).\]</div><p>This is a smooth partial sum of the ideal Möbius function. Only \(N/2\le\mathrm N\mathfrak n\le N\) contributes. For \(u=1\), the character is one and we recover the untwisted sum over the same admissible ideals.</p><p><a href="../ElevenTwelfths/IdealArithmetic.lean"><code>idealBall N</code></a> contains exactly the admissible ideals of norm at most \(N\). The arithmetic functions and norms are fixed definitions, not arguments to <code>M</code>. We suppress the fixed weight \(W\) in mathematical notation.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#family" aria-label="Link to 7 · The Möbius partial sums Mᵤ(N)">¶</a><a href="../ElevenTwelfths/IdealFamily.lean">source</a></div><pre><code>noncomputable def idealBall (N : ℕ) : Finset (Ideal 𝒪) := by
-  classical
-  exact (Ring.HasFiniteQuotients.finite_absNorm_le (S := 𝒪) N).toFinset.filter Admissible
+noncomputable def outsidePrimaryBall
+    (S : Finset (Ideal 𝒪)) (N : ℕ) : Finset 𝒪 :=
+  (outsideIdealsUpTo S N).image primaryGenerator
 
-noncomputable def M (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
-  ∑ n ∈ idealBall N,
-    (mobiusK n : ℂ) * chi n u * W ((Ideal.absNorm n : ℝ) / (N : ℝ))</code></pre></div></div></article>
-<article class="thm_wrapper" id="mean-square">
-<div class="lemma_thm_wrapper"><h2>8 · The mean square and the full lattice</h2><div class="lemma_thmcontent"><p>With a nonnegative smooth row weight \(V\) supported on \([1/2,1]\), set</p><div class="display-math">\[S(N,H)=\sum_{u\in\mathcal O}V\!\left(\frac{\mathrm N(u)}H\right)|M_u(N)|^2.\]</div><p>This sum is over <strong>elements, including all associates</strong>. For positive \(H\), compact support restricts the contributing rows to \(H/2\le\mathrm N(u)\le H\). The zero row contributes zero because \(V(0)=0\).</p><p>Lean defines the finite sum first. Finiteness of the actual lattice norm ball is proved in <code>IdealArithmetic.lean</code>, and <code>S_eq_tsum</code> gives the sum over the whole lattice needed for Poisson.</p><p>Opening the square can introduce a factor \(\mathbf1_{(u,\mathfrak g)=1}\), where \(\mathfrak g\) is the common divisor of the column ideals. The reference paper handles this indicator by inclusion–exclusion, then applies Poisson on lattice residue classes. That step remains to be developed here.</p></div></div>
-<div class="thm_side_panel"><div class="lean-decl-box"><div class="lean-decl-links"><a href="#mean-square" aria-label="Link to 8 · The mean square and the full lattice">¶</a><a href="../ElevenTwelfths/IdealFamily.lean">source</a></div><pre><code>noncomputable def S (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+noncomputable def outsideSexticTwist
+    (S : Finset (Ideal 𝒪))
+    (hbad : fixedBadPrimes ⊆ S) (N : ℕ)
+    (u n : 𝒪) : ℂ :=
+  idealSexticRow (outsideIdealsUpTo S N)
+    (outsideIdealsUpTo_ne_bot S N)
+    (outside_good S N hbad) (Ideal.span {n}) u
+
+noncomputable def outsideA
+    (S : Finset (Ideal 𝒪))
+    (hbad : fixedBadPrimes ⊆ S)
+    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
+  ∑ n ∈ outsidePrimaryBall S N,
+    if primary n then
+      (eisensteinMobius n : ℂ) *
+        outsideSexticTwist S hbad N u n *
+        W ((eisensteinNorm n : ℝ) / (N : ℝ))
+    else 0
+
+noncomputable def outsideS
+    (S : Finset (Ideal 𝒪)) (hbad : fixedBadPrimes ⊆ S)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
-  ∑ u ∈ rowBall H, V ((elementNorm u : ℝ) / (H : ℝ)) * ‖M W u N‖ ^ 2</code></pre><details class="proof-fold"><summary>Whole-lattice identity and proof</summary><pre><code>theorem S_eq_tsum (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
-    (N H : ℕ) : S W V N H =
-      ∑&#x27; u : 𝒪, V ((elementNorm u : ℝ) / (H : ℝ)) * ‖M W u N‖ ^ 2 := by
-  classical
-  unfold S
-  rw [tsum_eq_sum (s := rowBall H)]
-  intro u hu
-  have hnorm : H &lt; elementNorm u :=
-    Nat.lt_of_not_ge (fun hle ↦ hu (mem_rowBall.mpr hle))
-  by_cases hH : H = 0
-  · have hV : V 0 = 0 := V.toSmoothDyadicWeight.eq_zero_of_lt_half (by norm_num)
-    simp [hH, hV]
-  · have hHpos : (0 : ℝ) &lt; H := by exact_mod_cast Nat.pos_of_ne_zero hH
-    have hratio : (1 : ℝ) &lt; (elementNorm u : ℝ) / (H : ℝ) := by
-      rw [lt_div_iff₀ hHpos]
-      have hnorm&#x27; : (H : ℝ) &lt; elementNorm u := by exact_mod_cast hnorm
-      simpa using hnorm&#x27;
-    rw [V.toSmoothDyadicWeight.eq_zero_of_one_lt hratio, zero_mul]</code></pre></details></div></div></article></section>
-<section class="main-text" id="roadmap"><h2>To develop together</h2>
-<ol><li>Arithmetic lemmas: primary generators, the residue-field root selection, and character identities.</li><li>Sixth-power amplification.</li><li>Opening the mean square and Poisson summation, with coprimality indicators explicit.</li><li>Gauss–Jacobi conversion and the cubic theta estimate.</li><li>Closing the mean-square bound and extracting the exponent \(11/12\).</li><li>Mellin transforms and zeta nonvanishing, restoring the omitted Euler factors.</li></ol>
-<p>For the untwisted ideal series, the local convention is</p>
-<div class="display-math">\[\sum_{(\mathfrak n,(6))=1}\frac{\mu_K(\mathfrak n)}{(\mathrm N\mathfrak n)^s}=\frac{1}{\zeta_K(s)(1-4^{-s})(1-3^{-s})},\qquad\operatorname{Re}(s)>1.\]</div>
-<p>The prime above 2 has norm 4; the prime above 3 has norm 3. The omitted factors are nonzero in \(\operatorname{Re}(s)>0\). The corresponding analytic argument has not yet been formalized.</p></section>
-<footer class="footer-note">Edit this HTML directly and keep Lean excerpts synchronized with their linked sources. Layout adapted from the Zaremba blueprint. MathJax requires an internet connection.</footer>
-</main></div></body></html>
+  ∑ u ∈ exactRowBall H,
+    V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+      ‖outsideA S hbad W u N‖ ^ 2</code></pre>
+            <details>
+              <summary>The exact element-to-ideal and finite-to-lattice statements</summary>
+              <pre><code>theorem outsideA_eq_idealRowSum
+    (S : Finset (Ideal 𝒪))
+    (hbad : fixedBadPrimes ⊆ S)
+    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) :
+    outsideA S hbad W u N =
+      idealRowSum (outsideIdealsUpTo S N)
+        (outsideIdealsUpTo_ne_bot S N)
+        (outside_good S N hbad)
+        (1 : DirichletCharacter ℂ 1)
+        (fun n ↦ W ((n : ℝ) / (N : ℝ))) u
+
+theorem outsideS_eq_idealRowSum_tsum
+    (S : Finset (Ideal 𝒪))
+    (hbad : fixedBadPrimes ⊆ S)
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+    (N H : ℕ) :
+    outsideS S hbad W V N H = ∑' u : 𝒪,
+      V ((eisensteinNorm u : ℝ) / (H : ℝ)) *
+        ‖idealRowSum (outsideIdealsUpTo S N)
+          (outsideIdealsUpTo_ne_bot S N)
+          (outside_good S N hbad)
+          (1 : DirichletCharacter ℂ 1)
+          (fun n ↦ W ((n : ℝ) / (N : ℝ))) u‖ ^ 2</code></pre>
+            </details>
+            <p class="formal-note">These theorems certify the readable (A_u(N)) and (S(N,H)) notation. The analytic assembly starts from the equal <code>idealRowSum</code> expression rather than invoking the public wrappers again.</p>
+          </section>
+        </article>
+
+        <div class="section-break"><span>Transform</span></div>
+
+        <article class="beat" id="beat-3">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">03</span><span class="phase transform">Transform</span></div>
+            <h3>Open the square and apply the first Poisson summation</h3>
+            <p>Expand \(|A_u(N)|^2\), reverse the row and column sums, and run Poisson summation in the Eisenstein variable \(u\). Coprimality masks are removed by inclusion–exclusion.</p>
+            <div class="math-card">\[
+              \sum_{u\in\mathcal O}W_u\,\overline{\chi_I(u)}\chi_J(u)
+              \quad\stackrel{\rm Poisson}{\longrightarrow}\quad
+              \sum_{D\mid{\rm mask}}\frac{\mu_K(D)}{N(D)}
+              \sum_{h\in\mathcal O}\mathcal K_{I,J,D}(h).
+            \]</div>
+            <p>The zero frequency and the nonzero tail are tracked separately. The important structural fact is that the original moment has become a dual-frequency sum carrying finite Gauss factors.</p>
+            <p class="plain-note"><strong>What to verify.</strong> The left side of <code>canonicalPair_first_poisson</code> is the whole-lattice masked character pair. The right side is the Möbius inclusion–exclusion sum over dual modes.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">First transform</p><h4 class="formal-title">Masked radial Poisson, pair by pair</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L80">moment source</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L475">pair Poisson</a>
+              </div>
+            </div>
+            <pre><code><span class="comment">-- Exact central equality; parameters encode the two columns.</span>
+theorem canonicalPair_first_poisson
+    (hinj : Function.Injective
+      (fun i => Ideal.span {p i}))
+    (hc : ∀ i, ringChar (O ⧸ Ideal.span {p i}) ≠ 2)
+    (M N P B : Finset ι) (v : ι → ℕ)
+    (ε₁ ε₂ : ι → Bool) (C₁ C₂ : Finset ι → ℂ)
+    (W : 𝓢(ℝ, ℂ)) (V₁ V₂ : ℝ → ℂ)
+    (X₁ X₂ K : ℝ) (hK : 0 &lt; K) :
+  (V₁ (columnLog p X₁ N) * V₂ (columnLog p X₂ P)) *
+    (star (columnCoefficient p hp hcop hg N * C₁ N) *
+      (columnCoefficient p hp hcop hg P * C₂ P)) *
+    (∑' z : O,
+      rowCoprimeMask (fun i => Ideal.span {p i}) M z *
+      blockRow p hg
+        ((N ∪ P) ∪ cubeActiveSupport B v ε₁ ε₂)
+        (threeBlockExponent N P v ε₁ ε₂) z *
+      W (‖eisEmbedding z‖ ^ 2 / K)) =
+  ∑ D ∈ M.powerset,
+    (moebius (∏ i ∈ D, Ideal.span {p i}) : ℂ) /
+      (primeProductNorm p D : ℂ) *
+    ∑' h : O,
+      canonicalPairMode p hp hcop hg N P B v ε₁ ε₂
+        C₁ C₂ W V₁ V₂ X₁ X₂ K
+        (primeSubsetGenerator
+          (fun i => Ideal.span {p i}) D) h</code></pre>
+            <p class="formal-note">The wrapper <code>outside_mean_square_source</code> connects this equality to the original <code>idealRowSum</code> second moment and isolates zero, truncated, and tail terms.</p>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-4">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">04</span><span class="phase transform">Transform</span></div>
+            <h3>Use Gauss–Jacobi identities to expose cubic coefficients</h3>
+            <p>First Poisson produces sextic Gauss sums. Cubic reciprocity and the normalized Gauss–Jacobi relation absorb the squarefree Möbius sign into those local factors.</p>
+            <p>After conversion, the coefficient is no longer an awkward Möbius-weighted product of local transforms: it is the canonical cubic Gauss coefficient that belongs in the cubic theta series.</p>
+            <div class="math-card">\[
+              \mu_K\!\left(\prod p_i\right)
+              G\!\left(\prod \chi_{p_i}^{\,e_i}\right)
+              =\left(\prod_{i\ne j}\chi_{p_i}^{\,e_i}(p_j)\right)
+              \prod_i G_i^{\rm converted}.
+            \]</div>
+            <p class="plain-note"><strong>What to verify.</strong> The theorem’s left side contains the ideal Möbius factor and canonical product Gauss sum. Its right side contains only cross-character phases and converted local coefficients.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Local arithmetic</p><h4 class="formal-title">Möbius–Gauss conversion</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/MixedConversion.lean#L162">MixedConversion.lean</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CubicNormalization.lean#L611">Gauss–Jacobi identity</a>
+              </div>
+            </div>
+            <pre><code>theorem moebius_mixed_gauss_conversion
+    {ι : Type*} [Fintype ι]
+    (p : ι → O) (hp : ∀ i, p i ≠ 0)
+    [∀ i, (Ideal.span {p i}).IsMaximal]
+    (hcop : Pairwise
+      (Function.onFun IsCoprime
+        (fun i => Ideal.span {p i})))
+    (hgood : ∀ i, lambda ∉ Ideal.span {p i})
+    (hchar : ∀ i,
+      ringChar (O ⧸ Ideal.span {p i}) ≠ 2)
+    (hprimary : ∀ i, lambda ^ 2 ∣ p i - 1)
+    (inverse : ι → Bool) :
+  (moebius (Ideal.span {∏ i, p i}) : ℂ) *
+    canonicalProductGauss p hp hcop hgood
+      (fun i => if inverse i then 5 else 1) =
+  (∏ i, ∏ k ∈ Finset.univ.erase i,
+    (canonicalSextic (Ideal.span {p i}) (hgood i) ^
+      (if inverse i then 5 else 1))
+      (Ideal.Quotient.mk (Ideal.span {p i}) (p k))) *
+  ∏ i, convertedLocal (p i) (hp i)
+    (hgood i) (inverse i)</code></pre>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-5">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">05</span><span class="phase transform">Transform</span></div>
+            <h3>Complete to the full cubic theta series</h3>
+            <p>The transformed coefficient first appears with squarefree, divisor, unit, and ray restrictions. The completion layer puts back every missing local piece and packages the result into one full ideal-indexed theta object.</p>
+            <div class="math-card">\[
+              T_\Psi(W,X)=\sum_{I}\sum_J
+              \frac{c_\Psi(I)}{\sqrt{N(I)}}\,w_\Psi(J)\,
+              V^\ast\!\left(\frac{N(I)N(J)^3}{X}\right).
+            \]</div>
+            <p>The cube \(N(J)^3\) is the structural feature that later lets Möbius inversion reopen the completed series at cube scales.</p>
+            <p class="plain-note"><strong>What to verify.</strong> <code>completedT</code> is an honest double <code>tsum</code>. The reopening identity says a Möbius-weighted copy at \(X/N(H)^3\) equals the expanded three-ideal term.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Completion</p><h4 class="formal-title">The object that is reflected</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Arithmetic/IdealMobius.lean#L442">definitions</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CompletedExpansion.lean#L128">reopening</a>
+              </div>
+            </div>
+            <pre><code>def cubeWeight (Ψ : O →* ℂ) : Ideal O →* ℂ where
+  toFun I :=
+    star (FiniteGaussPhase.angularFactor
+      (primaryGenerator I)) ^ 3 *
+    Ψ (primaryGenerator I) ^ 3 /
+      (Ideal.absNorm I : ℂ)
+  map_one' := by
+    simp only [primaryGenerator_one,
+      FiniteGaussPhase.angularFactor, map_one,
+      norm_one, Complex.ofReal_one, div_one,
+      star_one, one_pow, one_mul, Nat.cast_one]
+  map_mul' I J := by
+    simp only [primaryGenerator_mul, angularFactor_mul,
+      map_mul, star_mul, mul_pow, Nat.cast_mul]
+    ring
+
+def columnWeight (Ψ : O →* ℂ) (I : Ideal O) : ℂ :=
+  squarefreeGaussCoefficient I * Ψ (primaryGenerator I)
+
+def Vstar (W : ℝ → ℂ) (y : ℝ) : ℂ :=
+  (Real.sqrt y : ℂ) * W y
+
+def summand (Ψ : O →* ℂ) (W : ℝ → ℂ)
+    (X : ℝ) (I J : Ideal O) : ℂ :=
+  columnWeight Ψ I /
+      (Real.sqrt (Ideal.absNorm I : ℝ) : ℂ) *
+    cubeWeight Ψ J *
+    Vstar W ((Ideal.absNorm I : ℝ) *
+      (Ideal.absNorm J : ℝ) ^ 3 / X)
+
+def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
+    (X : ℝ) : ℂ :=
+  ∑' I : Ideal O, ∑' J : Ideal O,
+    summand Ψ W X I J</code></pre>
+            <pre><code>theorem weighted_completedT_reopen
+    (Ψ : O →* ℂ) (W : ℝ → ℂ) (X : ℝ)
+    (H : Ideal O) :
+  (moebius H : ℂ) * cubeWeight Ψ H *
+    completedT Ψ W
+      (X / (Ideal.absNorm H : ℝ) ^ 3) =
+  ∑' I : Ideal O, ∑' J : Ideal O,
+    expandedTerm Ψ W X I H J</code></pre>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-6">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">06</span><span class="phase transform">Transform</span></div>
+            <h3>Reflect the cubic theta series</h3>
+            <p>The modular transformation law moves the completed theta sum to a reflected cusp. Analytically this is the cubic analogue of a Voronoi formula: the original coefficients are replaced by explicit Fourier coefficients and reflected kernels.</p>
+            <p>In this repository the models are built below the old packaged zero-free theorem. The fixed-shell identity comes from the Poisson, Gauss-sum, and branch-decoding layers; it is then promoted to the canonical theta-model interface needed by the density argument.</p>
+            <div class="math-card">\[
+              T_{\Psi_{\rm row}}(W,X)=
+              \bigl(4\,\Theta'^{-1}c_{\rm rad}\bigr)\,
+              \operatorname{ReflectedFiber}(W,X).
+            \]</div>
+            <p class="plain-note"><strong>Directness check.</strong> <code>ActualFixedShellModels.lean</code> imports <code>BranchDecoding</code>, not <code>RowCompletion.ZeroFreeRegion</code>.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Theta transformation</p><h4 class="formal-title">Actual fixed-shell models</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L104">fiber identity</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L137">model theorem</a>
+              </div>
+            </div>
+            <pre><code>def actualReflectionScale : ℂ :=
+  4 * thetaDerivativeScalar⁻¹ *
+    fixedRadialCoefficientScalar
+
+theorem completedT_eq_reflectedFiber_idealValue_local
+    (Ψ : Eis →* ℂ)
+    (hΨperiod : FactorsModulo
+      (fixedBaseConductor q) Ψ)
+    (hΨ : ∀ n, ‖Ψ n‖ ≤ 1)
+    (K : ℝ)
+    (hshell : ∀ I ∈ rows,
+      K / 2 ≤ (Ideal.absNorm I : ℝ) ∧
+      (Ideal.absNorm I : ℝ) ≤ K)
+    (J : RowIndex q m rows R F)
+    (W : ℝ → ℂ) (lo hi : ℝ) (hlo : 0 &lt; lo)
+    (hsupp : Function.support W ⊆ Set.Icc lo hi)
+    (hW : ContDiff ℝ ∞ W) (X : ℝ) (hX : 0 &lt; X) :
+  completedT
+      (rowTwist Ψ (maskElement q m)
+        (idealGenerator F)
+        (v.val * idealGenerator J.val)) W X =
+    (4 * thetaDerivativeScalar⁻¹ *
+      fixedRadialCoefficientScalar) *
+      (reflectedFiber q hq m hm rows R F hR hF
+        hrows v K Ψ hΨ).idealValue
+          W X 1 completedRamifiedStep
+          (rowResidualPart J.val (maskIdeal q m F))</code></pre>
+            <details>
+              <summary>The packaged model interface supplied by that identity</summary>
+              <pre><code>theorem exists_actual_fixedShellModels
+    (q : ℕ) [NeZero q]
+    (chi : DirichletCharacter ℂ q) :
+  ∃ (rays : ℕ) (scale : ℂ),
+    HasFixedShellModels
+      (reflectionExcludedPrimes q)
+      (initialBase chi)
+      rays scale 1 completedRamifiedStep
+      (fixedCuspLevelBound (reflectionConductor q))</code></pre>
+            </details>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-7">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">07</span><span class="phase transform">Transform</span></div>
+            <h3>Apply Poisson a second time</h3>
+            <p>On the reflected side, the key simplification is elementary but decisive: the cube of a sextic character is quadratic. The second Poisson transform therefore produces a family that the quadratic large sieve can see.</p>
+            <div class="math-card">\[
+              \chi_6^3=\chi_2,\qquad
+              \sum_{z\in\mathcal O}{\rm mask}(z)\,
+              \overline{\chi_T(z)}\chi_S(z)W_z
+              \longrightarrow
+              \sum_{k\in\mathcal O}\widehat W_k\,
+              {\rm GaussRow}_{S,T}(k).
+            \]</div>
+            <p>The theorem keeps the conductor, coprimality mask, Fourier scale, and active Gauss-row factor explicit.</p>
+            <p class="plain-note"><strong>What to verify.</strong> The first Lean equality identifies the cube with mathlib’s quadratic character. The second has the original lattice <code>tsum</code> on the left and the dual \(k\)-sum on the right.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Second transform</p><h4 class="formal-title">Sextic cubes become quadratic rows</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/GaussSum/SexticNormalization.lean#L40">sextic cube</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83">second Poisson</a>
+              </div>
+            </div>
+            <pre><code>theorem canonicalSextic_pow_three_quadratic
+    (P : Ideal O) [P.IsMaximal]
+    (hgood : lambda ∉ P) :
+  canonicalSextic P hgood ^ 3 =
+    (quadraticChar (O ⧸ P)).ringHomComp
+      (Int.castRingHom ℂ)</code></pre>
+            <pre><code><span class="comment">-- Core shape of the exact theorem masked_pair_second_poisson.</span>
+(∑' z : O,
+  rowCoprimeMask (fun i => Ideal.span {p i}) M z *
+  (star (finiteSquarefreeRow
+      (fun i => Ideal.span {p i}) hg T z) *
+    finiteSquarefreeRow
+      (fun i => Ideal.span {p i}) hg S z) *
+  W (‖eisEmbedding z‖ ^ 2 / Y)) =
+((Y : ℂ) / (‖eisEmbedding n‖ : ℂ)) *
+  ∑ E ∈ M.powerset,
+    ((moebius (∏ i ∈ E, Ideal.span {p i}) : ℂ) /
+      (‖eisEmbedding e‖ ^ 2 : ℝ)) *
+    ∑' k : O,
+      paperRadialFourier W
+        (Y * ‖eisEmbedding k‖ ^ 2 /
+          (‖eisEmbedding e‖ ^ 2 *
+            ‖eisEmbedding n‖ ^ 2)) *
+      activeGaussRowFactor p hp hinj hg T S e k</code></pre>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-8">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">08</span><span class="phase transform">Transform</span></div>
+            <h3>Use the quadratic large sieve</h3>
+            <p>The transformed rows are now quadratic. Their diagonal correlations contribute the row length \(M\); the off-diagonal correlations contribute the square of the conductor scale \(N^2\).</p>
+            <div class="math-card">\[
+              \sum_{z\in R}\left|\sum_{I\in F}a_I\,\chi_I(z)^3\right|^2
+              \ \ll\ (M+N^2)\sum_{I\in F}|a_I|^2.
+            \]</div>
+            <p>This is the main analytic estimate after the second Poisson passage. Everything later is bookkeeping, descent, and choosing scales so that this gain survives.</p>
+            <p class="plain-note"><strong>What to verify.</strong> The Lean conclusion below is already an ideal-indexed finite family bound, with squarefree and good-prime hypotheses explicit.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Large sieve</p><h4 class="formal-title">The quadratic energy bound</h4></div>
+              <div class="source-links"><a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/InitialBound.lean#L473">InitialBound.lean</a></div>
+            </div>
+            <pre><code>theorem ideal_initial_quadratic_sieve
+    (F : Finset (Ideal O))
+    (hFpos : ∀ I ∈ F, I ≠ ⊥)
+    (hFgood : ∀ I ∈ F, ∀ P ∈
+      UniqueFactorizationMonoid.normalizedFactors I,
+      goodLambda ∉ P)
+    (hsq : ∀ I ∈ F, Squarefree I)
+    (hchar : ∀ i : primePool F,
+      ringChar (O ⧸ i.val) ≠ 2)
+    (N : ℕ) (hN : 1 ≤ N)
+    (hnorm : ∀ I ∈ F, Ideal.absNorm I ≤ N)
+    (a : Ideal O → ℂ)
+    (M : ℝ) (hM : 1 ≤ M) (R : Finset O)
+    (hR : ∀ z ∈ R, ‖eisEmbedding z‖ ^ 2 ≤ M) :
+  (∑ z ∈ R,
+    ‖∑ I ∈ F,
+      a I * (idealSexticRow F hFpos hFgood I z) ^ 3‖ ^ 2) ≤
+  initialSieveConstant * (M + (N : ℝ) ^ 2) *
+    ∑ I ∈ F, ‖a I‖ ^ 2</code></pre>
+          </section>
+        </article>
+
+        <div class="section-break"><span>Close</span></div>
+
+        <article class="beat" id="beat-9">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">09</span><span class="phase close">Close</span></div>
+            <h3>Close the mean square at every positive radius</h3>
+            <p>The completion and sieve estimates are iterated through a finite descent. The crucial modification for \(11/12\) is that the descent reserve is not frozen at \(1/20\): for any \(\theta&gt;0\), Lean installs <code>CanonicalDescentScale.ofReserve (θ / 2)</code>.</p>
+            <div class="math-card">\[
+              \sum_{\substack{z\in T\\N(z)\le Z^{1+\theta}}}|A_z(Z)|^2
+              \ \ll_{\theta,\varepsilon}\ Z\cdot Z^{1+\theta}\cdot Z^\varepsilon.
+            \]</div>
+            <p>Being able to make \(\theta\) arbitrarily small is what lets the later sixth-power average reach \(11/12+\varepsilon\), rather than stopping at the historical \(23/24\).</p>
+            <p class="plain-note"><strong>What to verify.</strong> <code>ofReserve</code> constructs valid finite-descent data for any positive reserve. The mean-square theorem quantifies over every positive \(\sigma\).</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Density closure</p><h4 class="formal-title">A movable descent scale</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/DescentScale.lean#L15">DescentScale.lean</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L274">ThetaDensity.lean</a>
+              </div>
+            </div>
+            <pre><code>class CanonicalDescentScale where
+  denominator : ℕ
+  denominator_pos : 0 &lt; denominator
+  reserve : ℝ
+  reserve_pos : 0 &lt; reserve
+  short_budget : 50 ≤ reserve * denominator
+
+def CanonicalDescentScale.ofReserve
+    (κ : ℝ) (hκ : 0 &lt; κ) : CanonicalDescentScale where
+  denominator := ⌈50 / κ⌉₊ + 1
+  denominator_pos := by omega
+  reserve := κ
+  reserve_pos := hκ
+  short_budget := by
+    have hceil : 50 / κ ≤ (⌈50 / κ⌉₊ : ℝ) :=
+      Nat.le_ceil _
+    have hadd : (⌈50 / κ⌉₊ : ℝ) ≤
+        (⌈50 / κ⌉₊ + 1 : ℕ) := by
+      exact_mod_cast Nat.le_add_right ⌈50 / κ⌉₊ 1
+    have hdiv : 50 / κ ≤
+        (⌈50 / κ⌉₊ + 1 : ℕ) := hceil.trans hadd
+    have := (div_le_iff₀ hκ).1 hdiv
+    push_cast at this ⊢
+    nlinarith</code></pre>
+            <details open>
+              <summary>The arbitrary-positive-radius conclusion</summary>
+              <pre><code>theorem outside_mean_square_of_theta_models_pos
+    (χ : DirichletCharacter ℂ q₀)
+    (S : Finset (Ideal O))
+    (hbad : fixedBadPrimes ⊆ S)
+    (hSp : ∀ P ∈ S, Prime P)
+    (ρ q levelBound : ℝ)
+    (hρ : 0 &lt; ρ) (hq : 1 &lt; q)
+    (hlevel : 1 ≤ levelBound)
+    (hmodels : HasCanonicalThetaModels S
+      (conjugateMonoid (normCharacter χ))
+      ρ q levelBound)
+    (W : ℝ → ℂ) (a b : ℝ) (ha : 0 &lt; a)
+    (hs : Function.support W ⊆ Set.Icc a b)
+    (hW : ContDiff ℝ ∞ W)
+    (σ ε : ℝ) (hσ : 0 &lt; σ) (hε : 0 &lt; ε) :
+  ∃ C : ℝ, 0 &lt; C ∧
+    ∀ (D : ℕ) (Z : ℝ), 1 ≤ Z → b * Z ≤ D →
+    ∀ T : Finset O,
+      (∀ z ∈ T,
+        (Ideal.absNorm (Ideal.span {z}) : ℝ) ≤
+          Z ^ (1 + σ)) →
+      (∀ z ∈ T, z ≠ 0) →
+      (∑ z ∈ T,
+        ‖idealRowSum (outsideIdealsUpTo S D)
+          (outsideIdealsUpTo_ne_bot S D)
+          (outside_good S D hbad) χ
+          (fun n => W (n / Z)) z‖ ^ 2) ≤
+        C * Z * Z ^ (1 + σ) * Z ^ ε</code></pre>
+            </details>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-10">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">10</span><span class="phase close">Close</span></div>
+            <h3>Amplify with sixth powers and extract \(11/12\)</h3>
+            <p>Put \(u=b^6\). A sextic character evaluated at a sixth power is exactly the indicator that \(b\) is coprime to the column. We average over all \(b\) in a smooth annulus, not just primes. Its main term is the density \(\prod_{P\mid I}(1-1/N(P))\).</p>
+            <div class="math-card">\[
+              \chi_I(b^6)=\mathbf 1_{(b,I)=1},\quad
+              Y=Z^{(1+\theta)/6},\quad
+              |M(Z)|\ll Z^{(11+5\theta)/12+\eta}.
+            \]</div>
+            <p>Choose \(\theta=6\varepsilon/5\) and \(\eta=\varepsilon/2\). Then \((11+5\theta)/12+\eta=11/12+\varepsilon\).</p>
+            <p class="plain-note"><strong>What to verify.</strong> The mask identity is exact. The symbolic theorem displays the exponent before specialization, and the public theorem makes the two parameter choices in its proof.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Amplification</p><h4 class="formal-title">All sixth powers, then the exponent calculation</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L555">row mask</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Mellin/SixthPowerAverage.lean#L147">coprime sum</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/SixthPowerMeanSquare.lean#L44">symbolic bound</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L43">11/12 choice</a>
+              </div>
+            </div>
+            <pre><code>def totientDensity (I : Ideal O) : ℂ :=
+  ∏ P ∈ primeSupport I,
+    (1 - (1 : ℂ) / (Ideal.absNorm P : ℂ))
+
+theorem idealSexticRow_sixth_mask
+    (F : Finset (Ideal O)) (hF : ∀ I ∈ F, I ≠ ⊥)
+    (hg : ∀ I ∈ F, ∀ P ∈ normalizedFactors I,
+      goodLambda ∉ P)
+    (I : Ideal O) (b : O) :
+  idealSexticRow F hF hg I (b ^ 6) =
+    rowCoprimeMask
+      (fun i : primePool F => i.val)
+      (idealSupport F I) b</code></pre>
+            <pre><code>theorem idealRowSum_sixth_eq_coprime_sum
+    (F : Finset (Ideal O)) (hF : ∀ I ∈ F, I ≠ ⊥)
+    (hg : ∀ I ∈ F, ∀ P ∈ normalizedFactors I,
+      goodLambda ∉ P)
+    (χ : DirichletCharacter ℂ q) (W : ℕ → ℂ) (b : O) :
+  idealRowSum F hF hg χ W (b ^ 6) =
+    ∑ I ∈ F with IsCoprime I (Ideal.span {b}),
+      baseChangeWeight χ I * W (Ideal.absNorm I)</code></pre>
+            <pre><code><span class="comment">-- Conclusion of outside_totient_moebius_bound_of_mean_square</span>
+∃ C : ℝ, 0 &lt; C ∧
+  ∀ (D : ℕ) (Z : ℝ), 1 ≤ Z → b * Z ≤ D →
+  ‖∑ I ∈ outsideIdealsUpTo S D,
+    baseChangeWeight chi I *
+      W ((Ideal.absNorm I : ℝ) / Z) *
+      totientDensity I‖ ≤
+    C * Z ^ (((11 + 5 * theta) / 12 : ℝ) + epsilon)
+
+<span class="comment">-- Inside smoothedWeightedMobiusBound_of_theta_models_pos:</span>
+let theta : ℝ := 6 * epsilon / 5
+let averageLoss : ℝ := epsilon / 2</code></pre>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-11">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">11</span><span class="phase close">Close</span></div>
+            <h3>Use Mellin inversion and restore the Euler factors</h3>
+            <p>The amplifier naturally produces Möbius times <code>totientDensity</code>. That is the correct coefficient, not an error to discard. Inverse Mellin continuation turns its smoothed bound into an analytic function in \(\Re(s)&gt;11/12\).</p>
+            <p>An absolutely convergent <code>eulerCorrection</code> removes the density, while <code>finiteEulerFactor</code> restores the finitely excluded bad primes. The public \([1/2,1]\) convention is converted to the upstream \([1,2]\) Mellin convention by the harmless dilation \(x\mapsto2x\).</p>
+            <div class="math-card">\[
+              (L(s,\chi)L(s,\chi_K))\,
+              (E_S(s)E_{\rm dens}(s)\,\mathcal M(s))
+              =\widehat W(s).
+            \]</div>
+            <p class="plain-note"><strong>What to verify.</strong> The bound is a quantified proposition over every smooth dyadic weight. Its Mellin transform is analytic on the desired half-plane, and the corrected identity names every restored factor.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Analytic bridge</p><h4 class="formal-title">Weighted Möbius → analytic reciprocal</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Nonvanishing.lean#L30">Nonvanishing.lean</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/Hecke/MobiusEulerCorrection.lean#L262">Euler correction</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/OAI/NumberTheory/DirichletL/RowCompletion/ThetaNonvanishing.lean#L85">corrected identity</a>
+              </div>
+            </div>
+            <pre><code>def SmoothedWeightedMobiusBound
+    (chi : DirichletCharacter ℂ q)
+    (S : Finset (Ideal O)) (sigma : ℝ) : Prop :=
+  ∀ (W : ℝ → ℂ), ContDiff ℝ ∞ W →
+    Function.support W ⊆ Set.Icc (1 / 2 : ℝ) 1 →
+    ∀ epsilon : ℝ, 0 &lt; epsilon →
+      (fun Z : ℝ ↦ ∑' I : Ideal O,
+        outsideWeight chi S I *
+          W ((Ideal.absNorm I : ℝ) / Z))
+        =O[Filter.atTop]
+      (fun Z : ℝ ↦ Z ^ (sigma + epsilon))
+
+def eulerCorrection
+    (χ : DirichletCharacter ℂ q)
+    (S : Finset (Ideal O)) (s : ℂ) : ℂ :=
+  ∏' P : PrimeIdeal,
+    (1 + correctionTerm χ S P s)</code></pre>
+            <pre><code>theorem eulerCorrection_ne_zero
+    (χ : DirichletCharacter ℂ q)
+    (S : Finset (Ideal O))
+    (s : ℂ) (hs : 0 &lt; s.re) :
+  eulerCorrection χ S s ≠ 0
+
+theorem eulerCorrection_analytic
+    (χ : DirichletCharacter ℂ q)
+    (S : Finset (Ideal O)) :
+  AnalyticOnNhd ℂ (eulerCorrection χ S)
+    {s : ℂ | 0 &lt; s.re}</code></pre>
+            <details open>
+              <summary>Analytic continuation and the exact corrected identity</summary>
+              <pre><code>theorem weightedCompactMellin_analytic_of_smoothedWeightedMobiusBound
+    (chi : DirichletCharacter ℂ q)
+    (S : Finset (Ideal O)) (sigma : ℝ)
+    (hbound : SmoothedWeightedMobiusBound chi S sigma)
+    (W : ℝ → ℂ) (hW : ContDiff ℝ ∞ W)
+    (hsupp : ∀ x, x ≤ 1 ∨ 2 ≤ x → W x = 0) :
+  AnalyticOnNhd ℂ
+    (fun s : ℂ ↦ mellin
+      (fun Z : ℝ ↦ weightedCompactSum chi S W Z⁻¹) (-s))
+    {s : ℂ | sigma &lt; s.re}
+
+theorem corrected_weighted_mellin_identity
+    (χ : DirichletCharacter ℂ q)
+    (S : Finset (Ideal O))
+    (hS : ∀ P ∈ S, Prime P)
+    (W : ℝ → ℂ) (hW : ContDiff ℝ ∞ W)
+    (hs : ∀ x, x ≤ 1 ∨ 2 ≤ x → W x = 0)
+    (s : ℂ) (hRe : 2 &lt; s.re) :
+  (χ.LFunction s * (baseChangeChar χ).LFunction s) *
+    ((finiteEulerFactor χ S s *
+      SmoothMobiusCorrection.eulerCorrection χ S s) *
+      mellin
+        (fun Z : ℝ => weightedCompactSum χ S W Z⁻¹)
+        (-s)) =
+  mellin W s</code></pre>
+            </details>
+          </section>
+        </article>
+
+        <article class="beat" id="beat-12">
+          <section class="story">
+            <div class="beat-topline"><span class="beat-number">12</span><span class="phase close">Close</span></div>
+            <h3>Conclude zeta nonvanishing</h3>
+            <p>Choose a compactly supported Mellin test whose transform is nonzero at the point in question. The corrected identity then says that a zero of \(L(s,\chi)\) in the half-plane would force that nonzero transform to vanish.</p>
+            <p>First Lean proves the statement for every Dirichlet character, away from its possible pole. Specializing to the trivial character modulo one identifies its \(L\)-function with the Riemann zeta function; \(s=1\) is handled separately.</p>
+            <div class="math-card">\[
+              \boxed{\ \Re(s)>\frac{11}{12}\quad\Longrightarrow\quad\zeta(s)\ne0\ }.
+            \]</div>
+            <p class="plain-note"><strong>What to verify.</strong> The endpoint has no model, mean-square, or Mellin hypothesis: all of them have been discharged by <code>actual_smoothedWeightedMobiusBound</code>.</p>
+          </section>
+          <section class="formal">
+            <div class="formal-head">
+              <div><p class="formal-kicker">Endpoint</p><h4 class="formal-title">The unconditional theorem</h4></div>
+              <div class="source-links">
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L109">assembly</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L130">Dirichlet theorem</a>
+                <a href="https://github.com/AK-workstation/quasi-rh-eleven-twelfths/blob/main/ElevenTwelfths/Unconditional.lean#L141">zeta theorem</a>
+              </div>
+            </div>
+            <pre><code>theorem actual_smoothedWeightedMobiusBound
+    (q : ℕ) [NeZero q]
+    (chi : DirichletCharacter ℂ q) :
+  SmoothedWeightedMobiusBound chi
+    (reflectionExcludedPrimes q) (11 / 12 : ℝ)
+
+theorem dirichletL_ne_zero_of_re_gt_elevenTwelfths
+    (q : ℕ) [NeZero q]
+    (chi : DirichletCharacter ℂ q)
+    (z : ℂ) (hz : (11 / 12 : ℝ) &lt; z.re)
+    (hpole : ¬ (chi = 1 ∧ z = 1)) :
+  chi.LFunction z ≠ 0
+
+theorem riemannZeta_ne_zero_of_re_gt_elevenTwelfths
+    (z : ℂ) (hz : (11 / 12 : ℝ) &lt; z.re) :
+  riemannZeta z ≠ 0</code></pre>
+          </section>
+        </article>
+
+        <section class="endpoint">
+          <p class="eyebrow">How to read this blueprint</p>
+          <h3>The prose gives the invariant. The Lean gives the contract.</h3>
+          <p>Each right-hand panel shows the definition or theorem boundary that certifies the corresponding mathematical move. Long proof terms are intentionally left in the linked source; no analytic input is hidden behind prose-only notation.</p>
+          <div class="provenance">
+            <div><strong>Public layer</strong><code>ElevenTwelfths/*</code> fixes notation, the \([1/2,1]\) cutoff, the amplifier, and the final direct assembly.</div>
+            <div><strong>Reused core</strong><code>OAI/NumberTheory/DirichletL/*</code> supplies the Poisson, Gauss, theta, descent, and sieve machinery.</div>
+            <div><strong>Dependency boundary</strong>The endpoint is assembled from <code>BranchDecoding</code> and lower layers, not by weakening a previously packaged \(7/8\) or \(23/24\) theorem.</div>
+          </div>
+        </section>
+        <footer>
+          <span>Standalone HTML; MathJax is used only to render formulas.</span>
+          <span>Source links target the private GitHub repository’s main branch.</span>
+        </footer>
+      </div>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const links = [...document.querySelectorAll('.rail nav a')];
+      const sections = links.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+      if (!('IntersectionObserver' in window)) return;
+      const observer = new IntersectionObserver(entries => {
+        const visible = entries.filter(entry => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (!visible) return;
+        links.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + visible.target.id);
+        });
+      }, { rootMargin: '-15% 0px -72% 0px', threshold: 0 });
+      sections.forEach(section => observer.observe(section));
+    })();
+  </script>
+</body>
+</html>
