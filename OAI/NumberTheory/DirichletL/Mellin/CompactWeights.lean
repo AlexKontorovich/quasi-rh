@@ -125,40 +125,6 @@ theorem realCompactOutsideSum_eq_outsideCompactSum
   have h := hs.tsum_eq
   simpa only [CompactMellinBridge.outsideCompactSum, div_eq_mul_inv] using h.symm
 
-theorem zero_free_of_fixedTestPrimeMSConstants
-    {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (S : Finset (Ideal O))
-    (hSprime : ∀ P ∈ S, Prime P)
-    (hSbad : ∀ P : Ideal O, P.IsMaximal → goodLambda ∈ P → P ∈ S)
-    (W : ℝ → ℂ) (hSmooth : ContDiff ℝ (↑(⊤ : ℕ∞)) W)
-    (hSupp : ∀ y : ℝ, y ≤ 1 ∨ 2 ≤ y → W y = 0)
-    (hBoundW : ∀ y : ℝ, ‖W y‖ ≤ 1)
-    (ε η Cmean Ccount : ℝ) (m₀ : ℕ)
-    (hε : 0 ≤ ε) (hη : 0 < η) (hCcount : 0 < Ccount)
-    (hMS : ∀ m : ℕ, m₀ ≤ m →
-      FixedTestPrimeMSConstants χ S hSbad W m ε Cmean Ccount)
-    (ρ : ℂ) (hσρ : (23 / 24 : ℝ) + (ε + η) < ρ.re)
-    (hρone : ρ.re < 1) (hWρ : mellin W ρ ≠ 0) :
-    χ.LFunction ρ ≠ 0 := by
-  obtain ⟨LipC, hLipC, hLip⟩ :=
-    smooth_supported_hasLipschitzConstant W hSmooth hSupp
-  have hFinite := realCompactOutsideSum_isBigO_of_fixedTestPrimeMSConstants
-    χ S hSbad W LipC ε η Cmean Ccount m₀
-    hLipC hLip hε hη hCcount hBoundW hMS
-  have hEq :
-      (fun D : ℝ => CompactMellinBridge.outsideCompactSum χ S W D⁻¹) =ᶠ[atTop]
-      (realCompactOutsideSum χ S W) := by
-    filter_upwards [eventually_gt_atTop (0 : ℝ)] with D hD
-    exact (realCompactOutsideSum_eq_outsideCompactSum χ S W D hD
-      (fun y hy => hSupp y (Or.inr hy))).symm
-  have hTop :
-      (fun D : ℝ => CompactMellinBridge.outsideCompactSum χ S W D⁻¹) =O[atTop]
-      (fun D : ℝ => D ^ ((23 / 24 : ℝ) + (ε + η))) :=
-    hFinite.congr' hEq.symm Filter.EventuallyEq.rfl
-  exact CompactMellinBridge.baseChange_outsideCompact_zero_free
-    χ S hSprime W hSmooth hSupp ((23 / 24 : ℝ) + (ε + η)) hTop
-    ρ hσρ hρone hWρ
-
 end CompactScaleBridge
 
 open Filter Asymptotics MeasureTheory
@@ -358,53 +324,7 @@ section
 
 open ConcreteCompactWeight
 
-theorem zero_free_of_fixedTestPrimeMSConstants_concrete
-    {q : ℕ} [NeZero q] (χ : DirichletCharacter ℂ q)
-    (S : Finset (Ideal ActualEisensteinCubic.O))
-    (hSprime : ∀ P ∈ S, Prime P)
-    (hSbad : ∀ P : Ideal ActualEisensteinCubic.O, P.IsMaximal →
-      ConcretePrimeRowBridge.goodLambda ∈ P → P ∈ S)
-    (ρ : ℂ)
-    (ε η Cmean Ccount : ℝ) (m₀ : ℕ)
-    (hε : 0 ≤ ε) (hη : 0 < η) (hCcount : 0 < Ccount)
-    (hMS : ∀ m : ℕ, m₀ ≤ m →
-      FixedTestPrimeMSConstants χ S hSbad (weight ρ) m ε Cmean Ccount)
-    (hσρ : (23 / 24 : ℝ) + (ε + η) < ρ.re)
-    (hρone : ρ.re < 1) :
-    χ.LFunction ρ ≠ 0 := by
-  have hρnonneg : 0 ≤ ρ.re := by linarith
-  exact zero_free_of_fixedTestPrimeMSConstants
-    χ S hSprime hSbad (weight ρ)
-    (weight_smooth ρ) (weight_support ρ)
-    (weight_norm_le_one ρ hρnonneg)
-    ε η Cmean Ccount m₀ hε hη hCcount hMS
-    ρ hσρ hρone (weight_mellin_ne_zero ρ)
-
 end
-
-theorem dirichletTarget_of_fixedTestPrimeMSConstants_concrete
-    (hMS : ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
-      (ρ : ℂ), (23 / 24 : ℝ) < ρ.re → ρ.re < 1 →
-      ∃ S : Finset (Ideal ActualEisensteinCubic.O),
-      ∃ _hSprime : ∀ P ∈ S, Prime P,
-      ∃ hSbad : ∀ P : Ideal ActualEisensteinCubic.O,
-        P.IsMaximal → ConcretePrimeRowBridge.goodLambda ∈ P → P ∈ S,
-      ∃ ε η Cmean Ccount : ℝ, ∃ m₀ : ℕ,
-      ∃ _hmean : ∀ m : ℕ, m₀ ≤ m →
-          FixedTestPrimeMSConstants χ S hSbad
-            (ConcreteCompactWeight.weight ρ) m ε Cmean Ccount,
-        0 ≤ ε ∧ 0 < η ∧ 0 < Ccount ∧
-        (23 / 24 : ℝ) + (ε + η) < ρ.re) :
-    ShortDraft.DirichletTarget := by
-  intro q _ χ ρ h23 hprincipal
-  by_cases hρone : ρ.re < 1
-  · obtain ⟨S, hSprime, hSbad, ε, η, Cmean, Ccount, m₀,
-      hmean, hε, hη, hCcount, hgap⟩ := hMS q χ ρ h23 hρone
-    exact zero_free_of_fixedTestPrimeMSConstants_concrete
-      χ S hSprime hSbad ρ ε η Cmean Ccount m₀
-      hε hη hCcount hmean hgap hρone
-  · exact ShortDraft.dirichlet_target_of_one_le_re q χ ρ
-      (le_of_not_gt hρone) hprincipal
 
 end CompactScaleBridge
 

@@ -33,28 +33,6 @@ open Filter Asymptotics MeasureTheory
 open scoped Topology
 open Filter Asymptotics
 
-namespace ShortDraftHeckeBridge
-
-theorem dirichletTarget_of_normFiber_prefix_power
-    (hprefix : ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
-      (ρ : ℂ), (23 / 24 : ℝ) < ρ.re → ρ.re < 1 →
-        ∃ σ C : ℝ, 0 < σ ∧ σ < ρ.re ∧ σ ≤ 1 ∧ 0 ≤ C ∧
-          ∀ n : ℕ,
-            ‖prefixCoeff (normFiberCoeff (baseChangeWeight χ)) n‖ ≤
-              C * (((n : ℝ) + 1) ^ σ)) :
-    ShortDraft.DirichletTarget := by
-  apply dirichletTarget_of_normFiber_exp_bound
-  intro q _ χ ρ h23 hρ
-  obtain ⟨σ, C, hσpos, hσρ, hσone, hC, hsum⟩ :=
-    hprefix q χ ρ h23 hρ
-  refine ⟨σ, hσpos, hσρ, ?_⟩
-  apply normFiberExpSum_isBigO_of_prefix_power χ (baseChangeChar χ)
-    (baseChangeWeight χ)
-    (normFiberCoeff_baseChange_eq_pairInverseCoeff χ)
-    (normFiberCoeff_baseChangeWeight_zero χ)
-    σ C hσpos.le hσone hC hsum
-
-end ShortDraftHeckeBridge
 open Ideal NumberField RingOfIntegers UniqueFactorizationMonoid
 
 namespace FiniteSFactor

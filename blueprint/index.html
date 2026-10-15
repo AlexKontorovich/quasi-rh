@@ -673,13 +673,13 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
             <div class="beat-topline"><span class="beat-number">06</span><span class="phase transform">Transform</span></div>
             <h3>Reflect the cubic theta series</h3>
             <p>The modular transformation law moves the completed theta sum to a reflected cusp. Analytically this is the cubic analogue of a Voronoi formula: the original coefficients are replaced by explicit Fourier coefficients and reflected kernels.</p>
-            <p>In this repository the models are built below the old packaged zero-free theorem. The fixed-shell identity comes from the Poisson, Gauss-sum, and branch-decoding layers; it is then promoted to the canonical theta-model interface needed by the density argument.</p>
+            <p>In this repository the fixed-shell identity is constructed from the Poisson, Gauss-sum, and branch-decoding layers. It is then promoted to the canonical theta-model interface needed by the density argument.</p>
             <div class="math-card">\[
               T_{\Psi_{\rm row}}(W,X)=
               \bigl(4\,\Theta'^{-1}c_{\rm rad}\bigr)\,
               \operatorname{ReflectedFiber}(W,X).
             \]</div>
-            <p class="plain-note"><strong>Directness check.</strong> <code>ActualFixedShellModels.lean</code> imports <code>BranchDecoding</code>, not <code>RowCompletion.ZeroFreeRegion</code>.</p>
+            <p class="plain-note"><strong>Dependency boundary.</strong> <code>ActualFixedShellModels.lean</code> imports only <code>BranchDecoding</code>; this layer proves a model identity, not a nonvanishing conclusion.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -717,7 +717,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
           W X 1 completedRamifiedStep
           (rowResidualPart J.val (maskIdeal q m F))</code></pre>
             <details>
-              <summary>The packaged model interface supplied by that identity</summary>
+              <summary>The model interface supplied by that identity</summary>
               <pre><code>theorem exists_actual_fixedShellModels
     (q : ℕ) [NeZero q]
     (chi : DirichletCharacter ℂ q) :

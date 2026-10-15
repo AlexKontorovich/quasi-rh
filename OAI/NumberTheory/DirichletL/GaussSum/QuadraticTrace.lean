@@ -436,62 +436,6 @@ theorem finiteSquarefreeRow_one
   intro i hi
   simp
 
-theorem finite_actual_prime_extraction
-    {ι β : Type*} (P : ι → Ideal O) [∀ i, (P i).IsMaximal]
-    (hgood : ∀ i, lambda ∉ P i)
-    (columns : Finset O) (support : O → Finset ι) (weight : O → ℂ)
-    (selected : Finset β) (p : β → O) (rows : Finset O)
-    (D : ℕ) (ε : ℝ) (hD : 1 ≤ D) (hε : 0 ≤ ε)
-    (hp : ∀ i ∈ selected, p i ≠ 0)
-    (hprime : ∀ i ∈ selected, (Ideal.span {p i} : Ideal O).IsMaximal)
-    (hinj : Set.InjOn (fun i => (Ideal.span {p i} : Ideal O)) (selected : Set β))
-    (hrows : selected.image (fun i => p i ^ 6) ⊆ rows)
-    (hsupport : ∀ n ∈ columns, ∀ i ∈ support n, n ∈ P i)
-    (hcolnorm : ∀ n ∈ columns, Ideal.absNorm (Ideal.span {n}) ≤ D)
-    (hweight : ∀ n ∈ columns, ‖weight n‖ ≤ 1)
-    (hrowbound : ∀ i ∈ selected,
-      ((64 * (D / Ideal.absNorm (Ideal.span {p i}) + 1) : ℕ) : ℝ) ≤
-        (D : ℝ) ^ (49 / 60 : ℝ))
-    (hcount : (D : ℝ) ^ ((11 / 60 : ℝ) - ε) ≤ (selected.card : ℝ))
-    (hmean :
-      (∑ u ∈ rows,
-        ‖∑ n ∈ columns,
-          weight n * finiteSquarefreeRow P hgood (support n) u‖ ^ 2) ≤
-        (D : ℝ) ^ ((21 / 10 : ℝ) + ε)) :
-    ‖∑ n ∈ columns, weight n‖ ≤
-      2 * (D : ℝ) ^ ((23 / 24 : ℝ) + ε) := by
-  classical
-  let A : O → ℂ := fun u =>
-    ∑ n ∈ columns, weight n * finiteSquarefreeRow P hgood (support n) u
-  have hone : A 1 = ∑ n ∈ columns, weight n := by
-    dsimp [A]
-    apply Finset.sum_congr rfl
-    intro n hn
-    rw [finiteSquarefreeRow_one]
-    ring
-  have hinjRows : Set.InjOn (fun i => p i ^ 6) (selected : Set β) := by
-    apply sixth_power_rows_injective selected
-      (fun i => (Ideal.span {p i} : Ideal O)) p
-    · exact hprime
-    · intro i hi; rfl
-    · exact hinj
-  have happrox : ∀ i ∈ selected,
-      ‖A 1 - A (p i ^ 6)‖ ≤ (D : ℝ) ^ (49 / 60 : ℝ) := by
-    intro i hi
-    rw [hone]
-    change ‖(∑ n ∈ columns, weight n) -
-      (∑ n ∈ columns,
-        weight n * finiteSquarefreeRow P hgood (support n) (p i ^ 6))‖ ≤ _
-    exact (prime_sixth_row_approx_ideal_norm P hgood columns support
-      weight (p i) (hp i hi) (hprime i hi) D hsupport hcolnorm hweight).trans
-      (hrowbound i hi)
-  have hmean' : (∑ u ∈ rows, ‖A u‖ ^ 2) ≤
-      (D : ℝ) ^ ((21 / 10 : ℝ) + ε) := hmean
-  have hbound := PowerExtraction.from_finite_sixth_power_rows
-    rows selected (fun i => p i ^ 6) A 1 (D : ℝ) ε
-    (by exact_mod_cast hD) hε hrows hinjRows happrox hcount hmean'
-  simpa only [hone] using hbound
-
 open EisensteinEmbedding ConcreteTraceCRT Complex
 
 theorem breveE_int_trace_div (q u v : ℤ) (_hq : q ≠ 0) :

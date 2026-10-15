@@ -608,38 +608,6 @@ end CanonicalRowCompletion.ActualFiber
 
 open scoped Classical
 
-namespace CanonicalRowCompletion
-open ActualEisensteinCubic CompletedGauss CubicEisenstein CanonicalCoefficientClass
-local notation "Eis" => ActualEisensteinCubic.O
-
-theorem dirichletTarget_of_reflection_shells
-    (hmodels:∀(q₀:ℕ) [NeZero q₀] (χ:DirichletCharacter ℂ q₀),
-      ∃(rays:ℕ) (scale:ℂ),
-        HasFixedShellModels (reflectionExcludedPrimes q₀) (initialBase χ)
-          rays scale 1 completedRamifiedStep (fixedCuspLevelBound (reflectionConductor q₀))) :
-    ShortDraft.DirichletTarget := by
-  apply dirichletTarget_of_theta_models
-  intro q₀ hq₀ χ
-  obtain ⟨rays,scale,hm⟩:=hmodels q₀ χ
-  refine ⟨reflectionExcludedPrimes q₀,reflectionExcludedPrimes_bad q₀,
-    reflectionExcludedPrimes_prime q₀,1,completedRamifiedStep,
-    fixedCuspLevelBound (reflectionConductor q₀),by norm_num,
-    completedRamifiedStep_gt_one,reflectionLevelBound_ge_one q₀ (NeZero.ne q₀),?_⟩
-  exact hasCanonicalThetaModels_of_fixed_shell_models
-    (reflectionExcludedPrimes q₀) (initialBase χ) rays scale 1 completedRamifiedStep
-    (fixedCuspLevelBound (reflectionConductor q₀)) hm
-
-end CanonicalRowCompletion
-
-namespace ShortDraft
-
-theorem zeta_nonvanishing_of_dirichletTarget (h:DirichletTarget)
-    (s:ℂ) (hs:(23/24:ℝ)<s.re) (hs1:s≠1) : riemannZeta s≠0 := by
-  have he:=h 1 (1:DirichletCharacter ℂ 1) s hs (by simp only [true_and]; exact hs1)
-  simpa only [DirichletCharacter.LFunction_modOne_eq] using he
-
-end ShortDraft
-
 open scoped BigOperators Classical ContDiff
 
 namespace CanonicalRowCompletion.ActualFiber

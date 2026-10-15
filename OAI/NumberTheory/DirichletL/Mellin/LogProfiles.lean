@@ -142,32 +142,6 @@ theorem principal_dirichlet_exp_zero_free_of_power_bound_only
       (1 : DirichletCharacter ℂ q) D⁻¹) (-s))
     Complex.Gamma hLregular hM hW hregular heq ρ hρ hρone hWρ
 
-def ExponentialMobiusPowerBound : Prop :=
-  ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (σ : ℝ),
-    (23 / 24 : ℝ) < σ → σ < 1 →
-      (fun D : ℝ => mobiusExpSum χ D⁻¹) =O[atTop]
-        (fun D : ℝ => D ^ σ)
-
-theorem dirichletTarget_of_exponentialMobiusPowerBound
-    (hbound : ExponentialMobiusPowerBound) : ShortDraft.DirichletTarget := by
-  intro q _ χ s h23 hprincipal
-  by_cases hs : s.re < 1
-  · let σ : ℝ := ((23 / 24 : ℝ) + s.re) / 2
-    have hσ23 : (23 / 24 : ℝ) < σ := by dsimp [σ]; linarith
-    have hσs : σ < s.re := by dsimp [σ]; linarith
-    have hσone : σ < 1 := lt_trans hσs hs
-    have hσpos : 0 < σ := lt_trans (by norm_num : (0 : ℝ) < 23 / 24) hσ23
-    by_cases hχ : χ = 1
-    · subst χ
-      have hsone : s ≠ 1 := by
-        intro h; exact hprincipal ⟨rfl, h⟩
-      exact principal_dirichlet_exp_zero_free_of_power_bound_only q σ
-        hσpos hσone (hbound q 1 σ hσ23 hσone) s hσs hsone
-    · exact dirichlet_exp_zero_free_of_power_bound_only χ hχ σ
-        hσpos hσone (hbound q χ σ hσ23 hσone) s hσs
-  · exact ShortDraft.dirichlet_target_of_one_le_re q χ s
-      (le_of_not_gt hs) hprincipal
-
 end ShortDraftMellin
 
 namespace FiniteRingSieve

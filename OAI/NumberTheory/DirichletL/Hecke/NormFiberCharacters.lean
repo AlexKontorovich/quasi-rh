@@ -447,54 +447,6 @@ theorem norm_nine_fiber_ramified :
     rw [map_pow, absNorm_ramified P]
     norm_num
 
-theorem dirichletTarget_of_ideal_base_change
-    (hcoeff : ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
-      (n : ℕ), n ≠ 0 →
-        normFiberCoeff (baseChangeWeight χ) n =
-          pairInverseCoeff χ (baseChangeChar χ) n)
-    (hbound : ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
-      (ρ : ℂ), (23 / 24 : ℝ) < ρ.re → ρ.re < 1 →
-        ∃ σ : ℝ, 0 < σ ∧ σ < ρ.re ∧
-          (fun D : ℝ => normFiberExpSum (baseChangeWeight χ) D⁻¹) =O[atTop]
-            (fun D : ℝ => D ^ σ)) :
-    ShortDraft.DirichletTarget := by
-  intro q _ χ ρ h23 hprincipal
-  by_cases hρ : ρ.re < 1
-  · obtain ⟨σ, hσpos, hσρ, htop⟩ := hbound q χ ρ h23 hρ
-    have hσone : σ < 1 := lt_trans hσρ hρ
-    have hρone : ρ ≠ 1 := by
-      intro hh
-      subst ρ
-      norm_num at hρ
-    have hc := hcoeff q χ
-    have hz := normFiberCoeff_baseChangeWeight_zero χ
-    by_cases hχ : χ = 1
-    · have hψ : baseChangeChar χ ≠ 1 :=
-        baseChangeChar_ne_one_of_one χ hχ
-      have hc' : ∀ n : ℕ, n ≠ 0 →
-          normFiberCoeff (baseChangeWeight χ) n =
-            pairInverseCoeff (1 : DirichletCharacter ℂ q)
-              (baseChangeChar χ) n := by
-        intro n hn
-        simpa only [hχ] using hc n hn
-      have hpair := pair_zero_free_of_normFiber_exp_power_bound_principal_left
-        (q := q) (baseChangeChar χ) hψ (baseChangeWeight χ)
-        hc' hz σ hσpos hσone htop ρ hσρ hρone
-      simpa only [hχ] using hpair.1
-    · by_cases hψ : baseChangeChar χ = 1
-      · have hc' : ∀ n : ℕ, n ≠ 0 →
-            normFiberCoeff (baseChangeWeight χ) n =
-              pairInverseCoeff χ (1 : DirichletCharacter ℂ (q * 3)) n := by
-          intro n hn
-          simpa only [hψ] using hc n hn
-        exact (pair_zero_free_of_normFiber_exp_power_bound_principal_right
-          χ hχ (baseChangeWeight χ) hc' hz σ hσpos hσone htop ρ hσρ hρone).1
-      · exact (pair_zero_free_of_normFiber_exp_power_bound_only
-          χ (baseChangeChar χ) hχ hψ (baseChangeWeight χ)
-          (fun n hn => hc n hn) hz σ hσpos hσone htop ρ hσρ).1
-  · exact ShortDraft.dirichlet_target_of_one_le_re q χ ρ
-      (le_of_not_gt hρ) hprincipal
-
 theorem local_inert_p {q : ℕ} (χ : DirichletCharacter ℂ q)
     {p : ℕ} (hp : p.Prime) (hmod : p % 3 = 2) :
     normFiberCoeff (baseChangeWeight χ) p = 0 := by

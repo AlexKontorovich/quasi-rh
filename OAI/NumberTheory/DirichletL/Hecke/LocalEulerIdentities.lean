@@ -497,17 +497,6 @@ theorem normFiberCoeff_baseChange_eq_pairInverseCoeff
     (fun p hp => normFiberCoeff_eq_pairAF_prime χ hp)
     (fun p hp => normFiberCoeff_eq_pairAF_prime_sq χ hp) n hn
 
-theorem dirichletTarget_of_normFiber_exp_bound
-    (hbound : ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q)
-      (ρ : ℂ), (23 / 24 : ℝ) < ρ.re → ρ.re < 1 →
-        ∃ σ : ℝ, 0 < σ ∧ σ < ρ.re ∧
-          (fun D : ℝ => normFiberExpSum (baseChangeWeight χ) D⁻¹) =O[atTop]
-            (fun D : ℝ => D ^ σ)) :
-    ShortDraft.DirichletTarget := by
-  apply dirichletTarget_of_ideal_base_change ?_ hbound
-  intro q _ χ n hn
-  exact normFiberCoeff_baseChange_eq_pairInverseCoeff χ n hn
-
 end ShortDraftHeckeBridge
 open Filter Asymptotics
 

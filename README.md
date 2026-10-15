@@ -20,8 +20,9 @@ This is not obtained by weakening a previously formalized `7 / 8` theorem.
 The proof reuses the Eisenstein Poisson, Gauss--Jacobi, cubic-theta,
 row-completion, and quadratic-sieve components of OpenAI's formalization, but
 assembles them through an arbitrary-positive-radius mean square and a direct
-sixth-power amplifier. Its direct import chain does not import
-`OAI.NumberTheory.DirichletL.RowCompletion.ZeroFreeRegion`.
+sixth-power amplifier. The fixed-shell model is constructed from the
+`RowCompletion.BranchDecoding` layer, while the public nonvanishing endpoint
+is proved only in `ElevenTwelfths.Unconditional`.
 
 ## The argument
 
@@ -124,7 +125,7 @@ specialization; the direct `11 / 12` assembly does not use it.
 | Eisenstein norm, primaryness, and `mu_K ((n))` | `ElevenTwelfths.Arithmetic` |
 | Explicit finite `A_u(N)` and `S(N,H)` | `ElevenTwelfths.ConcreteFamily` |
 | Finite-to-`tsum` boundary | `outsideS_eq_idealRowSum_tsum` |
-| Theta/reflection model below the packaged zero-free theorem | `ElevenTwelfths.ActualFixedShellModels` |
+| Theta/reflection model built from branch decoding | `ElevenTwelfths.ActualFixedShellModels` |
 | Arbitrary-positive-radius mean square | `outside_mean_square_of_theta_models_pos` |
 | Symbolic sixth-power exponent calculation | `outside_totient_moebius_bound_of_mean_square` |
 | Smoothed bound at `11 / 12` | `actual_smoothedWeightedMobiusBound` |
@@ -169,8 +170,8 @@ idempotent when the patch is already present, and runs again after
 
 The analytic components under `OAI/` come from OpenAI's
 [`math`](https://github.com/openai/math) repository. This project reuses those
-components below the packaged zero-free theorem and locally parameterizes
-the finite descent needed for the direct `11 / 12` argument. The pinned
-source revision and local adaptations are recorded under
+Poisson, Gauss-sum, theta-reflection, row-completion, and sieve layers and
+locally parameterizes the finite descent needed for the direct `11 / 12`
+argument. The pinned source revision and local adaptations are recorded under
 [`upstream/`](upstream/), and the upstream Apache-2.0 license is included in
 [`LICENSE`](LICENSE).

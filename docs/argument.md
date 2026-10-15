@@ -14,12 +14,11 @@ The proof has one conceptual spine:
   \longrightarrow \zeta(s)\ne0.
 \]
 
-The long analytic middle is reused from OpenAI's formalization below its
-packaged zero-free theorem. The new assembly keeps the mean-square radius
-symbolic, chooses it as a function of the requested epsilon, and derives
-`11 / 12` directly. It does not invoke
-`OAI.NumberTheory.DirichletL.RowCompletion.ZeroFreeRegion` and does not use a
-stronger `7 / 8` theorem as a black box.
+The long analytic middle reuses OpenAI's Poisson, Gauss-sum,
+theta-reflection, row-completion, and quadratic-sieve layers. The new assembly
+keeps the mean-square radius symbolic, chooses it as a function of the
+requested epsilon, and derives `11 / 12` directly. It does not use a stronger
+`7 / 8` theorem as a black box.
 
 ## 1. The visible Eisenstein sum
 
@@ -115,9 +114,9 @@ theorem ActualFixedShellModels.actual_fixedShellModels ... :
     HasFixedShellModels ...
 ```
 
-It imports `RowCompletion.BranchDecoding`, not the packaged
-`RowCompletion.ZeroFreeRegion`. The resulting canonical theta models feed the
-mean-square endpoint
+Its sole upstream import is `RowCompletion.BranchDecoding`, and this layer
+proves only the fixed-shell identity and model interface. The resulting
+canonical theta models feed the mean-square endpoint
 
 ```lean
 theorem outside_mean_square_of_theta_models_pos ...

@@ -194,25 +194,7 @@ theorem exists_actual_fixedShellModels (q:ℕ) [NeZero q] (χ:DirichletCharacter
 
 end
 
-theorem dirichletTarget_unconditional : ShortDraft.DirichletTarget :=
-  dirichletTarget_of_reflection_shells exists_actual_fixedShellModels
-
 end CanonicalRowCompletion
-
-namespace ShortDraft
-
-theorem dirichlet_LFunction_ne_zero (q:ℕ) [NeZero q]
-    (χ:DirichletCharacter ℂ q) (s:ℂ)
-    (hs:(23/24:ℝ)<s.re) (hpole:¬(χ=1 ∧ s=1)) :
-    DirichletCharacter.LFunction χ s≠0 :=
-  CanonicalRowCompletion.dirichletTarget_unconditional q χ s hs hpole
-
-theorem riemannZeta_ne_zero_of_re_gt (s:ℂ)
-    (hs:(23/24:ℝ)<s.re) (hs1:s≠1) : riemannZeta s≠0 :=
-  zeta_nonvanishing_of_dirichletTarget
-    CanonicalRowCompletion.dirichletTarget_unconditional s hs hs1
-
-end ShortDraft
 
 end
 

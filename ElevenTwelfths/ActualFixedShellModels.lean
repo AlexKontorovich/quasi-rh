@@ -1,14 +1,13 @@
 import OAI.NumberTheory.DirichletL.RowCompletion.BranchDecoding
 
 /-!
-# Actual fixed-shell models, below the packaged zero-free theorem
+# Actual fixed-shell models from branch decoding
 
-This is the fixed-shell construction from
-`OAI.NumberTheory.DirichletL.RowCompletion.ZeroFreeRegion` at OpenAI commit
-`fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb`, copied without its downstream
-`DirichletTarget` and zero-free-region declarations.  It imports only the
-immediate lower-level module `BranchDecoding`, so the direct `11 / 12` theorem
-has no dependency on an already packaged zero-free theorem.
+This fixed-shell construction is adapted from OpenAI's row-completion sources
+at commit `fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb`.  It imports only the
+immediate lower-level module `BranchDecoding` and exposes the fixed-shell
+identity and model interface needed by the direct `11 / 12` argument.  The
+nonvanishing conclusion is proved later, in `ElevenTwelfths.Unconditional`.
 -/
 
 namespace ElevenTwelfths

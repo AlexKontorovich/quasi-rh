@@ -250,31 +250,11 @@ theorem eisenstein_norm_eq_zero_iff (x : EisensteinCoordinates) :
   · intro h
     simp_all
 
-def DirichletTarget : Prop :=
-  ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (s : ℂ),
-    (23 / 24 : ℝ) < s.re → ¬ (χ = 1 ∧ s = 1) →
-      DirichletCharacter.LFunction χ s ≠ 0
-
 theorem dirichlet_target_of_one_le_re
     (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (s : ℂ)
     (hs : 1 ≤ s.re) (hprincipal : ¬ (χ = 1 ∧ s = 1)) :
     DirichletCharacter.LFunction χ s ≠ 0 := by
   exact χ.LFunction_ne_zero_of_one_le_re (not_and_or.mp hprincipal) hs
-
-theorem dirichletTarget_iff_open_strip :
-    DirichletTarget ↔
-      ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (s : ℂ),
-        (23 / 24 : ℝ) < s.re → s.re < 1 →
-          DirichletCharacter.LFunction χ s ≠ 0 := by
-  constructor
-  · intro h q _ χ s h23 _
-    apply h q χ s h23
-    intro ⟨_, hs⟩
-    simp [hs] at *
-  · intro h q _ χ s h23 hprincipal
-    by_cases hs : s.re < 1
-    · exact h q χ s h23 hs
-    · exact dirichlet_target_of_one_le_re q χ s (le_of_not_gt hs) hprincipal
 
 theorem cube_index_filter (b : ℕ) :
     (∑ h ∈ b.divisors, (ArithmeticFunction.moebius h : ℤ)) =
@@ -344,12 +324,6 @@ theorem complex_row_extraction {α β : Type*} [DecidableEq α] [DecidableEq β]
       rw [sub_add_cancel]
     _ ≤ ‖A untwisted - A (row p)‖ + ‖A (row p)‖ := norm_add_le _ _
     _ ≤ ‖A (row p)‖ + error := by linarith [happrox p hp]
-
-theorem mean_square_exponent : (21 / 10 : ℚ) - 11 / 60 = 23 / 12 := by
-  norm_num
-
-theorem approximation_exponent : (2 : ℚ) - 11 / 30 = 49 / 30 := by
-  norm_num
 
 theorem zero_free_of_analytic_identity
     (σ : ℝ) (hσ : σ < 1) (L M W : ℂ → ℂ)

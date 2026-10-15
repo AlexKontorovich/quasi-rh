@@ -2,13 +2,7 @@
 
 ## Source and local adaptation
 
-`OAI/NumberTheory/DirichletL` began as the exact 286-module transitive import
-closure of
-
-```text
-OAI.NumberTheory.DirichletL.RowCompletion.ZeroFreeRegion
-```
-
+`OAI/NumberTheory/DirichletL` began as a 286-module transitive import closure
 from OpenAI's [`math` repository][source] at commit
 `fd4aeeb2ee4fc729c18d98444fed42fd0529eeeb`. The clean closure contains
 190,290 lines and 9,276,274 bytes. It supplies the concrete Eisenstein
@@ -16,17 +10,19 @@ arithmetic, both Poisson passages, Gauss--Jacobi conversion, cubic-theta
 reflection, quadratic large sieve, Mellin continuation, and unconditional
 reflection models reused here.
 
-The committed OAI tree contains 287 Lean modules, 190,912 lines, and
-9,304,027 bytes. Of the 286 upstream modules, 263 remain byte-for-byte
-identical and 23 are locally modified. The additional module is
-`CubicSieve/DescentScale.lean`. Each modified file carries a notice on its
-first line.
+The vendored tree retains the analytic support layers used by this project
+and prunes the unused fixed-exponent extraction/continuation chain together
+with its endpoints. The public nonvanishing endpoint is defined under
+`ElevenTwelfths/`. This pruning is separate from the positive-descent patch
+described below.
+
+The vendored tree contains the 286 modules in that source closure plus the
+local module `CubicSieve/DescentScale.lean`.
 
 The local change parameterizes the canonical descent step and reserve while
 preserving OpenAI's historical fixed-scale interfaces. This removes the
 hard-coded `1 / 20` reserve from the new mean-square entry point and permits
-any positive reserve. The complete 24-file adaptation (23 modified files and
-one added file) is archived in
+any positive reserve. That positive-descent adaptation is archived in
 [`openai-positive-descent.patch`](patches/openai-positive-descent.patch). It
 is a patch against the OpenAI repository root, so its paths begin with
 `lean/OAI/`. Its SHA-256 digest is
@@ -37,8 +33,8 @@ is a patch against the OpenAI repository root, so its paths begin with
 
 The direct `11 / 12` proof lives under `ElevenTwelfths/`. It uses the new
 arbitrary-positive-reserve mean square and the lower-level OpenAI components;
-it neither invokes the packaged `ZeroFreeRegion` theorem nor obtains
-`11 / 12` by weakening OpenAI's `7 / 8` result.
+its endpoint is assembled locally rather than obtained by weakening OpenAI's
+`7 / 8` result.
 
 ## Dependency compatibility patch
 

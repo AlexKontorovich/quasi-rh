@@ -26,34 +26,6 @@ open MulChar AddChar
 
 open Filter Asymptotics
 
-namespace TargetLocalReduction
-
-def LocalExponentialMobiusBound : Prop :=
-  ∀ (q : ℕ) [NeZero q] (χ : DirichletCharacter ℂ q) (ρ : ℂ),
-    (23 / 24 : ℝ) < ρ.re → ρ.re < 1 →
-      ∃ σ : ℝ, 0 < σ ∧ σ < ρ.re ∧ σ < 1 ∧
-        (fun D : ℝ => ShortDraftMellin.mobiusExpSum χ D⁻¹) =O[atTop]
-          (fun D : ℝ => D ^ σ)
-
-theorem dirichletTarget_of_localBound
-    (hbound : LocalExponentialMobiusBound) : ShortDraft.DirichletTarget := by
-  intro q _ χ ρ h23 hprincipal
-  by_cases hρ : ρ.re < 1
-  · obtain ⟨σ, hσpos, hσρ, hσone, htop⟩ := hbound q χ ρ h23 hρ
-    by_cases hχ : χ = 1
-    · subst χ
-      have hρone : ρ ≠ 1 := by
-        intro h
-        exact hprincipal ⟨rfl, h⟩
-      exact ShortDraftMellin.principal_dirichlet_exp_zero_free_of_power_bound_only
-        q σ hσpos hσone htop ρ hσρ hρone
-    · exact ShortDraftMellin.dirichlet_exp_zero_free_of_power_bound_only
-        χ hχ σ hσpos hσone htop ρ hσρ
-  · exact ShortDraft.dirichlet_target_of_one_le_re q χ ρ
-      (le_of_not_gt hρ) hprincipal
-
-end TargetLocalReduction
-
 namespace ActualEisensteinCubic
 
 open AddChar MulChar

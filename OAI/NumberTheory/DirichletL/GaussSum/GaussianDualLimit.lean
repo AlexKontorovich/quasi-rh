@@ -23,34 +23,6 @@ theorem principal_absNorm_pow (p : O) (k : ℕ) :
   rw [← Ideal.span_singleton_pow]
   exact map_pow Ideal.absNorm (Ideal.span {p}) k
 
-theorem sixth_power_rows_within_norm_cutoff
-    {β : Type*} (selected : Finset β) (p : β → O) (rows : Finset O)
-    (D : ℕ) (hD : 1 ≤ D)
-    (hupper : ∀ i ∈ selected,
-      (Ideal.absNorm (Ideal.span {p i}) : ℝ) ≤
-        (D : ℝ) ^ (11 / 60 : ℝ))
-    (hcover : ∀ u : O,
-      (Ideal.absNorm (Ideal.span {u}) : ℝ) ≤
-        (D : ℝ) ^ (11 / 10 : ℝ) → u ∈ rows) :
-    selected.image (fun i => p i ^ 6) ⊆ rows := by
-  classical
-  intro u hu
-  rcases Finset.mem_image.mp hu with ⟨i, hi, rfl⟩
-  apply hcover
-  have hDreal : (1 : ℝ) ≤ D := by exact_mod_cast hD
-  have hDpos : (0 : ℝ) < D := lt_of_lt_of_le zero_lt_one hDreal
-  calc
-    (Ideal.absNorm (Ideal.span {p i ^ 6}) : ℝ) =
-        (Ideal.absNorm (Ideal.span {p i}) : ℝ) ^ 6 := by
-          exact_mod_cast principal_absNorm_pow (p i) 6
-    _ ≤ ((D : ℝ) ^ (11 / 60 : ℝ)) ^ 6 := by
-          gcongr
-          exact hupper i hi
-    _ = (D : ℝ) ^ (11 / 10 : ℝ) := by
-          rw [← Real.rpow_mul_natCast hDpos.le (11 / 60 : ℝ) 6]
-          congr 1
-          norm_num
-
 end ActualEisensteinCubic
 namespace OscillatoryDeterminant
 
@@ -198,21 +170,6 @@ end EisensteinGaussianPrefactor
 
 namespace ActualEisensteinCubic
 
-theorem sixth_power_rows_in_rowNormBall
-    {β : Type*} (selected : Finset β) (p : β → O)
-    (D H : ℕ) (hD : 1 ≤ D)
-    (hupper : ∀ i ∈ selected,
-      (Ideal.absNorm (Ideal.span {p i}) : ℝ) ≤
-        (D : ℝ) ^ (11 / 60 : ℝ))
-    (hH : (D : ℝ) ^ (11 / 10 : ℝ) ≤ (H : ℝ)) :
-    selected.image (fun i => p i ^ 6) ⊆
-      ShortDraftLatticeCount.rowNormBall H := by
-  apply sixth_power_rows_within_norm_cutoff selected p
-    (ShortDraftLatticeCount.rowNormBall H) D hD hupper
-  intro u hu
-  apply ShortDraftLatticeCount.mem_rowNormBall_of_absNorm_le H
-  exact_mod_cast hu.trans hH
-
 open EisensteinEmbedding ConcreteTraceCRT Complex
 
 theorem actual_oscillatory_gaussian_coordinate
@@ -274,41 +231,6 @@ theorem complex_eta_times_prefactor (η q : ℝ) (hη : 0 < η) (hq : 0 < q) :
 
 end EisensteinGaussianPrefactor
 
-namespace ActualEisensteinCubic
-
-theorem finite_actual_prime_extraction_dyadic_ball
-    {ι β : Type*} (P : ι → Ideal O) [∀ i, (P i).IsMaximal]
-    (hgood : ∀ i, lambda ∉ P i)
-    (columns : Finset O) (support : O → Finset ι) (weight : O → ℂ)
-    (selected : Finset β) (p : β → O)
-    (D H : ℕ) (ε : ℝ) (hD : 1 ≤ D) (hε : 0 ≤ ε)
-    (hp : ∀ i ∈ selected, p i ≠ 0)
-    (hprime : ∀ i ∈ selected, (Ideal.span {p i} : Ideal O).IsMaximal)
-    (hinj : Set.InjOn (fun i => (Ideal.span {p i} : Ideal O)) (selected : Set β))
-    (hsupport : ∀ n ∈ columns, ∀ i ∈ support n, n ∈ P i)
-    (hcolnorm : ∀ n ∈ columns, Ideal.absNorm (Ideal.span {n}) ≤ D)
-    (hweight : ∀ n ∈ columns, ‖weight n‖ ≤ 1)
-    (hnormlower : ∀ i ∈ selected,
-      (D : ℝ) ^ (11 / 60 : ℝ) / 2 ≤
-        (Ideal.absNorm (Ideal.span {p i}) : ℝ))
-    (hnormupper : ∀ i ∈ selected,
-      (Ideal.absNorm (Ideal.span {p i}) : ℝ) ≤
-        (D : ℝ) ^ (11 / 60 : ℝ))
-    (hH : (D : ℝ) ^ (11 / 10 : ℝ) ≤ (H : ℝ))
-    (hcount : (D : ℝ) ^ ((11 / 60 : ℝ) - ε) ≤ (selected.card : ℝ))
-    (hmean :
-      (∑ u ∈ ShortDraftLatticeCount.rowNormBall H,
-        ‖∑ n ∈ columns,
-          weight n * finiteSquarefreeRow P hgood (support n) u‖ ^ 2) ≤
-        (D : ℝ) ^ ((21 / 10 : ℝ) + ε)) :
-    ‖∑ n ∈ columns, weight n‖ ≤
-      384 * (D : ℝ) ^ ((23 / 24 : ℝ) + ε) := by
-  apply finite_actual_prime_extraction_dyadic P hgood columns support weight
-    selected p (ShortDraftLatticeCount.rowNormBall H) D ε hD hε hp hprime
-    hinj ?_ hsupport hcolnorm hweight hnormlower hcount hmean
-  exact sixth_power_rows_in_rowNormBall selected p D H hD hnormupper hH
-
-end ActualEisensteinCubic
 namespace OscillatoryDeterminant
 
 open Complex

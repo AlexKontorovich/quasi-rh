@@ -260,36 +260,6 @@ theorem bounded_separated_double_integrable
 
 end AnalyticBridge
 
-namespace PowerExtraction
-
-theorem from_finite_sixth_power_rows
-    {α β : Type*} [DecidableEq α] [DecidableEq β]
-    (rows : Finset α) (primes : Finset β) (row : β → α)
-    (A : α → ℂ) (untwisted : α) (D ε : ℝ)
-    (hD : 1 ≤ D) (hε : 0 ≤ ε)
-    (hrows : primes.image row ⊆ rows)
-    (hinj : Set.InjOn row (primes : Set β))
-    (happrox : ∀ p ∈ primes,
-      ‖A untwisted - A (row p)‖ ≤ D ^ (49 / 60 : ℝ))
-    (hcount : D ^ ((11 / 60 : ℝ) - ε) ≤ (primes.card : ℝ))
-    (hmean : (∑ u ∈ rows, ‖A u‖ ^ 2) ≤
-      D ^ ((21 / 10 : ℝ) + ε)) :
-    ‖A untwisted‖ ≤ 2 * D ^ ((23 / 24 : ℝ) + ε) := by
-  have hDpos : 0 < D := lt_of_lt_of_le zero_lt_one hD
-  have hextract := ShortDraft.complex_row_extraction rows primes row A untwisted
-    (D ^ (49 / 60 : ℝ)) (D ^ ((21 / 10 : ℝ) + ε))
-    (by positivity) hrows hinj happrox hmean
-  have herror : (D ^ (49 / 60 : ℝ)) ^ 2 = D ^ (49 / 30 : ℝ) := by
-    calc
-      (D ^ (49 / 60 : ℝ)) ^ 2 = D ^ ((49 / 60 : ℝ) * 2) :=
-        (Real.rpow_mul_natCast hDpos.le _ 2).symm
-      _ = D ^ (49 / 30 : ℝ) := by congr 1; norm_num
-  rw [herror] at hextract
-  exact from_mean_square_and_prime_rows D ε (primes.card : ℝ)
-    ‖A untwisted‖ hD hε (norm_nonneg _) hcount hextract
-
-end PowerExtraction
-
 namespace ActualEisensteinCubic
 
 section
