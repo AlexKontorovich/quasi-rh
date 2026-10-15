@@ -1,75 +1,149 @@
 # The 11/12 argument, with Lean landmarks
 
-This document will be the short, human-readable route through the proof. Each
-section will contain:
+The [side-by-side blueprint](../blueprint/index.html) is our working guide.
+We will expand it together, one mathematical step at a time, pairing natural
+language with the actual Lean definitions and statements.
 
-1. the mathematical idea;
-2. the precise estimate used by the next section;
-3. the corresponding Lean declaration; and
-4. a brief note about formalization details that are mathematically invisible
-   on paper.
+## 1. Basic arithmetic objects
 
-## Proposed route
+Let \(\omega\) be a primitive cube root of unity. We work with
+\(K=\mathbb Q(\omega)=\mathbb Q(\sqrt{-3})\) and its ring of integers
+\(\mathcal O=\mathbb Z[\omega]\). Lean uses `CyclotomicField 3 ℚ` and
+`NumberField.RingOfIntegers K`, with a fixed complex embedding.
 
-1. Smoothed ideal-Mobius sums and the nonvanishing criterion.
-2. The sextically twisted family.
-3. Sixth-power amplification.
-4. Opening the mean square and Poisson summation.
-5. The Gauss--Jacobi identity.
-6. Cubic theta coefficients and the reflection estimate.
-7. Closing the mean-square recurrence.
-8. Extracting the exponent \(11/12\).
-9. Passing from the Mobius estimate to zeta nonvanishing.
+There are two kinds of norms:
 
-The exposition should emphasize why each transformation is introduced, while
-the Lean source records the local conditions, conductors, coprimality
-hypotheses, smooth weights, and uniformity of constants in full.
+- For a nonzero integral ideal, \(\mathrm N\mathfrak n=\#(\mathcal O/\mathfrak n)\).
+- For an element \(u=a+b\omega\),
+  \(\mathrm N(u)=u\bar u=|u|^2=a^2-ab+b^2\).
 
-## 1. The family and its mean square
+They agree on principal ideals: \(\mathrm N((u))=\mathrm N(u)\).
+We use mathlib's `Ideal.absNorm` directly, without a project wrapper. Its
+underlying function is `Submodule.cardQuot`, the cardinality of the quotient. `elementNorm` is the norm of
+`Ideal.span {u}`; `elementNorm_eq` and `complex_norm_sq` prove its compatibility
+with the algebraic norm and squared complex absolute value. The explicit
+coordinate identification with \(a+b\omega\) remains to be formalized.
 
-We use a fixed smooth weight `W : ℝ → ℂ` supported on `[1/2, 1]`. Thus
-`W (norm n / N)` restricts the column variable to `N/2 ≤ norm n ≤ N`. A
-second, nonnegative smooth weight `V : ℝ → ℝ`, also supported on `[1/2, 1]`,
-restricts the row variable to `H/2 ≤ norm u ≤ H`.
+For a nonzero ideal \(\mathfrak n=\prod_{j=1}^r\mathfrak p_j^{e_j}\), define
+\(\mu_K(\mathfrak n)=(-1)^r\) if all exponents are one, and zero otherwise.
+Thus \(\mu_K(\mathcal O)=1\). `mobiusK` uses squarefreeness and the multiset
+of prime-ideal factors. Its value at the zero ideal is defined as zero.
+It is not the integer Möbius function applied to the ideal norm.
 
-The corresponding Lean definitions are:
+These definitions are in [Arithmetic.lean](../ElevenTwelfths/Arithmetic.lean).
+
+## 2. Sextic characters and the two summation variables
+
+The [OpenAI source, Sections 2–4](https://github.com/openai/math/blob/main/preprints/The-Quasi-Riemann-Hypothesis-October-5-2026/build/paper2.tex)
+uses column ideals prime to a fixed set of primes containing those above 2 and
+3 and the conductor of its auxiliary Hecke character. We omit that auxiliary
+character and take the excluded primes to be those above 6.
+
+For a nonzero prime ideal \(\mathfrak p\nmid(6)\), let
+\(q=\mathrm N\mathfrak p\). If \(u\in\mathfrak p\), set
+\(\chi_{\mathfrak p}(u)=0\). Otherwise \(\chi_{\mathfrak p}(u)\) is the unique
+sixth root of unity congruent to \(u^{(q-1)/6}\) modulo \(\mathfrak p\).
+For \(\mathfrak n\) prime to \((6)\), define
+
+\[
+\chi_{\mathfrak n}(u)=\left(\frac{u}{\mathfrak n}\right)_6
+ =\prod_{\mathfrak p^{e_{\mathfrak p}}\parallel\mathfrak n}
+   \chi_{\mathfrak p}(u)^{e_{\mathfrak p}}.
+\]
+
+The unit ideal gives the empty product, so \(\chi_{\mathcal O}(u)=1\),
+including for \(u=0\). For other admissible ideals, the character is zero
+when \((u)+\mathfrak n\ne\mathcal O\). We define it to be zero outside the
+admissible denominator domain, which is excluded from the sums anyway.
+
+`primeSextic` implements the residue-field rule by summing the matching root
+among the six powers of `-omega`; `chi` multiplies over prime-ideal factors
+with multiplicity. The unique-root property and character identities remain
+proof obligations, not axioms.
+
+**Columns are ideals; rows are elements.** The paper sometimes writes the
+column ideal as its unique primary generator \(n\equiv1\pmod{3\mathcal O}\).
+In that notation, \(\mu_K(n)=\mu_K((n))\) and \(\chi_n=\chi_{(n)}\), and each
+ideal is counted once. `Primary` records this congruence, but our ideal sums
+do not require a generator choice. The generator correspondence is a future
+arithmetic lemma.
+
+The row variable \(u\) ranges over all of \(\mathcal O\), not just primary,
+squarefree, or coprime elements. All six associates occur as distinct lattice
+points. This is the full lattice used for Poisson summation.
+
+## 3. The Möbius partial sums and their mean square
+
+Fix a smooth complex weight \(W\) supported on \([1/2,1]\), and a nonnegative
+real smooth weight \(V\) with the same support. We use \(M\) for Möbius partial
+sums throughout this project:
+
+\[
+M_u(N)=\sum_{\substack{0\ne\mathfrak n\subseteq\mathcal O\\
+                      (\mathfrak n,(6))=1}}
+ \mu_K(\mathfrak n)\chi_{\mathfrak n}(u)
+ W\!\left(\frac{\mathrm N\mathfrak n}{N}\right),
+\qquad
+S(N,H)=\sum_{u\in\mathcal O}
+ V\!\left(\frac{\mathrm N(u)}H\right)|M_u(N)|^2.
+\]
+
+For positive scales only \(N/2\le\mathrm N\mathfrak n\le N\) and
+\(H/2\le\mathrm N(u)\le H\) contribute. The zero row contributes zero since
+\(V(0)=0\). The weight structures stay in the implementation; they do not
+need their own definition entries in the blueprint.
 
 ```lean
-noncomputable def A (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
-    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ)
-    (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ := by
-  classical
-  exact ∑ n ∈ normBall N,
-    if primary n then
-      (mobius n : ℂ) * sexticTwist u n * W ((norm n : ℝ) / (N : ℝ))
-    else 0
+noncomputable def M (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
+  ∑ n ∈ idealBall N,
+    (mobiusK n : ℂ) * chi n u * W ((Ideal.absNorm n : ℝ) / (N : ℝ))
 
-noncomputable def S (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
-    (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ)
-    (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+noncomputable def S (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (N H : ℕ) : ℝ :=
-  ∑ u ∈ normBall H,
-    V ((norm u : ℝ) / (H : ℝ)) *
-      ‖A norm normBall primary mobius sexticTwist W u N‖ ^ 2
+  ∑ u ∈ rowBall H, V ((elementNorm u : ℝ) / (H : ℝ)) * ‖M W u N‖ ^ 2
 ```
 
-For Eisenstein integers, `primary n` will mean the standard congruence
-`lambda ^ 2 ∣ n - 1`.  Keeping it visible in the summation records that we
-sum over the distinguished primary generator of each admissible ideal rather
-than over all six associates.
+`idealBall N` is the finite set of admissible ideals of norm at most `N`.
+`rowBall H` contains every lattice element of norm at most `H`; its finiteness
+is proved for the actual ring, rather than supplied as an input. No norm,
+Möbius function, or character is passed into `M`.
 
-Both quantities are definitionally finite: the column sum uses `normBall N`
-and the mean square uses `normBall H`. Immediately before Poisson summation,
-compact support gives the checked identity
+In [SexticFamily.lean](../ElevenTwelfths/SexticFamily.lean), compact support
+proves the whole-lattice form:
 
 ```lean
-theorem S_eq_tsum ... :
-    S norm normBall primary mobius sexticTwist W V N H = ∑' u : 𝒪,
-      V ((norm u : ℝ) / (H : ℝ)) *
-        ‖A norm normBall primary mobius sexticTwist W u N‖ ^ 2
+theorem S_eq_tsum (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+    (N H : ℕ) : S W V N H =
+      ∑' u : 𝒪, V ((elementNorm u : ℝ) / (H : ℝ)) * ‖M W u N‖ ^ 2
 ```
 
-This isolates `tsum` at exactly the point where the Poisson API requires it,
-while the basic definitions retain the clean finite bounds `N` and `H`.
+The reference paper's Poisson argument uses a Schwartz majorant for the full
+row ball; our dyadic cutoff is a localization convention. Relating the desired
+ball estimate to these smooth localizations remains part of the analytic work.
+When opening the square introduces a row coprimality indicator, the paper uses
+inclusion–exclusion and then applies Poisson on lattice residue classes.
+The ideal-denominator restriction does not remove rows from the lattice.
+
+## 4. The omitted Euler factors
+
+For \(\operatorname{Re}(s)>1\), the untwisted ideal series is
+
+\[
+\sum_{(\mathfrak n,(6))=1}\frac{\mu_K(\mathfrak n)}{(\mathrm N\mathfrak n)^s}
+ =\frac{1}{\zeta_K(s)(1-4^{-s})(1-3^{-s})}.
+\]
+
+The prime above 2 has norm 4 and the prime above 3 has norm 3. The omitted
+factors are nonzero in \(\operatorname{Re}(s)>0\). Their restoration and the
+passage from ideal Möbius cancellation to zeta nonvanishing are still to be
+formalized; they are not consequences of the definitions alone.
+
+## Proposed next steps
+
+1. Prove the arithmetic identities needed for the sextic characters.
+2. Extract the sixth-power rows and establish amplification.
+3. Open the mean square and apply Poisson summation.
+4. Establish the Gauss–Jacobi conversion.
+5. Identify cubic theta coefficients and prove the dual estimate.
+6. Close the mean-square bound and extract the exponent \(11/12\).
+7. Use the Mellin transform and restore local factors to deduce nonvanishing.
