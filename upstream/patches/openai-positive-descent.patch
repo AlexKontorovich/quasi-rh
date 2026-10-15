@@ -1,0 +1,3297 @@
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/ArithmeticBins.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/ArithmeticBins.lean
+index 90a55380f..7120ff899 100644
+--- a/lean/OAI/NumberTheory/DirichletL/CubicSieve/ArithmeticBins.lean
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/ArithmeticBins.lean
+@@ -1,4 +1,6 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.QuadraticSieve.PoissonComparison
++import OAI.NumberTheory.DirichletL.CubicSieve.DescentScale
+ 
+ namespace OAI
+ 
+@@ -239,45 +241,78 @@ theorem globalArithmeticBin_transfer
+ 
+ end
+ 
++end SecondPassArithmetic
++
+ open ActualEisensteinCubic
+ open FirstPassCubeLabels (primeProduct)
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-def fixedDepthRank (Z K : ℝ) : ℕ := ⌈1000*Real.log K/Real.log Z⌉₊
++namespace CanonicalDescentScale
+ 
+-theorem fixedDepthRank_initial (Z K : ℝ) (hZ : 1 < Z) (hK : 0 < K)
+-    (hstart : K ≤ Z^3) : fixedDepthRank Z K ≤ 3000 := by
++def depthRank (scale : CanonicalDescentScale) (Z K : ℝ) : ℕ :=
++  ⌈(scale.denominator : ℝ) * Real.log K / Real.log Z⌉₊
++
++theorem depthRank_initial (scale : CanonicalDescentScale) (Z K : ℝ)
++    (hZ : 1 < Z) (hK : 0 < K) (hstart : K ≤ Z ^ 3) :
++    scale.depthRank Z K ≤ scale.rankCap := by
+   have hz := Real.log_pos hZ
+   have hl := Real.log_le_log hK hstart
+   rw [Real.log_pow] at hl
+   apply Nat.ceil_le.mpr
+-  change 1000*Real.log K/Real.log Z ≤ (3000:ℝ)
++  change (scale.denominator : ℝ) * Real.log K / Real.log Z ≤
++    (scale.rankCap : ℝ)
++  rw [rankCap, Nat.cast_mul, Nat.cast_ofNat]
+   apply (div_le_iff₀ hz).mpr
+-  norm_num at hl
+-  linarith
+-
+-theorem fixedDepthRank_step (Z K K' : ℝ) (hZ : 1 < Z) (hK : 0 < K)
+-    (hK' : 1 ≤ K') (hstep : K' ≤ K/Z^((1:ℝ)/1000)) :
+-    fixedDepthRank Z K'+1 ≤ fixedDepthRank Z K := by
++  calc
++    (scale.denominator : ℝ) * Real.log K ≤
++        (scale.denominator : ℝ) * (3 * Real.log Z) :=
++      mul_le_mul_of_nonneg_left hl scale.denominator_real_pos.le
++    _ = 3 * (scale.denominator : ℝ) * Real.log Z := by ring
++
++theorem depthRank_step (scale : CanonicalDescentScale) (Z K K' : ℝ)
++    (hZ : 1 < Z) (hK : 0 < K) (hK' : 1 ≤ K')
++    (hstep : K' ≤ K / Z ^ scale.step) :
++    scale.depthRank Z K' + 1 ≤ scale.depthRank Z K := by
+   have hz0 : 0 < Z := lt_trans zero_lt_one hZ
+   have hz := Real.log_pos hZ
++  have hq := scale.denominator_real_pos
+   have hk0 : 0 < K' := lt_of_lt_of_le zero_lt_one hK'
+   have hl := Real.log_le_log hk0 hstep
+-  rw [Real.log_div hK.ne' (Real.rpow_pos_of_pos hz0 _).ne',Real.log_rpow hz0] at hl
+-  have ha : 0 ≤ 1000*Real.log K'/Real.log Z := by
+-    exact div_nonneg (mul_nonneg (by norm_num) (Real.log_nonneg hK')) hz.le
+-  have hb : 1000*Real.log K'/Real.log Z+1 ≤ 1000*Real.log K/Real.log Z := by
+-    apply (le_div_iff₀ hz).mpr
+-    field_simp
+-    nlinarith
++  rw [Real.log_div hK.ne' (Real.rpow_pos_of_pos hz0 _).ne',
++    Real.log_rpow hz0] at hl
++  have ha : 0 ≤ (scale.denominator : ℝ) * Real.log K' / Real.log Z := by
++    exact div_nonneg (mul_nonneg hq.le (Real.log_nonneg hK')) hz.le
++  have hb : (scale.denominator : ℝ) * Real.log K' / Real.log Z + 1 ≤
++      (scale.denominator : ℝ) * Real.log K / Real.log Z := by
++    unfold step at hl
++    have hm := mul_le_mul_of_nonneg_left hl hq.le
++    have hscaled :
++      (scale.denominator : ℝ) * Real.log K' + Real.log Z ≤
++          (scale.denominator : ℝ) *
++            (Real.log K - 1 / (scale.denominator : ℝ) * Real.log Z) +
++              Real.log Z := add_le_add hm le_rfl
++    have hscaled' :
++        (scale.denominator : ℝ) * Real.log K' + Real.log Z ≤
++          (scale.denominator : ℝ) * Real.log K := hscaled.trans_eq (by
++        field_simp [ne_of_gt hq]
++        <;> ring)
++    calc
++      (scale.denominator : ℝ) * Real.log K' / Real.log Z + 1 =
++          ((scale.denominator : ℝ) * Real.log K' + Real.log Z) / Real.log Z := by
++            field_simp [ne_of_gt hz]
++      _ ≤ ((scale.denominator : ℝ) * Real.log K) / Real.log Z :=
++        (div_le_div_iff_of_pos_right hz).2 hscaled'
+   have hn := Nat.ceil_mono hb
+   rw [Nat.ceil_add_one ha] at hn
+   exact hn
+ 
+-theorem fixedDepthRank_path (Z : ℝ) (hZ : 1 < Z) (K : ℕ → ℝ) (n : ℕ)
++theorem depthRank_path (scale : CanonicalDescentScale) (Z : ℝ) (hZ : 1 < Z)
++    (K : ℕ → ℝ) (n : ℕ)
+     (hK : ∀ i,i ≤ n → 1 ≤ K i) (hstart : K 0 ≤ Z^3)
+-    (hstep : ∀ i,i < n → K (i+1) ≤ K i/Z^((1:ℝ)/1000)) : n+1 ≤ 3001 := by
+-  have hiter : ∀ i,i ≤ n → fixedDepthRank Z (K i)+i ≤ fixedDepthRank Z (K 0) := by
++    (hstep : ∀ i,i < n → K (i+1) ≤ K i / Z ^ scale.step) :
++    n + 1 ≤ scale.rankCap + 1 := by
++  have hiter : ∀ i,i ≤ n → scale.depthRank Z (K i) + i ≤
++      scale.depthRank Z (K 0) := by
+     intro i
+     induction i with
+     | zero => simp
+@@ -286,14 +321,56 @@ theorem fixedDepthRank_path (Z : ℝ) (hZ : 1 < Z) (K : ℕ → ℝ) (n : ℕ)
+       have hip : i ≤ n := by omega
+       have hil : i < n := by omega
+       have hprev := hi hip
+-      have hs := fixedDepthRank_step Z (K i) (K (i+1)) hZ
++      have hs := scale.depthRank_step Z (K i) (K (i+1)) hZ
+         (lt_of_lt_of_le zero_lt_one (hK i hip)) (hK (i+1) hin) (hstep i hil)
+       omega
+   have ht := hiter n le_rfl
+-  have hb := fixedDepthRank_initial Z (K 0) hZ
++  have hb := scale.depthRank_initial Z (K 0) hZ
+     (lt_of_lt_of_le zero_lt_one (hK 0 (Nat.zero_le _))) hstart
+   omega
+ 
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
++
++/-- The historical scale, retained as the compatibility specialization. -/
++def canonicalDescentScale1000 : CanonicalDescentScale where
++  denominator := 1000
++  denominator_pos := by norm_num
++  reserve := (1:ℝ)/20
++  reserve_pos := by norm_num
++  short_budget := by norm_num
++
++@[simp] theorem canonicalDescentScale1000_denominator :
++    canonicalDescentScale1000.denominator=1000:=rfl
++
++@[simp] theorem canonicalDescentScale1000_rankCap :
++    canonicalDescentScale1000.rankCap=3000:=rfl
++
++@[simp] theorem canonicalDescentScale1000_step :
++    canonicalDescentScale1000.step=(1:ℝ)/1000:=rfl
++
++def fixedDepthRank (Z K : ℝ) : ℕ :=
++  canonicalDescentScale1000.depthRank Z K
++
++theorem fixedDepthRank_initial (Z K : ℝ) (hZ : 1 < Z) (hK : 0 < K)
++    (hstart : K ≤ Z^3) : fixedDepthRank Z K ≤ 3000 := by
++  simpa [fixedDepthRank] using
++      canonicalDescentScale1000.depthRank_initial Z K hZ hK hstart
++
++theorem fixedDepthRank_step (Z K K' : ℝ) (hZ : 1 < Z) (hK : 0 < K)
++    (hK' : 1 ≤ K') (hstep : K' ≤ K/Z^((1:ℝ)/1000)) :
++    fixedDepthRank Z K'+1 ≤ fixedDepthRank Z K := by
++  exact canonicalDescentScale1000.depthRank_step Z K K' hZ hK hK'
++    (by simpa using hstep)
++
++theorem fixedDepthRank_path (Z : ℝ) (hZ : 1 < Z) (K : ℕ → ℝ) (n : ℕ)
++    (hK : ∀ i,i ≤ n → 1 ≤ K i) (hstart : K 0 ≤ Z^3)
++    (hstep : ∀ i,i < n → K (i+1) ≤ K i/Z^((1:ℝ)/1000)) : n+1 ≤ 3001 := by
++  simpa using
++    canonicalDescentScale1000.depthRank_path Z hZ K n hK hstart
++      (by simpa using hstep)
++
+ theorem globalPooledDelta_pos (B F : ℝ) (hB : 0 < B) (hF : 0 < F)
+     (j : GlobalLogIndex) : 0 < globalPooledDelta B F j := by
+   unfold globalPooledDelta
+@@ -358,9 +435,10 @@ theorem globalPooled_J_bound (B : ℝ) (hB : 0 < B) (side : Bool) (x : GlobalSec
+ 
+ include hp in
+ 
+-theorem globalActualBin_fixed_depth (Z K ell B F : ℝ) (hZ : 1 < Z)
++theorem globalActualBin_depth (scale : CanonicalDescentScale)
++    (Z K ell B F : ℝ) (hZ : 1 < Z)
+     (hK : 0 < K) (hell : 0 < ell) (hB : 0 < B) (hF : 0 < F)
+-    (hprogress : Z^((1:ℝ)/1000) ≤ B*F)
++    (hprogress : Z ^ scale.step ≤ B * F)
+     (hstart : K ≤ Z^3) (side : Bool) (x : GlobalSecondData ι)
+     (hk : x.source.frequency ≠ 0)
+     (hb₁ : ‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2 ≤ B)
+@@ -368,19 +446,39 @@ theorem globalActualBin_fixed_depth (Z K ell B F : ℝ) (hZ : 1 < Z)
+     (hretained : globalBinRadial ell (globalPooledRowScale K ell B F (globalScaleIndex p side x))
+       (globalScaleIndex p side x) ≤ globalPooledDelta B F (globalScaleIndex p side x)) :
+     let K' := globalLogRep (globalScaleIndex p side x) 8*Real.exp 1
+-    K' ≤ K/Z^((1:ℝ)/1000) ∧ fixedDepthRank Z K'+1 ≤ fixedDepthRank Z K ∧
+-      fixedDepthRank Z K ≤ 3000 := by
++    K' ≤ K / Z ^ scale.step ∧
++      scale.depthRank Z K' + 1 ≤ scale.depthRank Z K ∧
++      scale.depthRank Z K ≤ scale.rankCap := by
+   dsimp only
+   have hrow := globalPooledRow_contraction K ell B F hK hell hB hF (globalScaleIndex p side x)
+     (globalPooled_J_bound p hp B hB side x hk hb₁ hb₂) hretained
+   have hD := hprogress.trans (globalPooledDelta_ge B F hB.le hF.le (globalScaleIndex p side x))
+   have hz0 : 0 < Z := lt_trans zero_lt_one hZ
+-  have hsmall : globalLogRep (globalScaleIndex p side x) 8*Real.exp 1 ≤ K/Z^((1:ℝ)/1000) :=
++  have hsmall : globalLogRep (globalScaleIndex p side x) 8*Real.exp 1 ≤
++      K / Z ^ scale.step :=
+     hrow.trans (div_le_div_of_nonneg_left hK.le (Real.rpow_pos_of_pos hz0 _) hD)
+   have hchild : 1 ≤ globalLogRep (globalScaleIndex p side x) 8*Real.exp 1 :=
+     one_le_mul_of_one_le_of_one_le (globalLogRep_ge_one _ _) (Real.one_le_exp (by norm_num))
+-  exact ⟨hsmall,fixedDepthRank_step Z K _ hZ hK hchild hsmall,
+-    fixedDepthRank_initial Z K hZ hK hstart⟩
++  exact ⟨hsmall, scale.depthRank_step Z K _ hZ hK hchild hsmall,
++    scale.depthRank_initial Z K hZ hK hstart⟩
++
++include hp in
++
++theorem globalActualBin_fixed_depth (Z K ell B F : ℝ) (hZ : 1 < Z)
++    (hK : 0 < K) (hell : 0 < ell) (hB : 0 < B) (hF : 0 < F)
++    (hprogress : Z^((1:ℝ)/1000) ≤ B*F)
++    (hstart : K ≤ Z^3) (side : Bool) (x : GlobalSecondData ι)
++    (hk : x.source.frequency ≠ 0)
++    (hb₁ : ‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2 ≤ B)
++    (hb₂ : ‖eisEmbedding (primeProduct p x.cube.support x.cube.rightExponent)‖^2 ≤ B)
++    (hretained : globalBinRadial ell (globalPooledRowScale K ell B F (globalScaleIndex p side x))
++      (globalScaleIndex p side x) ≤ globalPooledDelta B F (globalScaleIndex p side x)) :
++    let K' := globalLogRep (globalScaleIndex p side x) 8*Real.exp 1
++    K' ≤ K/Z^((1:ℝ)/1000) ∧ fixedDepthRank Z K'+1 ≤ fixedDepthRank Z K ∧
++      fixedDepthRank Z K ≤ 3000 := by
++  simpa [fixedDepthRank] using
++      globalActualBin_depth p hp canonicalDescentScale1000 Z K ell B F hZ hK
++        hell hB hF hprogress hstart side x hk hb₁ hb₂ hretained
+ 
+ end SecondPassArithmetic
+ 
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/CanonicalLogEnergy.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/CanonicalLogEnergy.lean
+index ac3a53519..00ea85cd4 100644
+--- a/lean/OAI/NumberTheory/DirichletL/CubicSieve/CanonicalLogEnergy.lean
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/CanonicalLogEnergy.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.CubicSieve.LogSeparation
+ 
+ namespace OAI
+@@ -511,18 +512,30 @@ theorem canonicalTerminalConstant_nonneg (A M : ℝ) : 0≤canonicalTerminalCons
+   unfold canonicalTerminalConstant
+   positivity
+ 
+-theorem fixedDepthRank_zero_iff (Z K : ℝ) (hZ : 1<Z) (hK : 0<K) :
+-    fixedDepthRank Z K=0 ↔ K≤1 := by
+-  rw [fixedDepthRank,Nat.ceil_eq_zero]
++end SecondPassArithmetic
++
++theorem CanonicalDescentScale.depthRank_zero_iff (scale : CanonicalDescentScale)
++    (Z K : ℝ) (hZ : 1<Z) (hK : 0<K) :
++    scale.depthRank Z K=0 ↔ K≤1 := by
++  rw [CanonicalDescentScale.depthRank,Nat.ceil_eq_zero]
+   constructor
+   · intro h
+     have hm := (div_le_iff₀ (Real.log_pos hZ)).mp h
+     apply (Real.log_nonpos_iff hK.le).mp
+-    nlinarith
++    exact nonpos_of_mul_nonpos_right (by simpa using hm) scale.denominator_real_pos
+   · intro h
+     apply (div_le_iff₀ (Real.log_pos hZ)).mpr
+     have hm := (Real.log_nonpos_iff hK.le).mpr h
+-    nlinarith
++    simpa using mul_nonpos_of_nonneg_of_nonpos scale.denominator_real_pos.le hm
++
++namespace SecondPassArithmetic
++open ActualEisensteinCubic
++open ConcreteTraceCRT (eisEmbedding)
++open FirstPassCubeLabels
++
++theorem fixedDepthRank_zero_iff (Z K : ℝ) (hZ : 1<Z) (hK : 0<K) :
++    fixedDepthRank Z K=0 ↔ K≤1 :=
++  canonicalDescentScale1000.depthRank_zero_iff Z K hZ hK
+ 
+ theorem smallColumn_row_le_label (m : ActualEisensteinCubic.O) (hm : m≠0) (X F K : ℝ)
+     (hX : X≤1) (hF : 0≤F) (hK : 0≤K)
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/ClosedRecursion.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/ClosedRecursion.lean
+index bf2a221cd..ad422b8b6 100644
+--- a/lean/OAI/NumberTheory/DirichletL/CubicSieve/ClosedRecursion.lean
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/ClosedRecursion.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.CubicSieve.ReopeningBounds
+ import OAI.NumberTheory.DirichletL.CubicSieve.CutoffOrders
+ 
+@@ -93,7 +94,7 @@ private theorem two_windows_bound (windows : Fin 7→ℝ→ℂ)
+   obtain ⟨B₆,h₆,hb₆⟩ := hb 6
+   exact ⟨B₅+B₆,by linarith,fun t=>(hb₅ t).trans (by linarith),fun t=>(hb₆ t).trans (by linarith)⟩
+ 
+-theorem reopenedCanonicalRow_state_step
++theorem reopenedCanonicalRow_state_step [scale : CanonicalDescentScale]
+     (g V : 𝓢(ℝ,ℂ)) (M Nv : ℝ) (hM : 0≤M) (hNv : 0≤Nv)
+     (hgM : ∀t,g t≠0→|t|≤M) (hV : ∀t,V t≠0→|t|≤Nv)
+     (hWin : ∀t,g t≠0→V t=1)
+@@ -117,10 +118,10 @@ theorem reopenedCanonicalRow_state_step
+       (pool : Finset ι) (Q : Finset (ι→₀ℕ)) (β : Ideal ActualEisensteinCubic.O→(ι→₀ℕ)→ℂ)
+       (Γ t B H U Tmax E : ℝ),
+       (∀u,‖base u‖≤1) → (∀i,IsCoprime (Ideal.span {p i}) bad) →
+-      1<Z → Real.exp 9000≤Z → 0≤η → η≤(1:ℝ)/1000 →
++      1<Z → scale.largeThreshold≤Z → 0≤η → η≤scale.step →
+       0≤Γ → 1≤E → 1≤U → 1≤B → 0≤H → 0≤Tmax →
+       Ksrc/Z^η≤U → X/B^3≤U → Real.exp 1*B≤U → H≤U → Real.exp M≤U →
+-      (X/B^3)*Real.exp M≤U → Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F →
++      (X/B^3)*Real.exp M≤U → Z^scale.step≤(Real.exp 1*B)*F →
+       (∀I∈labels,∀v∈Q,‖β I v‖≤Γ) → (∀v∈Q,v.support⊆pool) →
+       (∀v∈Q,‖eisEmbedding (primeProduct p v.support v)‖^2≤Real.exp 1*B) →
+       globalFirstTailFactor (Ksrc/Z^η) (X/B^3) (Real.exp 1*B) F U H Ntail≤Tmax →
+@@ -128,7 +129,7 @@ theorem reopenedCanonicalRow_state_step
+       (∀side : Bool, let windows:=if side then windows₁ else windows₂
+         ∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base bad Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z Ksrc → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z Ksrc → ∀s : ℝ,
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+@@ -226,11 +227,11 @@ theorem reopenedCanonicalRow_state_step
+         _ = _ := by rw [show Real.exp 5*Cf*Real.sqrt (D₁*Γ^2)*Real.sqrt (D₂*Γ^2)=
+             Real.exp 5*Cf*(Real.sqrt (D₁*Γ^2)*Real.sqrt (D₂*Γ^2)) by ring,hsqrt];ring
+ 
+-theorem reopenedCanonicalRow_polynomial_step
++theorem reopenedCanonicalRow_polynomial_step [scale : CanonicalDescentScale]
+     (g V : 𝓢(ℝ,ℂ)) (A M Nv : ℝ) (hM : 0≤M) (hNv : 0≤Nv)
+     (hgM : ∀t,g t≠0→|t|≤M) (hV : ∀t,V t≠0→|t|≤Nv)
+     (hWin : ∀t,g t≠0→V t=1)
+-    (ε deltaLoss η : ℝ) (hε : 0<ε) (hδ : 0<deltaLoss) (hη : 0<η) (hηsmall : η≤(1:ℝ)/1000)
++    (ε deltaLoss η : ℝ) (hε : 0<ε) (hδ : 0<deltaLoss) (hη : 0<η) (hηsmall : η≤scale.step)
+     (J : ℕ) :
+     ∃(windows₁ windows₂ : Fin 7→ℝ→ℂ) (C : ℝ), 0≤C ∧
+       (∀i,HasCompactSupport (windows₁ i)) ∧ (∀i,ContDiff ℝ ∞ (windows₁ i)) ∧
+@@ -248,15 +249,15 @@ theorem reopenedCanonicalRow_polynomial_step
+       (pool : Finset ι) (Q : Finset (ι→₀ℕ)) (β : Ideal ActualEisensteinCubic.O→(ι→₀ℕ)→ℂ)
+       (Γ t B E : ℝ),
+       (∀u,‖base u‖≤1) → (∀i,IsCoprime (Ideal.span {p i}) bad) →
+-      1<Z → Real.exp 9000≤Z → 1≤X → X≤Z^3 → F≤Z^3 →
++      1<Z → scale.largeThreshold≤Z → 1≤X → X≤Z^3 → F≤Z^3 →
+       0≤Γ → 1≤E → 1≤B → B^3≤Real.exp A*X →
+-      Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F →
++      Z^scale.step≤(Real.exp 1*B)*F →
+       (∀I∈labels,∀v∈Q,‖β I v‖≤Γ) → (∀v∈Q,v.support⊆pool) →
+       (∀v∈Q,‖eisEmbedding (primeProduct p v.support v)‖^2≤Real.exp 1*B) →
+       (∀side : Bool, let windows:=if side then windows₁ else windows₂
+         ∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base bad Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z Ksrc → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z Ksrc → ∀s : ℝ,
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+@@ -306,7 +307,7 @@ theorem reopenedCanonicalRow_polynomial_step
+     (zero_le_one.trans hZ.le) hTmax hKU hellU hBU hHU heU hMU hprogress hβ hQ hQB htail ht ih
+   dsimp only at hb ⊢
+   have hm:=reopening_recursive_with_ratio A M Z η X F Ksrc B deltaLoss ε hZ.le hη.le
+-    (by linarith) hX hXZ hstate.label_ge_one hFZ hstate.row_ge_one hB hδ.le hε.le
++    (hηsmall.trans scale.step_le_one) hX hXZ hstate.label_ge_one hFZ hstate.row_ge_one hB hδ.le hε.le
+   have hx := mul_le_mul_of_nonneg_left hm
+     (show 0≤Cbase*Γ^2*(X*F)^2*E*(1+‖t‖)^(2*J) by positivity)
+   apply hb.trans
+@@ -318,9 +319,10 @@ end
+ open ActualEisensteinCubic FirstPassCubeLabels
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem reopenedCanonicalFirstErrors_power
++theorem reopenedCanonicalFirstErrors_power [scale : CanonicalDescentScale]
+     (g : 𝓢(ℝ,ℂ)) (A M : ℝ) (hgM : ∀t,g t≠0→|t|≤M)
+-    (ε η : ℝ) (hε : 0<ε) (hη : 0<η) (hbudget : 3000*η≤(1:ℝ)/40) :
++    (ε η : ℝ) (hε : 0<ε) (hη : 0<η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) :
+     ∃C : ℝ,0≤C ∧ ∀{ι : Type*} [DecidableEq ι]
+       (p : ι→ActualEisensteinCubic.O) (hp : ∀i,p i≠0) [∀i,(Ideal.span {p i}).IsMaximal]
+       (hcop : Pairwise (Function.onFun IsCoprime (fun i=>Ideal.span {p i})))
+@@ -340,8 +342,8 @@ theorem reopenedCanonicalFirstErrors_power
+       let a:=reopenedPairCoefficient β
+       B*(‖canonicalSourceZero p hp hcop hg pool bs labels a Ψt Ψt m m g g rowMajorant Ksrc (X/B^3)‖+
+          ‖canonicalSourceTail p hp hcop hg pool bs labels a Ψt Ψt m m g g rowMajorant Ksrc (Ksrc/Z^η) (X/B^3)‖)≤
+-      C*Γ^2*(X*F)^2*Z^(3*ε-(1:ℝ)/40) := by
+-  obtain ⟨N,hN,horder⟩:=canonicalFirstTail_reopening_order η ε ((1:ℝ)/40) hη hε.le
++      C*Γ^2*(X*F)^2*Z^(3*ε-scale.shortMargin) := by
++  obtain ⟨N,hN,horder⟩:=canonicalFirstTail_reopening_order η ε scale.shortMargin hη hε.le
+   obtain ⟨Cz,Ct,hCz,hCt,herrors⟩:=reopenedCanonicalFirstErrors g M hgM ε hε N
+   let Cs:=reopeningScaleConstant A M
+   have hCs : 1≤Cs:=reopeningScaleConstant_one A M
+@@ -374,7 +376,7 @@ theorem reopenedCanonicalFirstErrors_power
+     hstate.label_ge_one hU hMU (fun u=>hstate.coefficient.norm_le hbase u) hβ hQB
+     (fun I hI=>(hstate.label_bounds I hI).1) (fun I hI=>(hstate.label_bounds I hI).2.2.2)
+   dsimp only at herr ⊢
+-  have hzero:=canonicalFirstZero_normalization Cz Γ X F Ksrc B Z ε hCz hX0 hF0.le hK0.le hB
++  have hzero:=canonicalFirstZero_normalization Cz Γ X F Ksrc B Z ε scale.shortMargin hCz hX0 hF0.le hK0.le hB
+     (hstate.row_bound hZ hη.le hbudget)
+   have hBpow : B^ε≤Cs^ε*Z^(3*ε) := by
+     have hh : B≤Cs*Z^3 := (le_mul_of_one_le_left hB0.le (Real.one_le_exp (by norm_num))).trans
+@@ -384,23 +386,23 @@ theorem reopenedCanonicalFirstErrors_power
+     norm_num
+   have hz : B*‖canonicalSourceZero p hp hcop hg pool (reopenedCubeFamily Q) labels (reopenedPairCoefficient β)
+       (normHeightTwist Ψ t) (normHeightTwist Ψ t) m m g g rowMajorant Ksrc (X/B^3)‖≤
+-      Cz'*Γ^2*(X*F)^2*Z^(3*ε-(1:ℝ)/40) := by
++      Cz'*Γ^2*(X*F)^2*Z^(3*ε-scale.shortMargin) := by
+     apply ((mul_le_mul_of_nonneg_left herr.1 hB0.le).trans hzero).trans
+     calc
+-      _ ≤ (Cz*(Real.exp 1)^(1+ε))*(Cs^ε*Z^(3*ε))*Γ^2*(X*F)^2*Z^(-((1:ℝ)/40)) := by gcongr
+-      _ = _ := by rw [show 3*ε-(1:ℝ)/40=3*ε+(-((1:ℝ)/40)) by ring,Real.rpow_add hZ0]; dsimp [Cz']; ring
++      _ ≤ (Cz*(Real.exp 1)^(1+ε))*(Cs^ε*Z^(3*ε))*Γ^2*(X*F)^2*Z^(-scale.shortMargin) := by gcongr
++      _ = _ := by rw [show 3*ε-scale.shortMargin=3*ε+(-scale.shortMargin) by ring,Real.rpow_add hZ0]; dsimp [Cz']; ring
+   have ht0:=horder Cs Ct Γ B (Real.exp 1*B) U F Ksrc Z M hCs hCt hB0.le
+     (by positivity) (by positivity) hF0.le hstate.row_ge_one hZ hB0U hBU le_rfl hFU hKsrcU
+   have ht : B*‖canonicalSourceTail p hp hcop hg pool (reopenedCubeFamily Q) labels (reopenedPairCoefficient β)
+       (normHeightTwist Ψ t) (normHeightTwist Ψ t) m m g g rowMajorant Ksrc (Ksrc/Z^η) (X/B^3)‖≤
+-      Ct'*Γ^2*(X*F)^2*Z^(3*ε-(1:ℝ)/40) := by
+-    have hpow : Z^(-((1:ℝ)/40))≤Z^(3*ε-(1:ℝ)/40):=
++      Ct'*Γ^2*(X*F)^2*Z^(3*ε-scale.shortMargin) := by
++    have hpow : Z^(-scale.shortMargin)≤Z^(3*ε-scale.shortMargin):=
+       Real.rpow_le_rpow_of_exponent_le hZ (by linarith)
+     have hXF : 1≤(X*F)^2:=one_le_pow₀ (one_le_mul_of_one_le_of_one_le hX hstate.label_ge_one)
+     apply ((mul_le_mul_of_nonneg_left herr.2 hB0.le).trans ht0).trans
+     calc
+-      _ = Ct'*Γ^2*Z^(-((1:ℝ)/40)):=by dsimp [Ct']; ring
+-      _ ≤ Ct'*Γ^2*((X*F)^2*Z^(3*ε-(1:ℝ)/40)):=by
++      _ = Ct'*Γ^2*Z^(-scale.shortMargin):=by dsimp [Ct']; ring
++      _ ≤ Ct'*Γ^2*((X*F)^2*Z^(3*ε-scale.shortMargin)):=by
+         apply mul_le_mul_of_nonneg_left _ (mul_nonneg hCt' (sq_nonneg Γ))
+         exact hpow.trans (le_mul_of_one_le_left (by positivity) hXF)
+       _ = _:=by ring
+@@ -411,12 +413,12 @@ open ActualEisensteinCubic FirstPassCubeLabels
+ open ConcreteTraceCRT (eisEmbedding)
+ open JointLogSeparation (frequencyTwist)
+ 
+-theorem reopenedCanonicalRow_closed_step
++theorem reopenedCanonicalRow_closed_step [scale : CanonicalDescentScale]
+     (g V : 𝓢(ℝ,ℂ)) (A M Nv : ℝ) (hM : 0≤M) (hNv : 0≤Nv)
+     (hgM : ∀t,g t≠0→|t|≤M) (hV : ∀t,V t≠0→|t|≤Nv)
+     (hWin : ∀t,g t≠0→V t=1)
+-    (ε deltaLoss η : ℝ) (hε : 0<ε) (hδ : 0<deltaLoss) (hη : 0<η) (hηsmall : η≤(1:ℝ)/1000)
+-    (hbudget : 3000*η≤(1:ℝ)/40) (J : ℕ) :
++    (ε deltaLoss η : ℝ) (hε : 0<ε) (hδ : 0<deltaLoss) (hη : 0<η) (hηsmall : η≤scale.step)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) (J : ℕ) :
+     ∃(windows₁ windows₂ : Fin 7→ℝ→ℂ) (C : ℝ), 0≤C ∧
+       (∀i,HasCompactSupport (windows₁ i)) ∧ (∀i,ContDiff ℝ ∞ (windows₁ i)) ∧
+       (∀i t,windows₁ i t≠0→|t|≤M+7) ∧
+@@ -433,15 +435,15 @@ theorem reopenedCanonicalRow_closed_step
+       (pool : Finset ι) (Q : Finset (ι→₀ℕ)) (β : Ideal ActualEisensteinCubic.O→(ι→₀ℕ)→ℂ)
+       (Γ t B E : ℝ),
+       (∀u,‖base u‖≤1) → (∀i,IsCoprime (Ideal.span {p i}) bad) →
+-      1<Z → Real.exp 9000≤Z → 1≤X → X≤Z^3 → F≤Z^3 →
++      1<Z → scale.largeThreshold≤Z → 1≤X → X≤Z^3 → F≤Z^3 →
+       0≤Γ → 1≤E → 1≤B → B^3≤Real.exp A*X →
+-      Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F →
++      Z^scale.step≤(Real.exp 1*B)*F →
+       (∀I∈labels,∀v∈Q,‖β I v‖≤Γ) → (∀v∈Q,v.support⊆pool) →
+       (∀v∈Q,‖eisEmbedding (primeProduct p v.support v)‖^2≤Real.exp 1*B) →
+       (∀side : Bool, let windows:=if side then windows₁ else windows₂
+         ∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base bad Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z Ksrc → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z Ksrc → ∀s : ℝ,
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+@@ -462,11 +464,11 @@ theorem reopenedCanonicalRow_closed_step
+   have herr:=herrors p hp hcop hg hinj hc base bad Z Ψ m labels X F Ksrc hstate pool Q β
+     Γ t B hbase hZ.le hX hXZ hFZ hΓ hB hactive hβ hQB
+   dsimp only at hpstep herr
+-  have hpow : Z^(3*ε-(1:ℝ)/40)≤Z^(η+17*deltaLoss+32*ε):=
+-    Real.rpow_le_rpow_of_exponent_le hZ.le (by linarith)
++  have hpow : Z^(3*ε-scale.shortMargin)≤Z^(η+17*deltaLoss+32*ε):=
++    Real.rpow_le_rpow_of_exponent_le hZ.le (by linarith [scale.shortMargin_pos])
+   have hEH : 1≤E*(1+‖t‖)^(2*J):=
+     one_le_mul_of_one_le_of_one_le hE (one_le_pow₀ (by linarith [norm_nonneg t]))
+-  have he : Ce*Γ^2*(X*F)^2*Z^(3*ε-(1:ℝ)/40)≤
++  have he : Ce*Γ^2*(X*F)^2*Z^(3*ε-scale.shortMargin)≤
+       Ce*Γ^2*(X*F)^2*Z^(η+17*deltaLoss+32*ε)*E*(1+‖t‖)^(2*J) := by
+     calc
+       _ ≤ Ce*Γ^2*(X*F)^2*Z^(η+17*deltaLoss+32*ε):=
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/DensityBudgets.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/DensityBudgets.lean
+index e74b25f29..c70700d6d 100644
+--- a/lean/OAI/NumberTheory/DirichletL/CubicSieve/DensityBudgets.lean
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/DensityBudgets.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.Eisenstein.CoordinateLaplacian
+ 
+ namespace OAI
+@@ -166,37 +167,104 @@ theorem globalFirstQuantitativeBudget_state_bound (deltaLoss : ℝ) (hδ : 0<del
+ 
+ end
+ 
++end SecondPassArithmetic
++
++open ActualEisensteinCubic ConcreteTraceCRT
++
++namespace CanonicalDescentScale
++
++def rankMass (scale : CanonicalDescentScale) (Z : ℝ) (r : ℕ) : ℝ :=
++  Real.exp (3 * (((scale.rankCap - r : ℕ) : ℝ))) * Z ^ 2
++
++def largeThreshold (scale : CanonicalDescentScale) : ℝ :=
++  Real.exp (3 * (scale.rankCap : ℝ))
++
++theorem rankMass_initial (scale : CanonicalDescentScale) (Z : ℝ) (r : ℕ) :
++    Z ^ 2 ≤ scale.rankMass Z r := by
++  have he : 1 ≤ Real.exp (3 * (((scale.rankCap - r : ℕ) : ℝ))) :=
++    Real.one_le_exp (by positivity)
++  simpa only [one_mul, rankMass] using
++    mul_le_mul_of_nonneg_right he (sq_nonneg Z)
++
++theorem rankMass_step (scale : CanonicalDescentScale) (Z : ℝ) (r s : ℕ)
++    (hr : r ≤ scale.rankCap) (hs : s + 1 ≤ r) :
++    Real.exp 3 * scale.rankMass Z r ≤ scale.rankMass Z s := by
++  have hn : scale.rankCap - r + 1 ≤ scale.rankCap - s := by omega
++  have hn' : (((scale.rankCap - r : ℕ) : ℝ)) + 1 ≤
++      (((scale.rankCap - s : ℕ) : ℝ)) := by exact_mod_cast hn
++  unfold rankMass
++  rw [←mul_assoc,←Real.exp_add]
++  exact mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr (by linarith)) (sq_nonneg Z)
++
++theorem rankMass_child (scale : CanonicalDescentScale) (Z X F X' F' : ℝ)
++    (r s : ℕ) (hr : r ≤ scale.rankCap) (hs : s + 1 ≤ r)
++    (hparent : X * F ≤ scale.rankMass Z r)
++    (hchild : X' * F' ≤ Real.exp 3 * (X * F)) :
++    X' * F' ≤ scale.rankMass Z s :=
++  hchild.trans ((mul_le_mul_of_nonneg_left hparent (Real.exp_pos _).le).trans
++    (scale.rankMass_step Z r s hr hs))
++
++theorem rankMass_global (scale : CanonicalDescentScale) (Z : ℝ)
++    (hZ : scale.largeThreshold ≤ Z) (r : ℕ) :
++    scale.rankMass Z r ≤ Z ^ 3 := by
++  have hn : (((scale.rankCap - r : ℕ) : ℝ)) ≤ scale.rankCap := by
++    exact_mod_cast Nat.sub_le scale.rankCap r
++  have he : Real.exp (3 * (((scale.rankCap - r : ℕ) : ℝ))) ≤ Z :=
++    (Real.exp_le_exp.mpr (by linarith)).trans hZ
++  calc
++    scale.rankMass Z r ≤ Z * Z ^ 2 :=
++      mul_le_mul_of_nonneg_right he (sq_nonneg Z)
++    _ = Z ^ 3 := by ring
++
++theorem live_scale_bounds (scale : CanonicalDescentScale) (Z X F : ℝ) (r : ℕ)
++    (hZ : scale.largeThreshold ≤ Z) (hX : 1 ≤ X) (hF : 1 ≤ F)
++    (hmass : X * F ≤ scale.rankMass Z r) : X ≤ Z ^ 3 ∧ F ≤ Z ^ 3 := by
++  have hm := hmass.trans (scale.rankMass_global Z hZ r)
++  constructor <;> nlinarith
++
++theorem small_or_live (scale : CanonicalDescentScale) (Z X F K : ℝ) (r : ℕ)
++    (m : ActualEisensteinCubic.O) (hZ : scale.largeThreshold ≤ Z)
++    (_hX : 0 < X) (hF : 1 ≤ F) (hK : 0 ≤ K) (hm : m ≠ 0)
++    (hmass : X * F ≤ scale.rankMass Z r)
++    (hinv : K * ‖eisEmbedding m‖ ^ 2 ≤ X * F) :
++    K ≤ F ∨ (1 < X ∧ X ≤ Z ^ 3 ∧ F ≤ Z ^ 3) := by
++  by_cases hx : X ≤ 1
++  · exact Or.inl (SecondPassArithmetic.smallColumn_row_le_label m hm X F K hx
++      (by linarith) hK hinv)
++  · have hl := lt_of_not_ge hx
++    exact Or.inr ⟨hl, scale.live_scale_bounds Z X F r hZ hl.le hF hmass⟩
++
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
+ open ActualEisensteinCubic ConcreteTraceCRT
+ 
++@[simp] theorem canonicalDescentScale1000_largeThreshold :
++    canonicalDescentScale1000.largeThreshold=Real.exp 9000:=by
++  norm_num [CanonicalDescentScale.largeThreshold]
++
+ def canonicalRankMass (Z : ℝ) (r : ℕ) : ℝ :=
+-  Real.exp (3*((3000-r:ℕ):ℝ))*Z^2
++  canonicalDescentScale1000.rankMass Z r
+ 
+ theorem canonicalRankMass_initial (Z : ℝ) (r : ℕ) : Z^2≤canonicalRankMass Z r := by
+-  have he : 1≤Real.exp (3*((3000-r:ℕ):ℝ)) := Real.one_le_exp (by positivity)
+-  simpa only [one_mul,canonicalRankMass] using mul_le_mul_of_nonneg_right he (sq_nonneg Z)
++  exact canonicalDescentScale1000.rankMass_initial Z r
+ 
+ theorem canonicalRankMass_step (Z : ℝ) (r s : ℕ) (hr : r≤3000) (hs : s+1≤r) :
+     Real.exp 3*canonicalRankMass Z r≤canonicalRankMass Z s := by
+-  have hn : 3000-r+1≤3000-s := by omega
+-  have hn' : ((3000-r:ℕ):ℝ)+1≤((3000-s:ℕ):ℝ) := by exact_mod_cast hn
+-  unfold canonicalRankMass
+-  rw [←mul_assoc,←Real.exp_add]
+-  exact mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr (by linarith)) (sq_nonneg Z)
++  exact canonicalDescentScale1000.rankMass_step Z r s
++    (by simpa [CanonicalDescentScale.rankCap, canonicalDescentScale1000] using hr) hs
+ 
+ theorem canonicalRankMass_child (Z X F X' F' : ℝ) (r s : ℕ)
+     (hr : r≤3000) (hs : s+1≤r) (hparent : X*F≤canonicalRankMass Z r)
+-    (hchild : X'*F'≤Real.exp 3*(X*F)) : X'*F'≤canonicalRankMass Z s :=
+-  hchild.trans ((mul_le_mul_of_nonneg_left hparent (Real.exp_pos _).le).trans
+-    (canonicalRankMass_step Z r s hr hs))
++    (hchild : X'*F'≤Real.exp 3*(X*F)) : X'*F'≤canonicalRankMass Z s := by
++  exact canonicalDescentScale1000.rankMass_child Z X F X' F' r s
++    (by simpa [CanonicalDescentScale.rankCap, canonicalDescentScale1000] using hr)
++    hs hparent hchild
+ 
+ theorem canonicalRankMass_global (Z : ℝ) (hZ : Real.exp 9000≤Z) (r : ℕ) :
+     canonicalRankMass Z r≤Z^3 := by
+-  have hn : ((3000-r:ℕ):ℝ)≤3000 := by exact_mod_cast (Nat.sub_le 3000 r)
+-  have he : Real.exp (3*((3000-r:ℕ):ℝ))≤Z :=
+-    (Real.exp_le_exp.mpr (by linarith)).trans hZ
+-  calc
+-    canonicalRankMass Z r ≤ Z*Z^2 := mul_le_mul_of_nonneg_right he (sq_nonneg Z)
+-    _ = Z^3 := by ring
++  exact canonicalDescentScale1000.rankMass_global Z
++    (by simpa using hZ) r
+ 
+ theorem lowerCubeBin_transfer_mass (X B F : ℝ) (hB : B≠0) :
+     (X/B^3)*(Real.exp 1*B)^3*F=Real.exp 3*(X*F) := by
+@@ -222,17 +290,17 @@ theorem lowerCubeBin_energy_normalization (ell B F : ℝ) (hell : 0<ell) (hB : 0
+ theorem canonical_live_scale_bounds (Z X F : ℝ) (r : ℕ)
+     (hZ : Real.exp 9000≤Z) (hX : 1≤X) (hF : 1≤F)
+     (hmass : X*F≤canonicalRankMass Z r) : X≤Z^3 ∧ F≤Z^3 := by
+-  have hm := hmass.trans (canonicalRankMass_global Z hZ r)
+-  constructor <;> nlinarith
++  exact canonicalDescentScale1000.live_scale_bounds Z X F r
++    (by simpa using hZ)
++    hX hF hmass
+ 
+ theorem canonical_small_or_live (Z X F K : ℝ) (r : ℕ) (m : ActualEisensteinCubic.O)
+     (hZ : Real.exp 9000≤Z) (_hX : 0<X) (hF : 1≤F) (hK : 0≤K) (hm : m≠0)
+     (hmass : X*F≤canonicalRankMass Z r) (hinv : K*‖eisEmbedding m‖^2≤X*F) :
+     K≤F ∨ (1<X ∧ X≤Z^3 ∧ F≤Z^3) := by
+-  by_cases hx : X≤1
+-  · exact Or.inl (smallColumn_row_le_label m hm X F K hx (by linarith) hK hinv)
+-  · have hl := lt_of_not_ge hx
+-    exact Or.inr ⟨hl,canonical_live_scale_bounds Z X F r hZ hl.le hF hmass⟩
++  exact canonicalDescentScale1000.small_or_live Z X F K r m
++    (by simpa using hZ)
++    _hX hF hK hm hmass hinv
+ 
+ def canonicalPoolCutoff (Bsupport Z : ℝ) : ℕ := ⌈Bsupport*Z^3⌉₊
+ 
+@@ -539,55 +607,129 @@ open ActualEisensteinCubic
+ open ConcreteTraceCRT (eisEmbedding)
+ open FirstPassCubeLabels (primeProduct)
+ 
++end SecondPassArithmetic
++
++namespace CanonicalDescentScale
++
++theorem progress_large (scale : CanonicalDescentScale)
++    (Z : ℝ) (hZ : scale.largeThreshold ≤ Z) :
++    Real.exp 4 ≤ Z ^ scale.step := by
++  have hh := Real.rpow_le_rpow
++    (Real.exp_pos (3 * (scale.rankCap : ℝ))).le hZ scale.step_pos.le
++  rw [Real.rpow_def_of_pos
++    (Real.exp_pos (3 * (scale.rankCap : ℝ))), Real.log_exp] at hh
++  have hscale : 3 * (scale.rankCap : ℝ) * scale.step = 9 := by
++    rw [rankCap, step]
++    have hq := scale.denominator_real_pos.ne'
++    push_cast
++    field_simp
++    ring
++  rw [hscale] at hh
++  exact (Real.exp_le_exp.mpr (by norm_num : (4 : ℝ) ≤ 9)).trans hh
++
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
++open ActualEisensteinCubic
++open ConcreteTraceCRT (eisEmbedding)
++open FirstPassCubeLabels (primeProduct)
++
+ theorem canonicalProgress_large (Z : ℝ) (hZ : Real.exp 9000≤Z) :
+     Real.exp 4≤Z^((1:ℝ)/1000) := by
+-  have hh := Real.rpow_le_rpow (Real.exp_pos 9000).le hZ (by norm_num : (0:ℝ)≤1/1000)
+-  rw [Real.rpow_def_of_pos (Real.exp_pos 9000), Real.log_exp] at hh
+-  norm_num at hh
+-  exact (Real.exp_le_exp.mpr (by norm_num : (4:ℝ)≤9)).trans hh
++  exact canonicalDescentScale1000.progress_large Z
++    (by simpa using hZ)
+ 
+ theorem paddedCanonicalRatio (K M R Z η : ℝ) (hM : 0<M) (hZ : 0<Z) :
+     Z^η*((K/Z^η)*R/(Real.exp 3*M))=(K*R/M)/Real.exp 3 := by
+   field_simp
+ 
+-def canonicalRankMargin (σ η : ℝ) (r : ℕ) : ℝ :=
+-  σ-η*((3000-r:ℕ):ℝ)
++end SecondPassArithmetic
+ 
+-theorem canonicalRankMargin_lower (σ η : ℝ) (hη : 0≤η) (r : ℕ) :
+-    σ-3000*η≤canonicalRankMargin σ η r := by
+-  have hn : ((3000-r:ℕ):ℝ)≤3000 := by exact_mod_cast (Nat.sub_le 3000 r)
+-  unfold canonicalRankMargin
++namespace CanonicalDescentScale
++
++def rankMargin (scale : CanonicalDescentScale)
++    (σ η : ℝ) (r : ℕ) : ℝ :=
++  σ - η * (((scale.rankCap - r : ℕ) : ℝ))
++
++theorem rankMargin_lower (scale : CanonicalDescentScale)
++    (σ η : ℝ) (hη : 0 ≤ η) (r : ℕ) :
++    σ - (scale.rankCap : ℝ) * η ≤ scale.rankMargin σ η r := by
++  have hn : (((scale.rankCap - r : ℕ) : ℝ)) ≤ scale.rankCap := by
++    exact_mod_cast Nat.sub_le scale.rankCap r
++  unfold rankMargin
+   nlinarith
+ 
+-theorem canonicalRankMargin_step (σ η : ℝ) (hη : 0≤η) (r s : ℕ)
+-    (hr : r≤3000) (hs : s+1≤r) :
+-    canonicalRankMargin σ η s+η≤canonicalRankMargin σ η r := by
+-  have hn : 3000-r+1≤3000-s := by omega
+-  have hn' : ((3000-r:ℕ):ℝ)+1≤((3000-s:ℕ):ℝ) := by exact_mod_cast hn
+-  unfold canonicalRankMargin
++theorem rankMargin_step (scale : CanonicalDescentScale)
++    (σ η : ℝ) (hη : 0 ≤ η) (r s : ℕ)
++    (hr : r ≤ scale.rankCap) (hs : s + 1 ≤ r) :
++    scale.rankMargin σ η s + η ≤ scale.rankMargin σ η r := by
++  have hn : scale.rankCap - r + 1 ≤ scale.rankCap - s := by omega
++  have hn' : (((scale.rankCap - r : ℕ) : ℝ)) + 1 ≤
++      (((scale.rankCap - s : ℕ) : ℝ)) := by exact_mod_cast hn
++  unfold rankMargin
+   nlinarith
+ 
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
++
+ theorem canonicalRatio_exp_loss (K M R : ℝ) (hM : 0<M) :
+     K*R/(Real.exp 3*M)=(K*R/M)/Real.exp 3 := by
+   field_simp
+ 
+-theorem canonicalRankMargin_padding (Z σ η a : ℝ) (r s : ℕ)
+-    (hZ : 1<Z) (hη : 0≤η) (hr : r≤3000) (hs : s+1≤r)
+-    (ha : 0≤a) (hbound : a≤Z^(-canonicalRankMargin σ η r)) :
+-    Z^η*(a/Real.exp 3)≤Z^(-canonicalRankMargin σ η s) := by
++end SecondPassArithmetic
++
++namespace CanonicalDescentScale
++
++theorem rankMargin_padding (scale : CanonicalDescentScale)
++    (Z σ η a : ℝ) (r s : ℕ)
++    (hZ : 1 < Z) (hη : 0 ≤ η) (hr : r ≤ scale.rankCap)
++    (hs : s + 1 ≤ r) (ha : 0 ≤ a)
++    (hbound : a ≤ Z ^ (-scale.rankMargin σ η r)) :
++    Z ^ η * (a / Real.exp 3) ≤ Z ^ (-scale.rankMargin σ η s) := by
+   have hZ0 : 0<Z := zero_lt_one.trans hZ
+-  have hmargin := canonicalRankMargin_step σ η hη r s hr hs
++  have hmargin := scale.rankMargin_step σ η hη r s hr hs
+   calc
+     Z^η*(a/Real.exp 3) ≤ Z^η*a :=
+       mul_le_mul_of_nonneg_left (div_le_self ha (Real.one_le_exp (by norm_num)))
+         (Real.rpow_nonneg hZ0.le _)
+-    _ ≤ Z^η*Z^(-canonicalRankMargin σ η r) :=
++    _ ≤ Z^η*Z^(-scale.rankMargin σ η r) :=
+       mul_le_mul_of_nonneg_left hbound (Real.rpow_nonneg hZ0.le _)
+-    _ = Z^(η-canonicalRankMargin σ η r) := by
++    _ = Z^(η-scale.rankMargin σ η r) := by
+       rw [sub_eq_add_neg,Real.rpow_add hZ0]
+-    _ ≤ Z^(-canonicalRankMargin σ η s) :=
++    _ ≤ Z^(-scale.rankMargin σ η s) :=
+       Real.rpow_le_rpow_of_exponent_le hZ.le (by linarith)
+ 
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
++open ActualEisensteinCubic
++open ConcreteTraceCRT (eisEmbedding)
++open FirstPassCubeLabels (primeProduct)
++
++def canonicalRankMargin (σ η : ℝ) (r : ℕ) : ℝ :=
++  canonicalDescentScale1000.rankMargin σ η r
++
++theorem canonicalRankMargin_lower (σ η : ℝ) (hη : 0≤η) (r : ℕ) :
++    σ-3000*η≤canonicalRankMargin σ η r := by
++  simpa [canonicalRankMargin, CanonicalDescentScale.rankCap,
++    canonicalDescentScale1000] using
++      canonicalDescentScale1000.rankMargin_lower σ η hη r
++
++theorem canonicalRankMargin_step (σ η : ℝ) (hη : 0≤η) (r s : ℕ)
++    (hr : r≤3000) (hs : s+1≤r) :
++    canonicalRankMargin σ η s+η≤canonicalRankMargin σ η r := by
++  exact canonicalDescentScale1000.rankMargin_step σ η hη r s
++    (by simpa [CanonicalDescentScale.rankCap, canonicalDescentScale1000] using hr) hs
++
++theorem canonicalRankMargin_padding (Z σ η a : ℝ) (r s : ℕ)
++    (hZ : 1<Z) (hη : 0≤η) (hr : r≤3000) (hs : s+1≤r)
++    (ha : 0≤a) (hbound : a≤Z^(-canonicalRankMargin σ η r)) :
++    Z^η*(a/Real.exp 3)≤Z^(-canonicalRankMargin σ η s) := by
++  exact canonicalDescentScale1000.rankMargin_padding Z σ η a r s hZ hη
++    (by simpa [CanonicalDescentScale.rankCap, canonicalDescentScale1000] using hr)
++    hs ha hbound
++
+ variable {ι : Type*} [DecidableEq ι] (p : ι → ActualEisensteinCubic.O) (hp : ∀i,p i≠0)
+   [∀i,(Ideal.span {p i}).IsMaximal]
+ 
+@@ -607,15 +749,15 @@ theorem fixedTripleMask_ne_zero_of_bin (source : Finset (GlobalSecondData ι)) (
+ 
+ include hp in
+ 
+-theorem canonical_retained_scale_closure
++theorem canonical_retained_scale_closure [scale : CanonicalDescentScale]
+     (source : Finset (GlobalSecondData ι)) (side : Bool)
+     (q : Ideal ActualEisensteinCubic.O × Ideal ActualEisensteinCubic.O × Ideal ActualEisensteinCubic.O) (j : GlobalLogIndex)
+     (hq : q∈globalBinTriples p source side j)
+     (Z σ η X B F K : ℝ) (m : ActualEisensteinCubic.O)
+-    (hZ : 1<Z) (hZbig : Real.exp 9000≤Z) (hη : 0≤η) (hηsmall : η≤(1:ℝ)/1000)
++    (hZ : 1<Z) (hZbig : scale.largeThreshold≤Z) (hη : 0≤η) (hηsmall : η≤scale.step)
+     (hX : 0<X) (hB : 0<B) (hF : 1≤F) (hK : 1≤K) (hm : m≠0)
+-    (hprogress : Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F)
+-    (hstart : K≤Z^3) (hmass : X*F≤canonicalRankMass Z (fixedDepthRank Z K))
++    (hprogress : Z^scale.step≤(Real.exp 1*B)*F)
++    (hstart : K≤Z^3) (hmass : X*F≤scale.rankMass Z (scale.depthRank Z K))
+     (hinv : K*‖eisEmbedding m‖^2≤(X*F)*Z^(-σ))
+     (hk : ∀x∈source,x.source.frequency≠0)
+     (hb₁ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2≤Real.exp 1*B)
+@@ -626,8 +768,8 @@ theorem canonical_retained_scale_closure
+     let F':=globalPooledLabelScale j
+     let K':=globalLogRep j 8*Real.exp 1
+     0<X' ∧ 1≤F' ∧ 1≤K' ∧
+-      fixedDepthRank Z K'+1≤fixedDepthRank Z K ∧ K'≤Z^3 ∧
+-      X'*F'≤canonicalRankMass Z (fixedDepthRank Z K') ∧
++      scale.depthRank Z K'+1≤scale.depthRank Z K ∧ K'≤Z^3 ∧
++      X'*F'≤scale.rankMass Z (scale.depthRank Z K') ∧
+       K'*‖eisEmbedding (fixedTripleMask m q)‖^2≤(X'*F')*Z^(-σ) ∧
+       fixedTripleMask m q≠0 ∧
+       (∀I∈globalCanonicalLabels p source side q j,
+@@ -639,7 +781,7 @@ theorem canonical_retained_scale_closure
+   have hell : 0<X/B^3 := div_pos hX (pow_pos hB 3)
+   have hKpad : 0<K/Z^η := div_pos hK0 (Real.rpow_pos_of_pos hZ0 _)
+   have hKle : K/Z^η≤K := div_le_self hK0.le (Real.one_le_rpow hZ.le hη)
+-  have hlarge : Real.exp 4≤(Real.exp 1*B)*F := (canonicalProgress_large Z hZbig).trans hprogress
++  have hlarge : Real.exp 4≤(Real.exp 1*B)*F := (scale.progress_large Z hZbig).trans hprogress
+   obtain ⟨hXc,hFc,hKc,hMc,hsmall,hrank,hrank0,hratio,hlabels⟩ :=
+     globalRetained_canonical_geometry p hp source side q j hq Z η K (K/Z^η)
+       (X/B^3) (Real.exp 1*B) F m hZ hηsmall hK0 hKpad hKle hell hBup hF
+@@ -657,23 +799,23 @@ theorem canonical_retained_scale_closure
+   refine ⟨hXc,hFc,hKc,hrank,?_,?_,?_,fixedTripleMask_ne_zero_of_bin p hp source side q j hq m hm,
+     globalCanonicalLabels_bounds p hp source side q j hk⟩
+   · exact hsmall.trans ((div_le_self hK0.le
+-      (Real.one_le_rpow hZ.le (by norm_num : (0:ℝ)≤1/1000))).trans hstart)
+-  · exact canonicalRankMass_child Z X F _ _ _ _ hrank0 hrank hmass hMc'
++      (Real.one_le_rpow hZ.le scale.step_pos.le)).trans hstart)
++  · exact scale.rankMass_child Z X F _ _ _ _ hrank0 hrank hmass hMc'
+   · exact (div_le_iff₀ (mul_pos hXc (zero_lt_one.trans_le hFc))).mp hratio' |>.trans_eq (by ring)
+ 
+ include hp in
+ 
+-theorem canonical_retained_unpadded_closure
++theorem canonical_retained_unpadded_closure [scale : CanonicalDescentScale]
+     (source : Finset (GlobalSecondData ι)) (side : Bool)
+     (q : Ideal ActualEisensteinCubic.O × Ideal ActualEisensteinCubic.O × Ideal ActualEisensteinCubic.O) (j : GlobalLogIndex)
+     (hq : q∈globalBinTriples p source side j)
+     (Z σ η X B F K : ℝ) (m : ActualEisensteinCubic.O)
+-    (hZ : 1<Z) (hZbig : Real.exp 9000≤Z) (hη : 0≤η) (hηsmall : η≤(1:ℝ)/1000)
++    (hZ : 1<Z) (hZbig : scale.largeThreshold≤Z) (hη : 0≤η) (hηsmall : η≤scale.step)
+     (hX : 0<X) (hB : 0<B) (hF : 1≤F) (hK : 1≤K) (hm : m≠0)
+-    (hprogress : Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F)
+-    (hstart : K≤Z^3) (hmass : X*F≤canonicalRankMass Z (fixedDepthRank Z K))
++    (hprogress : Z^scale.step≤(Real.exp 1*B)*F)
++    (hstart : K≤Z^3) (hmass : X*F≤scale.rankMass Z (scale.depthRank Z K))
+     (hinv : K*‖eisEmbedding m‖^2≤
+-      (X*F)*Z^(-canonicalRankMargin σ η (fixedDepthRank Z K)))
++      (X*F)*Z^(-scale.rankMargin σ η (scale.depthRank Z K)))
+     (hk : ∀x∈source,x.source.frequency≠0)
+     (hb₁ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2≤Real.exp 1*B)
+     (hb₂ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.rightExponent)‖^2≤Real.exp 1*B)
+@@ -683,10 +825,10 @@ theorem canonical_retained_unpadded_closure
+     let F':=globalPooledLabelScale j
+     let K':=globalLogRep j 8*Real.exp 1
+     0<X' ∧ 1≤F' ∧ 1≤K' ∧
+-      fixedDepthRank Z K'+1≤fixedDepthRank Z K ∧ K'≤Z^3 ∧
+-      X'*F'≤canonicalRankMass Z (fixedDepthRank Z K') ∧
++      scale.depthRank Z K'+1≤scale.depthRank Z K ∧ K'≤Z^3 ∧
++      X'*F'≤scale.rankMass Z (scale.depthRank Z K') ∧
+       K'*‖eisEmbedding (fixedTripleMask m q)‖^2≤
+-        (X'*F')*Z^(-canonicalRankMargin σ η (fixedDepthRank Z K')) ∧
++        (X'*F')*Z^(-scale.rankMargin σ η (scale.depthRank Z K')) ∧
+       fixedTripleMask m q≠0 ∧
+       (∀I∈globalCanonicalLabels p source side q j,
+         I≠⊥ ∧ Squarefree I ∧ (Ideal.absNorm I:ℝ)≤F') := by
+@@ -695,7 +837,7 @@ theorem canonical_retained_unpadded_closure
+   have hF0 : 0<F := zero_lt_one.trans_le hF
+   have hBup : 0<Real.exp 1*B := mul_pos (Real.exp_pos _) hB
+   have hell : 0<X/B^3 := div_pos hX (pow_pos hB 3)
+-  have hlarge : Real.exp 4≤(Real.exp 1*B)*F := (canonicalProgress_large Z hZbig).trans hprogress
++  have hlarge : Real.exp 4≤(Real.exp 1*B)*F := (scale.progress_large Z hZbig).trans hprogress
+   obtain ⟨hXc,hFc,hKc,hMc,hsmall,hrank,hrank0,hratio,hlabels⟩ :=
+     globalRetained_canonical_geometry p hp source side q j hq Z η K K
+       (X/B^3) (Real.exp 1*B) F m hZ hηsmall hK0 hK0 le_rfl hell hBup hF
+@@ -703,20 +845,20 @@ theorem canonical_retained_unpadded_closure
+   have hMc' : globalPooledColumnScale (X/B^3) j*globalPooledLabelScale j≤Real.exp 3*(X*F) := by
+     simpa only [lowerCubeBin_transfer_mass X B F hB.ne'] using hMc
+   have hparent : K*‖eisEmbedding m‖^2/(X*F)≤
+-      Z^(-canonicalRankMargin σ η (fixedDepthRank Z K)) :=
++      Z^(-scale.rankMargin σ η (scale.depthRank Z K)) :=
+     (div_le_iff₀ (mul_pos hX hF0)).mpr (by simpa only [mul_comm] using hinv)
+   have hratio' : globalLogRep j 8*Real.exp 1*‖eisEmbedding (fixedTripleMask m q)‖^2/
+       (globalPooledColumnScale (X/B^3) j*globalPooledLabelScale j)≤
+-      Z^(-canonicalRankMargin σ η (fixedDepthRank Z (globalLogRep j 8*Real.exp 1))) := by
++      Z^(-scale.rankMargin σ η (scale.depthRank Z (globalLogRep j 8*Real.exp 1))) := by
+     rw [lowerCubeBin_transfer_mass X B F hB.ne',canonicalRatio_exp_loss K (X*F)
+       (‖eisEmbedding m‖^2) (mul_pos hX hF0)] at hratio
+-    exact hratio.trans (canonicalRankMargin_padding Z σ η _ _ _ hZ hη hrank0 hrank
++    exact hratio.trans (scale.rankMargin_padding Z σ η _ _ _ hZ hη hrank0 hrank
+       (div_nonneg (mul_nonneg hK0.le (sq_nonneg _)) (mul_pos hX hF0).le) hparent)
+   refine ⟨hXc,hFc,hKc,hrank,?_,?_,?_,fixedTripleMask_ne_zero_of_bin p hp source side q j hq m hm,
+     globalCanonicalLabels_bounds p hp source side q j hk⟩
+   · exact hsmall.trans ((div_le_self hK0.le
+-      (Real.one_le_rpow hZ.le (by norm_num : (0:ℝ)≤1/1000))).trans hstart)
+-  · exact canonicalRankMass_child Z X F _ _ _ _ hrank0 hrank hmass hMc'
++      (Real.one_le_rpow hZ.le scale.step_pos.le)).trans hstart)
++  · exact scale.rankMass_child Z X F _ _ _ _ hrank0 hrank hmass hMc'
+   · exact (div_le_iff₀ (mul_pos hXc (zero_lt_one.trans_le hFc))).mp hratio' |>.trans_eq (by ring)
+ 
+ end SecondPassArithmetic
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/DescentScale.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/DescentScale.lean
+new file mode 100644
+index 000000000..52b019dbd
+--- /dev/null
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/DescentScale.lean
+@@ -0,0 +1,123 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
++import Mathlib.Analysis.SpecialFunctions.Pow.Real
++
++namespace OAI
++
++noncomputable section
++
++/-- Numerical data for the finite canonical descent.
++
++`denominator` is the reciprocal step size, while `reserve` is the initial
++power saving.  The last field is exactly the compatibility needed by the
++short-cube argument: twenty-five factors of size `Z^(1 / denominator)` spend
++at most half of the reserve.  There is deliberately no global instance;
++public theorems install the scale they need locally. -/
++class CanonicalDescentScale where
++  denominator : ℕ
++  denominator_pos : 0 < denominator
++  reserve : ℝ
++  reserve_pos : 0 < reserve
++  short_budget : 50 ≤ reserve * denominator
++
++namespace CanonicalDescentScale
++
++def step (scale : CanonicalDescentScale) : ℝ :=
++  1 / (scale.denominator : ℝ)
++
++def rankCap (scale : CanonicalDescentScale) : ℕ :=
++  3 * scale.denominator
++
++def shortMargin (scale : CanonicalDescentScale) : ℝ :=
++  scale.reserve / 2
++
++def fixedFactorExponent (scale : CanonicalDescentScale) : ℝ :=
++  scale.reserve / 4
++
++def strictReserve (scale : CanonicalDescentScale) : ℝ :=
++  3 * scale.reserve / 4
++
++theorem denominator_real_pos (scale : CanonicalDescentScale) :
++    (0 : ℝ) < scale.denominator := by
++  exact_mod_cast scale.denominator_pos
++
++theorem denominator_real_ge_one (scale : CanonicalDescentScale) :
++    (1 : ℝ) ≤ scale.denominator := by
++  exact_mod_cast scale.denominator_pos
++
++theorem step_pos (scale : CanonicalDescentScale) : 0 < scale.step := by
++  exact div_pos zero_lt_one scale.denominator_real_pos
++
++theorem step_le_one (scale : CanonicalDescentScale) : scale.step ≤ 1 := by
++  rw [step, div_le_one scale.denominator_real_pos]
++  exact scale.denominator_real_ge_one
++
++theorem reserve_nonneg (scale : CanonicalDescentScale) : 0 ≤ scale.reserve :=
++  scale.reserve_pos.le
++
++theorem shortMargin_pos (scale : CanonicalDescentScale) :
++    0 < scale.shortMargin := by
++  exact div_pos scale.reserve_pos (by norm_num)
++
++theorem fixedFactorExponent_pos (scale : CanonicalDescentScale) :
++    0 < scale.fixedFactorExponent := by
++  exact div_pos scale.reserve_pos (by norm_num)
++
++theorem fixedFactorExponent_le_shortMargin (scale : CanonicalDescentScale) :
++    scale.fixedFactorExponent ≤ scale.shortMargin := by
++  unfold fixedFactorExponent shortMargin
++  linarith [scale.reserve_pos]
++
++theorem rankCap_pos (scale : CanonicalDescentScale) : 0 < scale.rankCap := by
++  unfold rankCap
++  exact Nat.mul_pos (by norm_num) scale.denominator_pos
++
++theorem strictReserve_pos (scale : CanonicalDescentScale) :
++    0 < scale.strictReserve := by
++  unfold strictReserve
++  exact div_pos (mul_pos (by norm_num) scale.reserve_pos) (by norm_num)
++
++/-- The numerical hypothesis used by the short-cube algebra. -/
++theorem short_spend (scale : CanonicalDescentScale) :
++    25 * scale.step ≤ scale.shortMargin := by
++  have hq := scale.denominator_real_pos
++  have hb : (50 : ℝ) ≤ scale.reserve * (scale.denominator : ℝ) := by
++    exact scale.short_budget
++  rw [step, shortMargin]
++  calc
++    25 * (1 / (scale.denominator : ℝ)) = 25 / scale.denominator := by ring
++    _ ≤ scale.reserve / 2 := (div_le_iff₀ hq).2 (by nlinarith)
++
++theorem reserve_decomposition (scale : CanonicalDescentScale) :
++    scale.strictReserve - scale.fixedFactorExponent = scale.shortMargin := by
++  unfold strictReserve fixedFactorExponent shortMargin
++  ring
++
++/-- A scale with prescribed positive reserve.  The extra `+ 1` makes the
++denominator positive without a case split. -/
++def ofReserve (κ : ℝ) (hκ : 0 < κ) : CanonicalDescentScale where
++  denominator := ⌈50 / κ⌉₊ + 1
++  denominator_pos := by omega
++  reserve := κ
++  reserve_pos := hκ
++  short_budget := by
++    have hceil : 50 / κ ≤ (⌈50 / κ⌉₊ : ℝ) := Nat.le_ceil _
++    have hadd : (⌈50 / κ⌉₊ : ℝ) ≤ (⌈50 / κ⌉₊ + 1 : ℕ) := by
++      exact_mod_cast Nat.le_add_right ⌈50 / κ⌉₊ 1
++    have hdiv : 50 / κ ≤ (⌈50 / κ⌉₊ + 1 : ℕ) := hceil.trans hadd
++    have := (div_le_iff₀ hκ).1 hdiv
++    push_cast at this ⊢
++    nlinarith
++
++/-- Historical parameters, exposed as a value rather than a global instance. -/
++def historical : CanonicalDescentScale where
++  denominator := 1000
++  denominator_pos := by norm_num
++  reserve := (1 : ℝ) / 20
++  reserve_pos := by norm_num
++  short_budget := by norm_num
++
++end CanonicalDescentScale
++
++end
++
++end OAI
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/RankMargins.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/RankMargins.lean
+index 4df3f231d..fc212f28d 100644
+--- a/lean/OAI/NumberTheory/DirichletL/CubicSieve/RankMargins.lean
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/RankMargins.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.RowCompletion.PolynomialHeight
+ import OAI.NumberTheory.DirichletL.CubicSieve.DensityBudgets
+ 
+@@ -76,6 +77,70 @@ open scoped BigOperators Classical
+ 
+ namespace SecondPassArithmetic
+ 
++end SecondPassArithmetic
++
++namespace CanonicalDescentScale
++
++/-- A padding choice for an arbitrary descent denominator and initial reserve.
++The constants are deliberately slack: the recurrence only needs positivity,
++one-step smallness, a quarter-reserve for rank losses, and a summable analytic
++loss over at most `rankCap` steps. -/
++def padding (scale : CanonicalDescentScale)
++    (ε C : ℝ) : ℝ :=
++  let budgetLength := (scale.rankCap : ℝ) + 1
++  let a := min (scale.step / 2)
++    (min (scale.reserve / (8 * budgetLength)) (ε / (4 * budgetLength)))
++  a / (1 + C)
++
++theorem padding_budget (scale : CanonicalDescentScale)
++    (ε C : ℝ) (hε : 0 < ε) (hC : 0 ≤ C) :
++    0 < scale.padding ε C ∧
++    scale.padding ε C ≤ scale.step ∧
++    (scale.rankCap : ℝ) * scale.padding ε C ≤ scale.fixedFactorExponent ∧
++    ((scale.rankCap : ℝ) + 1) * C * scale.padding ε C ≤ ε / 4 := by
++  let budgetLength : ℝ := (scale.rankCap : ℝ) + 1
++  let a : ℝ := min (scale.step / 2)
++    (min (scale.reserve / (8 * budgetLength)) (ε / (4 * budgetLength)))
++  have hcap : (0 : ℝ) ≤ scale.rankCap := Nat.cast_nonneg _
++  have hL : 0 < budgetLength := by dsimp [budgetLength]; linarith
++  have ha : 0 < a := lt_min (div_pos scale.step_pos (by norm_num))
++    (lt_min (div_pos scale.reserve_pos (mul_pos (by norm_num) hL))
++      (div_pos hε (mul_pos (by norm_num) hL)))
++  have haStep : a ≤ scale.step / 2 := min_le_left _ _
++  have haK : a ≤ scale.reserve / (8 * budgetLength) :=
++    (min_le_right _ _).trans (min_le_left _ _)
++  have haE : a ≤ ε / (4 * budgetLength) :=
++    (min_le_right _ _).trans (min_le_right _ _)
++  have hd : 0 < 1 + C := by linarith
++  have heta : 0 < scale.padding ε C := by
++    exact div_pos ha hd
++  have hetaA : scale.padding ε C ≤ a := by
++    exact div_le_self ha.le (by linarith)
++  have hCeta : C * scale.padding ε C ≤ a := by
++    change C * (a / (1 + C)) ≤ a
++    rw [← mul_div_assoc]
++    exact (div_le_iff₀ hd).mpr (by nlinarith)
++  have hLK : budgetLength * scale.padding ε C ≤ scale.reserve / 8 := by
++    have hraw := (le_div_iff₀ (mul_pos (by norm_num) hL)).mp
++      (hetaA.trans haK)
++    nlinarith
++  have hLE : budgetLength * (C * scale.padding ε C) ≤ ε / 4 := by
++    have hraw := (le_div_iff₀ (mul_pos (by norm_num) hL)).mp
++      (hCeta.trans haE)
++    nlinarith
++  refine ⟨heta, ?_, ?_, ?_⟩
++  · exact hetaA.trans (haStep.trans (by linarith [scale.step_pos]))
++  · have hcapL : (scale.rankCap : ℝ) ≤ budgetLength := by
++      dsimp [budgetLength]
++      linarith
++    unfold CanonicalDescentScale.fixedFactorExponent
++    nlinarith [mul_le_mul_of_nonneg_right hcapL heta.le, scale.reserve_pos.le]
++  · simpa only [budgetLength, mul_assoc] using hLE
++
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
++
+ def canonicalPadding (ε C : ℝ) : ℝ :=
+   min ((1:ℝ)/120040) (ε/6002)/(1+C)
+ 
+@@ -100,9 +165,53 @@ theorem canonicalPadding_budget (ε C : ℝ) (hε : 0<ε) (hC : 0≤C) :
+ 
+ theorem canonicalRankMargin_le (σ η : ℝ) (hη : 0≤η) (r : ℕ) :
+     canonicalRankMargin σ η r≤σ := by
+-  unfold canonicalRankMargin
+-  have hn : (0:ℝ)≤((3000-r:ℕ):ℝ) := Nat.cast_nonneg _
+-  nlinarith
++  unfold canonicalRankMargin CanonicalDescentScale.rankMargin
++  exact sub_le_self _ (mul_nonneg hη (Nat.cast_nonneg _))
++
++end SecondPassArithmetic
++
++namespace CanonicalDescentScale
++
++theorem rankMargin_le (scale : CanonicalDescentScale)
++    (σ η : ℝ) (hη : 0 ≤ η) (r : ℕ) :
++    scale.rankMargin σ η r ≤ σ := by
++  unfold CanonicalDescentScale.rankMargin
++  exact sub_le_self _ (mul_nonneg hη (Nat.cast_nonneg _))
++
++theorem rankMargin_reserved (scale : CanonicalDescentScale)
++    (κ reserve η : ℝ) (hη : 0 ≤ η)
++    (hbudget : (scale.rankCap : ℝ) * η ≤ κ - reserve) (r : ℕ) :
++    reserve ≤ scale.rankMargin κ η r ∧
++      scale.rankMargin κ η r ≤ κ := by
++  constructor
++  · exact (by linarith : reserve ≤ κ - (scale.rankCap : ℝ) * η).trans
++      (scale.rankMargin_lower κ η hη r)
++  · exact scale.rankMargin_le κ η hη r
++
++theorem rankMargin_initial_bound
++    (scale : CanonicalDescentScale) (Z κ η R M : ℝ) (r : ℕ)
++    (hZ : 1 ≤ Z) (hη : 0 ≤ η) (hM : 0 ≤ M)
++    (hbound : R ≤ M * Z ^ (-κ)) :
++    R ≤ M * Z ^ (-scale.rankMargin κ η r) := by
++  apply hbound.trans
++  apply mul_le_mul_of_nonneg_left _ hM
++  exact Real.rpow_le_rpow_of_exponent_le hZ
++    (neg_le_neg (scale.rankMargin_le κ η hη r))
++
++theorem rankMargin_final_bound
++    (scale : CanonicalDescentScale) (Z κ reserve η R M : ℝ) (r : ℕ)
++    (hZ : 1 ≤ Z) (hη : 0 ≤ η) (hM : 0 ≤ M)
++    (hbudget : (scale.rankCap : ℝ) * η ≤ κ - reserve)
++    (hbound : R ≤ M * Z ^ (-scale.rankMargin κ η r)) :
++    R ≤ M * Z ^ (-reserve) := by
++  apply hbound.trans
++  apply mul_le_mul_of_nonneg_left _ hM
++  exact Real.rpow_le_rpow_of_exponent_le hZ
++    (neg_le_neg (scale.rankMargin_reserved κ reserve η hη hbudget r).1)
++
++end CanonicalDescentScale
++
++namespace SecondPassArithmetic
+ 
+ theorem canonicalRankMargin_reserved (η : ℝ) (hη : 0≤η)
+     (hbudget : 3000*η≤(1:ℝ)/40) (r : ℕ) :
+diff --git a/lean/OAI/NumberTheory/DirichletL/CubicSieve/ReopeningBounds.lean b/lean/OAI/NumberTheory/DirichletL/CubicSieve/ReopeningBounds.lean
+index f655025e6..5094a67be 100644
+--- a/lean/OAI/NumberTheory/DirichletL/CubicSieve/ReopeningBounds.lean
++++ b/lean/OAI/NumberTheory/DirichletL/CubicSieve/ReopeningBounds.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.Eisenstein.BarrierPotential
+ 
+ namespace OAI
+@@ -148,13 +149,14 @@ theorem outsideCanonicalBin_filter (S : Finset (Ideal ActualEisensteinCubic.O))
+     exact hn (largeCubeCoefficient_support H₀ _ hh).2
+   simp only [hz,zero_mul]
+ 
+-theorem progressingCubes_progress (S : Finset (Ideal ActualEisensteinCubic.O)) (D : ℕ)
++theorem progressingCubes_progress [scale : CanonicalDescentScale]
++    (S : Finset (Ideal ActualEisensteinCubic.O)) (D : ℕ)
+     (Q : Finset (primePool (InitialMeanSquare.outsideSquarefreeIdeals S D)→₀ℕ))
+     (Z F B : ℝ) (hF : 1≤F) (hB : 1≤B)
+-    (hQ : (progressingCubes S D (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0) Q).Nonempty)
++    (hQ : (progressingCubes S D (if F<Z^scale.step then Z^scale.step else 0) Q).Nonempty)
+     (hupper : ∀v∈Q,(Ideal.absNorm (cubeIdeal (InitialMeanSquare.outsideSquarefreeIdeals S D) v):ℝ)≤Real.exp 1*B) :
+-    Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F := by
+-  by_cases hsmall : F<Z^((1:ℝ)/1000)
++    Z^scale.step≤(Real.exp 1*B)*F := by
++  by_cases hsmall : F<Z^scale.step
+   · obtain ⟨v,hv⟩ := hQ
+     obtain ⟨hvQ,hlo⟩ := Finset.mem_filter.mp hv
+     simp only [ite_eq_left hsmall] at hlo
+@@ -165,11 +167,12 @@ theorem progressingCubes_progress (S : Finset (Ideal ActualEisensteinCubic.O)) (
+       one_le_mul_of_one_le_of_one_le (Real.one_le_exp (by norm_num)) hB
+     exact (le_of_not_gt hsmall).trans (le_mul_of_one_le_left (zero_le_one.trans hF) hb)
+ 
+-theorem progressingActiveBin_progress (S : Finset (Ideal ActualEisensteinCubic.O)) (D : ℕ)
++theorem progressingActiveBin_progress [scale : CanonicalDescentScale]
++    (S : Finset (Ideal ActualEisensteinCubic.O)) (D : ℕ)
+     (b X Z F : ℝ) (j : ℕ) (hF : 1≤F)
+-    (hQ : (progressingCubes S D (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0)
++    (hQ : (progressingCubes S D (if F<Z^scale.step then Z^scale.step else 0)
+       (activeCubeLogBin S D b X j)).Nonempty) :
+-    Z^((1:ℝ)/1000)≤(Real.exp 1*normLogScale j)*F :=
++    Z^scale.step≤(Real.exp 1*normLogScale j)*F :=
+   progressingCubes_progress S D (activeCubeLogBin S D b X j) Z F (normLogScale j) hF
+     (normLogScale_ge_one j) hQ (fun v hv=>(activeCubeLogBin_norms S D b X j v hv).2)
+ 
+@@ -286,7 +289,8 @@ open FirstPassCubeLabels (primeProduct firstLogDensity)
+ open ConcreteTraceCRT (eisEmbedding)
+ open RayFourExpansion (RayCharacter)
+ 
+-theorem globalFirstQuantitativeBudget_bounded (deltaLoss : ℝ) (hδ : 0<deltaLoss) (ε : ℝ) (hε : 0<ε) :
++theorem globalFirstQuantitativeBudget_bounded [scale : CanonicalDescentScale]
++    (deltaLoss : ℝ) (hδ : 0<deltaLoss) (ε : ℝ) (hε : 0<ε) :
+     ∃Clo Chi : ℝ,0<Clo ∧ 0<Chi ∧ ∀{ι : Type*} [DecidableEq ι]
+       (p : ι→ActualEisensteinCubic.O) (hp : ∀i,p i≠0) [∀i,(Ideal.span {p i}).IsMaximal]
+       (hcop : Pairwise (Function.onFun IsCoprime (fun i=>Ideal.span {p i})))
+@@ -298,10 +302,10 @@ theorem globalFirstQuantitativeBudget_bounded (deltaLoss : ℝ) (hδ : 0<deltaLo
+       (pool : Finset ι) (blocks : Finset (GlobalCubeBlock ι)) (side : Bool)
+       (windows : Fin 7→ℝ→ℂ) (C Cd Ct Tmax Γ E oldHeight B M H U A₀ Vmax : ℝ) (N J Ntail : ℕ),
+       (∀u,‖base u‖≤1) → (∀i,IsCoprime (Ideal.span {p i}) bad) →
+-      1<Z → Real.exp 9000≤Z → 0≤η → η≤(1:ℝ)/1000 →
++      1<Z → scale.largeThreshold≤Z → 0≤η → η≤scale.step →
+       0≤C → 0≤Cd → 0≤Ct → 0≤Tmax → 0≤Γ → 1≤E → 1≤U → 1≤B → 0≤H →
+       Ksrc/Z^η≤U → X/B^3≤U → Real.exp 1*B≤U → H≤U → Real.exp M≤U →
+-      Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F → 0≤A₀ → 0≤Vmax →
++      Z^scale.step≤(Real.exp 1*B)*F → 0≤A₀ → 0≤Vmax →
+       (∀t,‖windows 5 t‖≤Vmax) → (∀t,‖windows 6 t‖≤Vmax) →
+       (∀t,windows 5 t≠0→|t|≤A₀) → (∀t,windows 6 t≠0→|t|≤A₀) →
+       (∀b∈blocks,‖eisEmbedding (primeProduct p b.cube.support b.cube.leftExponent)‖^2≤Real.exp 1*B) →
+@@ -310,7 +314,7 @@ theorem globalFirstQuantitativeBudget_bounded (deltaLoss : ℝ) (hδ : 0<deltaLo
+       (Ksrc/Z^η)/Z^(η*(N:ℝ))≤1 →
+       (∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base bad Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z Ksrc → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z Ksrc → ∀s : ℝ,
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+diff --git a/lean/OAI/NumberTheory/DirichletL/Eisenstein/BarrierPotential.lean b/lean/OAI/NumberTheory/DirichletL/Eisenstein/BarrierPotential.lean
+index cefe344ba..a7cab07d2 100644
+--- a/lean/OAI/NumberTheory/DirichletL/Eisenstein/BarrierPotential.lean
++++ b/lean/OAI/NumberTheory/DirichletL/Eisenstein/BarrierPotential.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.MeanSquare.UnitRows
+ import OAI.NumberTheory.DirichletL.Eisenstein.CuspHeight
+ 
+@@ -277,7 +278,8 @@ open FirstPassCubeLabels (primeProduct firstLogDensity)
+ open ConcreteTraceCRT (eisEmbedding)
+ open RayFourExpansion (RayCharacter)
+ 
+-theorem globalFirstQuantitativeBudget_below_rank (deltaLoss : ℝ) (hδ : 0<deltaLoss) (ε : ℝ) (hε : 0<ε) :
++theorem globalFirstQuantitativeBudget_below_rank [scale : CanonicalDescentScale]
++    (deltaLoss : ℝ) (hδ : 0<deltaLoss) (ε : ℝ) (hε : 0<ε) :
+     ∃Clo Chi : ℝ,0<Clo ∧ 0<Chi ∧ ∀{ι : Type*} [DecidableEq ι]
+       (p : ι→ActualEisensteinCubic.O) (hp : ∀i,p i≠0) [∀i,(Ideal.span {p i}).IsMaximal]
+       (hcop : Pairwise (Function.onFun IsCoprime (fun i=>Ideal.span {p i})))
+@@ -289,17 +291,17 @@ theorem globalFirstQuantitativeBudget_below_rank (deltaLoss : ℝ) (hδ : 0<delt
+       (pool : Finset ι) (blocks : Finset (GlobalCubeBlock ι)) (side : Bool)
+       (windows : Fin 7→ℝ→ℂ) (C Cd Ct Γ E oldHeight B M H U A₀ Vmax : ℝ) (N J Ntail : ℕ),
+       (∀u,‖base u‖≤1) → (∀i,IsCoprime (Ideal.span {p i}) bad) →
+-      1<Z → Real.exp 9000≤Z → 0≤η → η≤(1:ℝ)/1000 →
++      1<Z → scale.largeThreshold≤Z → 0≤η → η≤scale.step →
+       0≤C → 0≤Γ → 0≤E → 1≤U → 1≤B → 0≤H →
+       Ksrc/Z^η≤U → X/B^3≤U → Real.exp 1*B≤U → H≤U → Real.exp M≤U →
+-      Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F → 0≤A₀ → 0≤Vmax →
++      Z^scale.step≤(Real.exp 1*B)*F → 0≤A₀ → 0≤Vmax →
+       (∀t,‖windows 5 t‖≤Vmax) → (∀t,‖windows 6 t‖≤Vmax) →
+       (∀t,windows 5 t≠0→|t|≤A₀) → (∀t,windows 6 t≠0→|t|≤A₀) →
+       (∀b∈blocks,‖eisEmbedding (primeProduct p b.cube.support b.cube.leftExponent)‖^2≤Real.exp 1*B) →
+       (∀b∈blocks,‖eisEmbedding (primeProduct p b.cube.support b.cube.rightExponent)‖^2≤Real.exp 1*B) →
+       (∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base bad Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z Ksrc → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z Ksrc → ∀s : ℝ,
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+         (canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ' s) m' labels'
+@@ -341,7 +343,7 @@ theorem globalFirstQuantitativeBudget_below_rank (deltaLoss : ℝ) (hδ : 0<delt
+   have hs := canonicalStateCondition_cutoff_retained p hp base bad Z η Ψ m labels X F Ksrc hstate
+     hpbad source side q j hq (if side then a.1 else a.2) r ray B
+     hZ hZbig hη hηsmall hB0 hprogress hk hb₁' hb₂' (Finset.mem_filter.mp hj).2.le
+-  have hr : fixedDepthRank Z (globalLogRep j 8*Real.exp 1)<fixedDepthRank Z Ksrc := by
++  have hr : scale.depthRank Z (globalLogRep j 8*Real.exp 1)<scale.depthRank Z Ksrc := by
+     have := hs.1
+     omega
+   exact ⟨(ih _ _ _ _ _ _ hs.2.1 hr s).1,(ih _ _ _ _ _ _ hs.2.2 hr s).2⟩
+@@ -459,12 +461,13 @@ section
+ open ActualEisensteinCubic
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem CanonicalStateCondition.row_bound
++theorem CanonicalStateCondition.row_bound [scale : CanonicalDescentScale]
+     {base : ActualEisensteinCubic.O→*ℂ} {bad : Ideal ActualEisensteinCubic.O} {Z η : ℝ} {Ψ : ActualEisensteinCubic.O→*ℂ} {m : ActualEisensteinCubic.O}
+     {labels : Finset (Ideal ActualEisensteinCubic.O)} {X F K : ℝ}
+     (h : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+-    (hZ : 1≤Z) (hη : 0≤η) (hbudget : 3000*η≤(1:ℝ)/40) :
+-    K≤(X*F)*Z^(-((1:ℝ)/40)) := by
++    (hZ : 1≤Z) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) :
++    K≤(X*F)*Z^(-scale.shortMargin) := by
+   have hn := element_norm_ge_one m h.mask_ne_zero
+   calc
+     K = K*1 := (mul_one _).symm
+@@ -472,11 +475,11 @@ theorem CanonicalStateCondition.row_bound
+       mul_le_mul_of_nonneg_left hn (zero_le_one.trans h.row_ge_one)
+     _ ≤ _ := h.invariant_reserved hZ hη hbudget
+ 
+-theorem canonicalFirstZero_normalization (C Γ X F K B Z ε : ℝ)
++theorem canonicalFirstZero_normalization (C Γ X F K B Z ε reserveMargin : ℝ)
+     (hC : 0≤C) (hX : 0<X) (hF : 0≤F) (hK : 0≤K) (hB : 1≤B)
+-    (hrow : K≤(X*F)*Z^(-((1:ℝ)/40))) :
++    (hrow : K≤(X*F)*Z^(-reserveMargin)) :
+     B*(C*(Real.exp 1*B)^(1+ε)*(X/B^3)*F*Γ^2*K)≤
+-      (C*(Real.exp 1)^(1+ε))*B^ε*Γ^2*(X*F)^2*Z^(-((1:ℝ)/40)) := by
++      (C*(Real.exp 1)^(1+ε))*B^ε*Γ^2*(X*F)^2*Z^(-reserveMargin) := by
+   have hB0 : 0<B := zero_lt_one.trans_le hB
+   have hc : 0≤C*(Real.exp 1)^(1+ε)*B^ε*Γ^2*(X*F) := by
+     positivity
+@@ -487,7 +490,7 @@ theorem canonicalFirstZero_normalization (C Γ X F K B Z ε : ℝ)
+ 
+     _ ≤ (C*(Real.exp 1)^(1+ε)*B^ε*Γ^2*(X*F))*K :=
+       div_le_self (mul_nonneg hc hK) hB
+-    _ ≤ (C*(Real.exp 1)^(1+ε)*B^ε*Γ^2*(X*F))*((X*F)*Z^(-((1:ℝ)/40))) :=
++    _ ≤ (C*(Real.exp 1)^(1+ε)*B^ε*Γ^2*(X*F))*((X*F)*Z^(-reserveMargin)) :=
+       mul_le_mul_of_nonneg_left hrow hc
+     _ = _ := by ring
+ 
+@@ -556,26 +559,27 @@ variable {ι : Type*} [DecidableEq ι] (p : ι→ActualEisensteinCubic.O) (hp :
+   (hcop : Pairwise (Function.onFun IsCoprime (fun i=>Ideal.span {p i})))
+   (hg : ∀i,lambda∉Ideal.span {p i})
+ 
+-theorem CanonicalStateCondition.terminal_energy
++theorem CanonicalStateCondition.terminal_energy [scale : CanonicalDescentScale]
+     (hc : ∀i,ringChar (ActualEisensteinCubic.O⧸Ideal.span {p i})≠2)
+     (hinj : Function.Injective (fun i=>Ideal.span {p i}))
+     (pool : Finset ι) (base : ActualEisensteinCubic.O→*ℂ) (bad : Ideal ActualEisensteinCubic.O) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ)
+     (m : ActualEisensteinCubic.O) (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ)
+     (hstate : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+-    (hbase : ∀u,‖base u‖≤1) (hZ : 1<Z) (hη : 0≤η) (hbudget : 3000*η≤(1:ℝ)/40)
++    (hbase : ∀u,‖base u‖≤1) (hZ : 1<Z) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin)
+     (V : ℝ→ℂ) (A M t : ℝ) (hM : 0≤M)
+     (hV : ∀s,‖V s‖≤M) (hVs : ∀s,V s≠0→|s|≤A)
+-    (hstop : fixedDepthRank Z K=0 ∨ X≤1) :
++    (hstop : scale.depthRank Z K=0 ∨ X≤1) :
+     canonicalLogEnergy p hp hcop hg pool (normHeightTwist Ψ t) m labels V X K≤
+       canonicalTerminalConstant A M*(X*F)^2 := by
+   have hKF : K≤F := by
+     rcases hstop with hr|hx
+-    · exact ((fixedDepthRank_zero_iff Z K hZ (zero_lt_one.trans_le hstate.row_ge_one)).mp hr).trans
++    · exact ((scale.depthRank_zero_iff Z K hZ (zero_lt_one.trans_le hstate.row_ge_one)).mp hr).trans
+         hstate.label_ge_one
+     · have hi := hstate.invariant_reserved hZ.le hη hbudget
+-      have hz : Z^(-((1:ℝ)/40))≤1 := by
++      have hz : Z^(-scale.shortMargin)≤1 := by
+         simpa only [Real.rpow_zero] using
+-          Real.rpow_le_rpow_of_exponent_le hZ.le (by norm_num : -((1:ℝ)/40)≤0)
++          Real.rpow_le_rpow_of_exponent_le hZ.le (neg_nonpos.mpr scale.shortMargin_pos.le)
+       have hi' : K*‖ConcreteTraceCRT.eisEmbedding m‖^2≤X*F :=
+         hi.trans ((mul_le_mul_of_nonneg_left hz
+           (mul_nonneg hstate.column_pos.le (zero_le_one.trans hstate.label_ge_one))).trans_eq (mul_one _))
+diff --git a/lean/OAI/NumberTheory/DirichletL/Eisenstein/FredholmAlternative.lean b/lean/OAI/NumberTheory/DirichletL/Eisenstein/FredholmAlternative.lean
+index 56d327fc3..f110e92b9 100644
+--- a/lean/OAI/NumberTheory/DirichletL/Eisenstein/FredholmAlternative.lean
++++ b/lean/OAI/NumberTheory/DirichletL/Eisenstein/FredholmAlternative.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.CubicSieve.ClosedRecursion
+ 
+ namespace OAI
+@@ -327,33 +328,63 @@ theorem halfCanonicalPadding_budget (ε C : ℝ) (hε : 0<ε) (hC : 0≤C) :
+     mul_nonneg (mul_nonneg (by norm_num) hC) h.1.le
+   nlinarith [h.2.2.2.2.1]
+ 
++theorem CanonicalDescentScale.halfPadding_budget (scale : CanonicalDescentScale)
++    (ε C : ℝ) (hε : 0<ε) (hC : 0≤C) :
++    0 < scale.padding ε C / 2 ∧
++    scale.padding ε C / 2 ≤ scale.step ∧
++    (scale.rankCap:ℝ) * (scale.padding ε C / 2) ≤ scale.fixedFactorExponent ∧
++    ((scale.rankCap:ℝ) + 1) * C * (scale.padding ε C / 2) ≤ ε / 2 := by
++  have h := scale.padding_budget ε C hε hC
++  refine ⟨by linarith, by linarith, ?_, ?_⟩
++  · have hn : 0 ≤ (scale.rankCap:ℝ) * scale.padding ε C :=
++      mul_nonneg (Nat.cast_nonneg _) h.1.le
++    nlinarith [h.2.2.1]
++  · have hn : 0 ≤ ((scale.rankCap:ℝ) + 1) * C * scale.padding ε C := by
++      exact mul_nonneg
++        (mul_nonneg (add_nonneg (Nat.cast_nonneg _) zero_le_one) hC) h.1.le
++    nlinarith [h.2.2.2]
++
+ theorem canonicalRankMargin_strict_reserve (η : ℝ) (hη : 0≤η)
+     (hbudget : 3000*η≤(1:ℝ)/80) (r : ℕ) :
+     (3:ℝ)/80≤canonicalRankMargin ((1:ℝ)/20) η r :=
+   (by linarith : (3:ℝ)/80≤(1:ℝ)/20-3000*η).trans
+     (canonicalRankMargin_lower _ η hη r)
+ 
+-theorem CanonicalStateCondition.fixed_factor_margin
++theorem CanonicalDescentScale.rankMargin_strict_reserve
++    (scale : CanonicalDescentScale) (η : ℝ) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent) (r : ℕ) :
++    scale.strictReserve≤scale.rankMargin scale.reserve η r := by
++  apply (show scale.strictReserve ≤ scale.reserve-(scale.rankCap:ℝ)*η by
++    unfold CanonicalDescentScale.strictReserve CanonicalDescentScale.fixedFactorExponent at *
++    linarith).trans
++  exact scale.rankMargin_lower _ η hη r
++
++theorem CanonicalStateCondition.fixed_factor_margin [scale : CanonicalDescentScale]
+     {base : ActualEisensteinCubic.O→*ℂ} {bad : Ideal ActualEisensteinCubic.O} {Z η : ℝ} {Ψ : ActualEisensteinCubic.O→*ℂ} {m : ActualEisensteinCubic.O}
+     {labels : Finset (Ideal ActualEisensteinCubic.O)} {X F K : ℝ}
+     (h : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+-    (hZ : 1≤Z) (hη : 0≤η) (hbudget : 3000*η≤(1:ℝ)/80)
+-    (C : ℝ) (hC : 0≤C) (hCZ : C≤Z^((1:ℝ)/80)) :
+-    C*K*‖eisEmbedding m‖^2≤(X*F)*Z^(-((1:ℝ)/40)) := by
++    (hZ : 1≤Z) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent)
++    (C : ℝ) (hC : 0≤C) (hCZ : C≤Z^scale.fixedFactorExponent) :
++    C*K*‖eisEmbedding m‖^2≤(X*F)*Z^(-scale.shortMargin) := by
+   have hZ0 : 0<Z:=zero_lt_one.trans_le hZ
+   have hXF : 0≤X*F:=mul_nonneg h.column_pos.le (zero_le_one.trans h.label_ge_one)
+-  have hm := canonicalRankMargin_strict_reserve η hη hbudget (fixedDepthRank Z K)
+-  have hi : K*‖eisEmbedding m‖^2≤(X*F)*Z^(-((3:ℝ)/80)) := by
++  have hm := SecondPassArithmetic.CanonicalDescentScale.rankMargin_strict_reserve
++    scale η hη hbudget (scale.depthRank Z K)
++  have hi : K*‖eisEmbedding m‖^2≤(X*F)*Z^(-scale.strictReserve) := by
+     apply h.invariant.trans
+     exact mul_le_mul_of_nonneg_left
+       (Real.rpow_le_rpow_of_exponent_le hZ (neg_le_neg hm)) hXF
+   calc
+     C*K*‖eisEmbedding m‖^2 = C*(K*‖eisEmbedding m‖^2) := by ring
+-    _ ≤ C*((X*F)*Z^(-((3:ℝ)/80))) := mul_le_mul_of_nonneg_left hi hC
+-    _ ≤ Z^((1:ℝ)/80)*((X*F)*Z^(-((3:ℝ)/80))) :=
++    _ ≤ C*((X*F)*Z^(-scale.strictReserve)) := mul_le_mul_of_nonneg_left hi hC
++    _ ≤ Z^scale.fixedFactorExponent*((X*F)*Z^(-scale.strictReserve)) :=
+       mul_le_mul_of_nonneg_right hCZ (mul_nonneg hXF (Real.rpow_nonneg hZ0.le _))
+-    _ = (X*F)*(Z^((1:ℝ)/80)*Z^(-((3:ℝ)/80))) := by ring
+-    _ = _ := by rw [←Real.rpow_add hZ0];norm_num
++    _ = (X*F)*(Z^scale.fixedFactorExponent*Z^(-scale.strictReserve)) := by ring
++    _ = _ := by
++      rw [←Real.rpow_add hZ0]
++      congr 2
++      linarith [scale.reserve_decomposition]
+ 
+ end SecondPassArithmetic
+ 
+@@ -469,7 +500,7 @@ open CanonicalQuadraticSieve hiding O
+ open SecondPassArithmetic hiding O
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem canonicalLabels_subset_idealRange
++theorem canonicalLabels_subset_idealRange [scale : CanonicalDescentScale]
+     (base : ActualEisensteinCubic.O→*ℂ) (bad : Ideal ActualEisensteinCubic.O) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+     (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ)
+     (hstate : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+@@ -505,21 +536,21 @@ theorem rowFamilyEnergy_le_rectangle (labels : Finset (Ideal ActualEisensteinCub
+       exact (Finset.sum_coe_sort (s:=idealRange F)
+         (f:=fun I=>∑z∈(firstFrequencyDisk (2*K)).erase 0,‖P I z‖^2)).symm
+ 
+-theorem canonicalShortEnergy_uniform_twist
++theorem canonicalShortEnergy_uniform_twist [scale : CanonicalDescentScale]
+     (a b : ℝ) (ha : 0<a) (ε ρ q levelBound : ℝ)
+     (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃d : ℕ,∀W : ℝ→ℂ,Function.support W⊆Set.Icc a b → ContDiff ℝ ∞ W →
+     ∃C : ℝ,0≤C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^((1:ℝ)/1000) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-((1:ℝ)/40)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀(labels : Finset (Ideal ActualEisensteinCubic.O)),labels⊆idealRange F →
+     ∀(Ψ : ActualEisensteinCubic.O→*ℂ),(∀x,‖Ψ x‖≤1) → ∀(mask : ActualEisensteinCubic.O) (lengthScale : ℂ),
+-      (∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^((1:ℝ)/1000)),
++      (∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays (((firstFrequencyDisk (2*K)).erase 0).image (fun z=>Ideal.span {z})) (2*K)
+           (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound f.val (G*f.val)
+           (CompletedHeight.normTwistedSource W θ) (CompletedUnitRows.unitRowFamily Ψ mask u f) lengthScale) →
+       rowFamilyEnergy labels (fun I z=>shortCompletedSum (rowTwist (normHeightTwist Ψ θ)
+-        mask (idealGenerator I) z) W X (Z^((1:ℝ)/1000))) K≤
++        mask (idealGenerator I) z) W X (Z^scale.step)) K≤
+       (C*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*((2*K)*(Ideal.absNorm G:ℝ)*F)^ε*(K*F)*Z^ε := by
+   obtain ⟨d,hbound⟩:=CompletedUnitRows.short_completed_elements_uniform_twist a b ha ε ρ q levelBound hε hρ hq hlevel
+   refine ⟨d,?_⟩
+@@ -539,7 +570,7 @@ theorem canonicalShortEnergy_uniform_twist
+     ((firstFrequencyDisk (2*K)).erase 0) hT Ψ hΨ mask lengthScale hmodels
+   have hsum := (div_le_iff₀ hF0).mp hshort
+   have hrect:=rowFamilyEnergy_le_rectangle labels F K hK0 hlabels
+-    (fun I z=>shortCompletedSum (rowTwist (normHeightTwist Ψ θ) mask (idealGenerator I) z) W X (Z^((1:ℝ)/1000)))
++    (fun I z=>shortCompletedSum (rowTwist (normHeightTwist Ψ θ) mask (idealGenerator I) z) W X (Z^scale.step))
+   exact hrect.trans ((mul_le_mul_of_nonneg_left hsum (apply_nonneg _ _)).trans_eq (by ring))
+ 
+ end CanonicalRowCompletion
+diff --git a/lean/OAI/NumberTheory/DirichletL/Eisenstein/SeedHeight.lean b/lean/OAI/NumberTheory/DirichletL/Eisenstein/SeedHeight.lean
+index 306e4ed45..d717e2c29 100644
+--- a/lean/OAI/NumberTheory/DirichletL/Eisenstein/SeedHeight.lean
++++ b/lean/OAI/NumberTheory/DirichletL/Eisenstein/SeedHeight.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.RowCompletion.CubicReopening
+ import OAI.NumberTheory.DirichletL.Eisenstein.MeromorphicResolvent
+ 
+@@ -586,7 +587,8 @@ open SecondPassArithmetic SecondPassIntegration JointLogSeparation
+ open FirstPassCubeLabels (primeProductNorm)
+ 
+ def HasInitialCanonicalDensityAtRadius {q : ℕ} (χ : DirichletCharacter ℂ q)
+-    (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes ⊆ S) : Prop :=
++    (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes ⊆ S)
++    (reserve : ℝ) : Prop :=
+   ∀ deltaLoss : ℝ,0 < deltaLoss → ∀ P : ℕ,∀ A : ℝ,0≤A → ∃ J : ℕ,
+     ∀ V₁ V₂ : ℝ → ℂ,HasCompactSupport V₁ → HasCompactSupport V₂ →
+     ContDiff ℝ ∞ V₁ → ContDiff ℝ ∞ V₂ →
+@@ -597,7 +599,8 @@ def HasInitialCanonicalDensityAtRadius {q : ℕ} (χ : DirichletCharacter ℂ q)
+       X ≤ Z^P → lengthScale ≤ Z^P → K ≤ Z^P →
+       initialExcludedNorm S*primeProductNorm (outsidePrime S D) R ≤ Z^P →
+       X*lengthScale ≤ Z^2 →
+-      K*(initialExcludedNorm S*primeProductNorm (outsidePrime S D) R) ≤ X*lengthScale*Z^(-(1 : ℝ)/20) →
++      K*(initialExcludedNorm S*primeProductNorm (outsidePrime S D) R) ≤
++        X*lengthScale*Z^(-reserve) →
+       (∀ z ∈ T,Admissible z.1 ∧ (Ideal.absNorm z.1 : ℝ) ≤ lengthScale ∧
+         z.2 ≠ 0 ∧ ‖ConcreteTraceCRT.eisEmbedding z.2‖^2 ≤ K) →
+       (∀z∈T,IsCoprime z.1 (∏P∈S,P)) →
+diff --git a/lean/OAI/NumberTheory/DirichletL/Eisenstein/UnitNormalization.lean b/lean/OAI/NumberTheory/DirichletL/Eisenstein/UnitNormalization.lean
+index fa4c3434d..81797b872 100644
+--- a/lean/OAI/NumberTheory/DirichletL/Eisenstein/UnitNormalization.lean
++++ b/lean/OAI/NumberTheory/DirichletL/Eisenstein/UnitNormalization.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.Eisenstein.FredholmAlternative
+ 
+ namespace OAI
+@@ -263,20 +264,21 @@ open CanonicalQuadraticSieve hiding O
+ open SecondPassArithmetic hiding O
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem shortEnergy_scalar_normalization (C H R Z K X F G ε : ℝ)
++theorem shortEnergy_scalar_normalization [scale : CanonicalDescentScale]
++    (C H R Z K X F G ε : ℝ)
+     (hC : 0≤C) (hH : 0≤H) (hR : 0≤R) (hZ : 1≤Z) (hK : 0≤K)
+     (hX : 0<X) (hF : 0≤F) (hG : 1≤G) (hε : 0≤ε)
+     (hFZ : F≤Z^3) (hmass : X*F≤Z^3)
+-    (hmargin : (2*K)*G≤X*F*Z^(-((1:ℝ)/40))) :
++    (hmargin : (2*K)*G≤X*F*Z^(-scale.shortMargin)) :
+     2*X*((C*H)*R*((2*K)*G*F)^ε*(K*F)*Z^ε)≤
+-      (C*H)*R*(X*F)^2*Z^(7*ε-(1:ℝ)/40) := by
++      (C*H)*R*(X*F)^2*Z^(7*ε-scale.shortMargin) := by
+   have hZ0 : 0<Z:=zero_lt_one.trans_le hZ
+-  have hs : Z^(-((1:ℝ)/40))≤1 := by
++  have hs : Z^(-scale.shortMargin)≤1 := by
+     simpa only [Real.rpow_zero] using
+-      Real.rpow_le_rpow_of_exponent_le hZ (by norm_num : -((1:ℝ)/40)≤0)
++      Real.rpow_le_rpow_of_exponent_le hZ (neg_nonpos.mpr scale.shortMargin_pos.le)
+   have hp : (2*K)*G*F≤Z^6 := by
+     calc
+-      _ ≤ (X*F*Z^(-((1:ℝ)/40)))*F:=mul_le_mul_of_nonneg_right hmargin hF
++      _ ≤ (X*F*Z^(-scale.shortMargin))*F:=mul_le_mul_of_nonneg_right hmargin hF
+       _ ≤ (X*F)*F:=mul_le_mul_of_nonneg_right
+         ((mul_le_mul_of_nonneg_left hs (by positivity)).trans_eq (mul_one _)) hF
+       _ ≤ (Z^3)*(Z^3):=mul_le_mul hmass hFZ hF (by positivity)
+@@ -285,38 +287,38 @@ theorem shortEnergy_scalar_normalization (C H R Z K X F G ε : ℝ)
+     apply (Real.rpow_le_rpow (by positivity) hp hε).trans_eq
+     rw [←Real.rpow_natCast_mul hZ0.le]
+     norm_num
+-  have hrow : 2*K≤X*F*Z^(-((1:ℝ)/40)) :=
++  have hrow : 2*K≤X*F*Z^(-scale.shortMargin) :=
+     (le_mul_of_one_le_right (by positivity) hG).trans hmargin
+-  have hnorm : 2*X*(K*F)≤(X*F)^2*Z^(-((1:ℝ)/40)) := by
++  have hnorm : 2*X*(K*F)≤(X*F)^2*Z^(-scale.shortMargin) := by
+     calc
+       _ = (X*F)*(2*K):=by ring
+-      _ ≤ (X*F)*(X*F*Z^(-((1:ℝ)/40))):=mul_le_mul_of_nonneg_left hrow (by positivity)
++      _ ≤ (X*F)*(X*F*Z^(-scale.shortMargin)):=mul_le_mul_of_nonneg_left hrow (by positivity)
+       _ = _:=by ring
+   calc
+     _ = (C*H)*R*((2*K)*G*F)^ε*(2*X*(K*F))*Z^ε:=by ring
+-    _ ≤ (C*H)*R*Z^(6*ε)*((X*F)^2*Z^(-((1:ℝ)/40)))*Z^ε:=by gcongr
++    _ ≤ (C*H)*R*Z^(6*ε)*((X*F)^2*Z^(-scale.shortMargin))*Z^ε:=by gcongr
+     _ = _:=by
+-      rw [show 7*ε-(1:ℝ)/40=6*ε+(-((1:ℝ)/40))+ε by ring,
++      rw [show 7*ε-scale.shortMargin=6*ε+(-scale.shortMargin)+ε by ring,
+         Real.rpow_add hZ0,Real.rpow_add hZ0]
+       ring
+ 
+-theorem canonicalShortEnergy_normalized_uniform_twist
++theorem canonicalShortEnergy_normalized_uniform_twist [scale : CanonicalDescentScale]
+     (a b : ℝ) (ha : 0<a) (ε ρ q levelBound : ℝ)
+     (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃d : ℕ,∀W : ℝ→ℂ,Function.support W⊆Set.Icc a b → ContDiff ℝ ∞ W →
+     ∃C : ℝ,0≤C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^((1:ℝ)/1000) → 0<X → X*F≤Z^3 →
++      F≤Z^scale.step → 0<X → X*F≤Z^3 →
+     ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-((1:ℝ)/40)) →
++      (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀(labels : Finset (Ideal ActualEisensteinCubic.O)),labels⊆idealRange F →
+     ∀(Ψ : ActualEisensteinCubic.O→*ℂ),(∀x,‖Ψ x‖≤1) → ∀(mask : ActualEisensteinCubic.O) (lengthScale : ℂ),
+-      (∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^((1:ℝ)/1000)),
++      (∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays (((firstFrequencyDisk (2*K)).erase 0).image (fun z=>Ideal.span {z})) (2*K)
+           (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound f.val (G*f.val)
+           (CompletedHeight.normTwistedSource W θ) (CompletedUnitRows.unitRowFamily Ψ mask u f) lengthScale) →
+       2*X*rowFamilyEnergy labels (fun I z=>shortCompletedSum (rowTwist (normHeightTwist Ψ θ)
+-        mask (idealGenerator I) z) W X (Z^((1:ℝ)/1000))) K≤
+-      (C*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*(X*F)^2*Z^(7*ε-(1:ℝ)/40) := by
++        mask (idealGenerator I) z) W X (Z^scale.step)) K≤
++      (C*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*(X*F)^2*Z^(7*ε-scale.shortMargin) := by
+   obtain ⟨d,hbound⟩:=canonicalShortEnergy_uniform_twist a b ha ε ρ q levelBound hε hρ hq hlevel
+   refine ⟨d,?_⟩
+   intro W hs hW
+@@ -327,7 +329,8 @@ theorem canonicalShortEnergy_normalized_uniform_twist
+   have hFZ' : F≤Z^3 := by
+     apply hFZ.trans
+     rw [←Real.rpow_natCast]
+-    exact Real.rpow_le_rpow_of_exponent_le hZ (by norm_num)
++    exact Real.rpow_le_rpow_of_exponent_le hZ
++      (scale.step_le_one.trans (by norm_num))
+   have hGN : 1≤(Ideal.absNorm G:ℝ) := by
+     exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun hz=>hG (Ideal.absNorm_eq_zero_iff.mp hz))
+   have hscalar:=shortEnergy_scalar_normalization C ((1+‖θ‖)^d) ((rays:ℝ)^2*‖lengthScale‖^2)
+diff --git a/lean/OAI/NumberTheory/DirichletL/GaussSum/CompletedDyadicRows.lean b/lean/OAI/NumberTheory/DirichletL/GaussSum/CompletedDyadicRows.lean
+index e9f2736bb..fa02b2c1f 100644
+--- a/lean/OAI/NumberTheory/DirichletL/GaussSum/CompletedDyadicRows.lean
++++ b/lean/OAI/NumberTheory/DirichletL/GaussSum/CompletedDyadicRows.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.Eisenstein.LocalCutoffs
+ 
+ namespace OAI
+@@ -311,19 +312,19 @@ end
+ 
+ open ActualEisensteinCubic CanonicalQuadraticSieve
+ 
+-theorem short_completed_average_of_exact_reflection
++theorem short_completed_average_of_exact_reflection [scale : CanonicalDescentScale]
+     (W : ℝ→ℂ) (a b : ℝ) (ha : 0<a)
+     (hsupp : Function.support W⊆Set.Icc a b) (hW : ContDiff ℝ ∞ W)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃C : ℝ,0<C ∧ ∀(rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal O→O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) W (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) W X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) W X (Z^scale.step)‖^2)/F≤
+         C*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨Cr,hCr,hr⟩ := completed_mean_square_of_exact_reflection
+     W a b ha hsupp hW ε ρ q levelBound hε hρ hq hlevel
+@@ -334,7 +335,7 @@ theorem short_completed_average_of_exact_reflection
+     exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun hz => hG (Ideal.absNorm_eq_zero_iff.mp hz))
+   let A : ℝ := Cr*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε
+   have hA : 0≤A := by dsimp [A]; positivity
+-  have hcompleted (f : idealRange F) (H : Ideal O) (hH : H∈shortCubeRange (Z^(1/1000:ℝ))) :
++  have hcompleted (f : idealRange F) (H : Ideal O) (hH : H∈shortCubeRange (Z^scale.step)) :
+       (∑I : rows,‖completedT (Ψ f I.val) W (X/(Ideal.absNorm H:ℝ)^3)‖^2)≤
+         A*(K+K^2*(Ideal.absNorm G:ℝ)*(Ideal.absNorm f.val:ℝ)*(Ideal.absNorm H:ℝ)^3/X) := by
+     have hf0 := (mem_idealRange.mp f.property).1.1
+@@ -370,9 +371,9 @@ theorem short_completed_average_of_exact_reflection
+   have hb := hs Z K (Ideal.absNorm G:ℝ) X F A hZ hK hG1 hF hFZ hA hmargin
+     (fun f (I : rows) => Ψ f I.val) (fun f I z => hΨ f I.val z) W hcompleted
+   have hsum (f : idealRange F) :
+-      (∑I : rows,‖shortCompletedSum (Ψ f I.val) W X (Z^(1/1000:ℝ))‖^2)=
+-      ∑I∈rows,‖shortCompletedSum (Ψ f I) W X (Z^(1/1000:ℝ))‖^2 :=
+-    Finset.sum_coe_sort (s := rows) (f := fun I : Ideal O => ‖shortCompletedSum (Ψ f I) W X (Z^(1/1000:ℝ))‖^2)
++      (∑I : rows,‖shortCompletedSum (Ψ f I.val) W X (Z^scale.step)‖^2)=
++      ∑I∈rows,‖shortCompletedSum (Ψ f I) W X (Z^scale.step)‖^2 :=
++    Finset.sum_coe_sort (s := rows) (f := fun I : Ideal O => ‖shortCompletedSum (Ψ f I) W X (Z^scale.step)‖^2)
+   simp_rw [hsum] at hb
+   apply hb.trans_eq
+   dsimp [A]
+diff --git a/lean/OAI/NumberTheory/DirichletL/MeanSquare/CanonicalTailBounds.lean b/lean/OAI/NumberTheory/DirichletL/MeanSquare/CanonicalTailBounds.lean
+index 42a4f3ecf..b9320fe3f 100644
+--- a/lean/OAI/NumberTheory/DirichletL/MeanSquare/CanonicalTailBounds.lean
++++ b/lean/OAI/NumberTheory/DirichletL/MeanSquare/CanonicalTailBounds.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.MeanSquare.RetainedDensity
+ 
+ namespace OAI
+@@ -587,12 +588,12 @@ theorem globalArithmeticTargets_nonzero (source:Finset (GlobalSecondData ι)) (s
+ 
+ include hp in
+ 
+-theorem globalRetained_canonical_geometry
++theorem globalRetained_canonical_geometry [scale : CanonicalDescentScale]
+     (source:Finset (GlobalSecondData ι)) (side:Bool) (q:Ideal ActualEisensteinCubic.O×Ideal ActualEisensteinCubic.O×Ideal ActualEisensteinCubic.O) (j:GlobalLogIndex)
+     (hq:q∈globalBinTriples p source side j)
+     (Z η Ksrc K ell B F:ℝ) (m:ActualEisensteinCubic.O)
+-    (hZ:1<Z) (hη:η≤(1:ℝ)/1000) (hKsrc:0<Ksrc) (hK:0<K) (hKle:K≤Ksrc)
+-    (hell:0<ell) (hB:0<B) (hF:1≤F) (hprogress:Z^((1:ℝ)/1000)≤B*F)
++    (hZ:1<Z) (hη:η≤scale.step) (hKsrc:0<Ksrc) (hK:0<K) (hKle:K≤Ksrc)
++    (hell:0<ell) (hB:0<B) (hF:1≤F) (hprogress:Z^scale.step≤B*F)
+     (hlarge:Real.exp 4≤B*F) (hstart:Ksrc≤Z^3)
+     (hk:∀x∈source,x.source.frequency≠0)
+     (hb₁:∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2≤B)
+@@ -602,8 +603,8 @@ theorem globalRetained_canonical_geometry
+     let lengthScale:=globalPooledLabelScale j
+     let Kchild:=globalLogRep j 8*Real.exp 1
+     0<X ∧ 1≤lengthScale ∧ 1≤Kchild ∧ X*lengthScale≤(ell*B^3)*F ∧
+-      Kchild≤Ksrc/Z^((1:ℝ)/1000) ∧ fixedDepthRank Z Kchild+1≤fixedDepthRank Z Ksrc ∧
+-      fixedDepthRank Z Ksrc≤3000 ∧ Kchild*‖eisEmbedding (fixedTripleMask m q)‖^2/(X*lengthScale)≤
++      Kchild≤Ksrc/Z^scale.step ∧ scale.depthRank Z Kchild+1≤scale.depthRank Z Ksrc ∧
++      scale.depthRank Z Ksrc≤scale.rankCap ∧ Kchild*‖eisEmbedding (fixedTripleMask m q)‖^2/(X*lengthScale)≤
+         Z^η*(K*‖eisEmbedding m‖^2/((ell*B^3)*F)) ∧
+       (∀z∈globalArithmeticTargets p source side q j,
+         Squarefree z.1 ∧ z.2≠0 ∧ (Ideal.absNorm z.1:ℝ)≤lengthScale ∧ ‖eisEmbedding z.2‖^2≤Kchild) := by
+@@ -619,10 +620,10 @@ theorem globalRetained_canonical_geometry
+     globalPooledRow_contraction K ell B F hK hell hB hF0 j hJ (hretained.trans hD)
+   have hKchild:1≤globalLogRep j 8*Real.exp 1:=one_le_mul_of_one_le_of_one_le
+     (globalLogRep_ge_one j 8) (Real.one_le_exp (by norm_num))
+-  have hsmall:globalLogRep j 8*Real.exp 1≤Ksrc/Z^((1:ℝ)/1000):=by
++  have hsmall:globalLogRep j 8*Real.exp 1≤Ksrc/Z^scale.step:=by
+     apply hr.trans
+     calc
+-      _ ≤ K/Z^((1:ℝ)/1000):=div_le_div_of_nonneg_left hK.le
++      _ ≤ K/Z^scale.step:=div_le_div_of_nonneg_left hK.le
+         (Real.rpow_pos_of_pos (zero_lt_one.trans hZ) _)
+         (hprogress.trans (globalPooledDelta_ge B F hB.le hF0.le j))
+       _ ≤ _:=div_le_div_of_nonneg_right hKle (Real.rpow_nonneg (zero_lt_one.trans hZ).le _)
+@@ -631,8 +632,8 @@ theorem globalRetained_canonical_geometry
+   simp only [hj,hqx] at hinv
+   refine ⟨globalPooledColumnScale_pos ell hell j,globalPooledLabelScale_ge_one j,hKchild,
+     globalPooled_mass_le_parent K ell B F hell hB hF0 j hJ hlarge,hsmall,
+-    fixedDepthRank_step Z Ksrc _ hZ hKsrc hKchild hsmall,
+-    fixedDepthRank_initial Z Ksrc hZ hKsrc hstart,hinv,?_⟩
++    scale.depthRank_step Z Ksrc _ hZ hKsrc hKchild hsmall,
++    scale.depthRank_initial Z Ksrc hZ hKsrc hstart,hinv,?_⟩
+   intro z hz
+   have hb:=globalArithmeticTargets_bounds p hp source side q j hk z hz
+   exact ⟨globalArithmeticTargets_squarefree p source side q j z hz,
+diff --git a/lean/OAI/NumberTheory/DirichletL/MeanSquare/PolynomialHeight.lean b/lean/OAI/NumberTheory/DirichletL/MeanSquare/PolynomialHeight.lean
+index 45666b77e..6f2354bd2 100644
+--- a/lean/OAI/NumberTheory/DirichletL/MeanSquare/PolynomialHeight.lean
++++ b/lean/OAI/NumberTheory/DirichletL/MeanSquare/PolynomialHeight.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.RowCompletion.PolynomialHeight
+ 
+ namespace OAI
+@@ -359,18 +360,18 @@ theorem polynomial_mean_square_of_exact_reflection
+ 
+     _ = _ := by dsimp [C]; ring
+ 
+-theorem polynomial_short_completed_average
++theorem polynomial_short_completed_average [scale : CanonicalDescentScale]
+     (Wfamily : ℝ→ℝ→ℂ) (hWfamily : HasPolynomialKernel Wfamily)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal ActualEisensteinCubic.O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal ActualEisensteinCubic.O→ActualEisensteinCubic.O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) (Wfamily θ) (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily θ) X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily θ) X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨heightDegree,Cbase,hCbase,hbase⟩ := polynomial_mean_square_of_exact_reflection
+     Wfamily hWfamily ε ρ q levelBound hε hρ hq hlevel
+@@ -384,7 +385,7 @@ theorem polynomial_short_completed_average
+     exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun hz => hG (Ideal.absNorm_eq_zero_iff.mp hz))
+   let A : ℝ := Cr*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε
+   have hA : 0≤A := by dsimp [A]; positivity
+-  have hcompleted (f : idealRange F) (H : Ideal ActualEisensteinCubic.O) (hH : H∈shortCubeRange (Z^(1/1000:ℝ))) :
++  have hcompleted (f : idealRange F) (H : Ideal ActualEisensteinCubic.O) (hH : H∈shortCubeRange (Z^scale.step)) :
+       (∑I : rows,‖completedT (Ψ f I.val) (Wfamily θ) (X/(Ideal.absNorm H:ℝ)^3)‖^2)≤
+         A*(K+K^2*(Ideal.absNorm G:ℝ)*(Ideal.absNorm f.val:ℝ)*(Ideal.absNorm H:ℝ)^3/X) := by
+     have hf0 := (mem_idealRange.mp f.property).1.1
+@@ -420,9 +421,9 @@ theorem polynomial_short_completed_average
+   have hb := hs Z K (Ideal.absNorm G:ℝ) X F A hZ hK hG1 hF hFZ hA hmargin
+     (fun f (I : rows) => Ψ f I.val) (fun f I z => hΨ f I.val z) (Wfamily θ) hcompleted
+   have hsum (f : idealRange F) :
+-      (∑I : rows,‖shortCompletedSum (Ψ f I.val) (Wfamily θ) X (Z^(1/1000:ℝ))‖^2)=
+-      ∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily θ) X (Z^(1/1000:ℝ))‖^2 :=
+-    Finset.sum_coe_sort (s := rows) (f := fun I : Ideal ActualEisensteinCubic.O => ‖shortCompletedSum (Ψ f I) (Wfamily θ) X (Z^(1/1000:ℝ))‖^2)
++      (∑I : rows,‖shortCompletedSum (Ψ f I.val) (Wfamily θ) X (Z^scale.step)‖^2)=
++      ∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily θ) X (Z^scale.step)‖^2 :=
++    Finset.sum_coe_sort (s := rows) (f := fun I : Ideal ActualEisensteinCubic.O => ‖shortCompletedSum (Ψ f I) (Wfamily θ) X (Z^scale.step)‖^2)
+   simp_rw [hsum] at hb
+   apply hb.trans_eq
+   dsimp [A,Cr]
+@@ -451,19 +452,19 @@ theorem completed_mean_square_norm_height
+     (normTwistedSource_polynomial_kernel W a b ha hsupp hW)
+     ε ρ q levelBound hε hρ hq hlevel
+ 
+-theorem short_completed_average_norm_height
++theorem short_completed_average_norm_height [scale : CanonicalDescentScale]
+     (W : ℝ→ℂ) (a b : ℝ) (ha : 0<a)
+     (hsupp : Function.support W⊆Set.Icc a b) (hW : ContDiff ℝ ∞ W)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal ActualEisensteinCubic.O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal ActualEisensteinCubic.O→ActualEisensteinCubic.O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) (normTwistedSource W θ) (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (normTwistedSource W θ) X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (normTwistedSource W θ) X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   exact polynomial_short_completed_average (normTwistedSource W)
+     (normTwistedSource_polynomial_kernel W a b ha hsupp hW)
+@@ -592,27 +593,27 @@ theorem completed_mean_square_twist
+   simp_rw [completedT_normHeight_norm _ _ _ _ (lt_of_lt_of_le zero_lt_one hX)]
+   exact h θ rays K X hK hX rows F Q hQ hbad hrows Ψ lengthScale hmodel
+ 
+-theorem short_completed_average_twist
++theorem short_completed_average_twist [scale : CanonicalDescentScale]
+     (W : ℝ→ℂ) (a b : ℝ) (ha : 0<a)
+     (hsupp : Function.support W⊆Set.Icc a b) (hW : ContDiff ℝ ∞ W)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal ActualEisensteinCubic.O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal ActualEisensteinCubic.O→ActualEisensteinCubic.O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) (normTwistedSource W θ) (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (SecondPassArithmetic.normHeightTwist (Ψ f I) θ) W X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (SecondPassArithmetic.normHeightTwist (Ψ f I) θ) W X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨n,C,hC,h⟩ := short_completed_average_norm_height W a b ha hsupp hW ε ρ q levelBound hε hρ hq hlevel
+   refine ⟨n,C,hC,?_⟩
+   intro θ rays Z K X F hZ hK hF hFZ G hG hbad hmargin rows hrows Ψ hΨ lengthScale hmodel
+   have hGpos : 0<(Ideal.absNorm G:ℝ) := lt_of_lt_of_le zero_lt_one (norm_at_least_one G hG)
+-  have hright : 0 < F*Z^(-(1/40:ℝ)) := mul_pos (lt_of_lt_of_le zero_lt_one hF)
++  have hright : 0 < F*Z^(-scale.shortMargin) := mul_pos (lt_of_lt_of_le zero_lt_one hF)
+     (Real.rpow_pos_of_pos (lt_of_lt_of_le zero_lt_one hZ) _)
+-  have hprod : 0 < X*(F*Z^(-(1/40:ℝ))) := by
++  have hprod : 0 < X*(F*Z^(-scale.shortMargin)) := by
+     have hh := lt_of_lt_of_le (mul_pos (lt_of_lt_of_le zero_lt_one hK) hGpos) hmargin
+     simpa only [mul_assoc] using hh
+   have hX : 0<X := (mul_pos_iff_of_pos_right hright).mp hprod
+diff --git a/lean/OAI/NumberTheory/DirichletL/MeanSquare/RetainedDensity.lean b/lean/OAI/NumberTheory/DirichletL/MeanSquare/RetainedDensity.lean
+index 26e1aab8e..07fe14b93 100644
+--- a/lean/OAI/NumberTheory/DirichletL/MeanSquare/RetainedDensity.lean
++++ b/lean/OAI/NumberTheory/DirichletL/MeanSquare/RetainedDensity.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.MeanSquare.CanonicalDensity
+ 
+ namespace OAI
+@@ -180,12 +181,12 @@ theorem initial_large_threshold (a b c deltaLoss : ℝ) (hc : 1 ≤ c) (hδ : 0
+ 
+ theorem initial_large_bin_geometry {ι : Type*} [DecidableEq ι]
+     (p : ι → ActualEisensteinCubic.O) (hp : ∀ i,p i ≠ 0) [∀ i,(Ideal.span {p i}).IsMaximal]
+-    (F R : Finset ι) (a b Z σ θ deltaLoss c : ℝ) (j : SecondLogIndex)
++    (F R : Finset ι) (a b Z σ θ deltaLoss κ c : ℝ) (j : SecondLogIndex)
+     (hZ : 1 ≤ Z) (hc : 1 ≤ c)
+     (hR : R ∈ boundedPrimeSupports p F (Z*Real.exp (initialErrorWindow a b)))
+     (hj : j ∈ secondLogBinBox (Z*Real.exp (initialErrorWindow a b))
+       (initialErrorRowBound a b Z (Z^(1+σ))))
+-    (hσ : 0 ≤ σ) (hmargin : deltaLoss+θ ≤ σ-(1 : ℝ)/20)
++    (hσ : 0 ≤ σ) (hmargin : deltaLoss+θ ≤ σ-κ)
+     (hlarge : Real.exp 2 ≤ Z ∧ c*Real.exp (initialErrorWindow a b) ≤ Z ∧
+       initialPolynomialCap a b*Real.exp 2 ≤ Z ∧
+       (Real.exp (initialErrorWindow a b))^2*Real.exp 2 ≤ Z ∧ c ≤ Z^deltaLoss)
+@@ -194,7 +195,7 @@ theorem initial_large_bin_geometry {ι : Type*} [DecidableEq ι]
+     let lengthScale := initialLogLabel j
+     let K := secondLogK j*Real.exp 2
+     X ≤ Z^20 ∧ lengthScale ≤ Z^20 ∧ K ≤ Z^20 ∧ c*primeProductNorm p R ≤ Z^20 ∧
+-      X*lengthScale ≤ Z^2 ∧ K*(c*primeProductNorm p R) ≤ X*lengthScale*Z^(-(1 : ℝ)/20) := by
++      X*lengthScale ≤ Z^2 ∧ K*(c*primeProductNorm p R) ≤ X*lengthScale*Z^(-κ) := by
+   dsimp only
+   have hZ0 := zero_lt_one.trans_le hZ
+   have hB := primeProductNorm_ge_one p hp R
+@@ -210,8 +211,7 @@ theorem initial_large_bin_geometry {ι : Type*} [DecidableEq ι]
+   have hL := initialLogLabel_cap _ _ hU j hj
+   have hp20 (n : ℕ) (hn : n ≤ 20) : Z^n ≤ Z^20 := pow_le_pow_right₀ hZ hn
+   have hinv := initial_radial_invariant Z (primeProductNorm p R) c σ θ deltaLoss
+-    ((1 : ℝ)/20) j hZ hBp (zero_le_one.trans hc) hlarge.2.2.2.2 hmargin hrad
+-  rw [show -((1 : ℝ)/20)=(-1 : ℝ)/20 by ring] at hinv
++    κ j hZ hBp (zero_le_one.trans hc) hlarge.2.2.2.2 hmargin hrad
+   refine ⟨?_,?_,?_,?_,?_,hinv⟩
+   · exact (initialLogColumn_le Z _ j hZ0.le hB).trans (by simpa using hp20 1 (by decide))
+   · apply hL.trans
+@@ -357,9 +357,11 @@ theorem HasInitialCanonicalDensity.retained_density {q : ℕ} (χ : DirichletCha
+       outsideCanonicalDensity χ S hbad D ray R T V₁ V₂ X J ≤ C*Z^η*(X*lengthScale)^2 :=
+     he.trans (mul_le_mul_of_nonneg_right (hd.trans (le_mul_of_one_le_right hC.le hZη)) (sq_nonneg _))
+   by_cases hzlarge : Z0 ≤ Z
+-  · have hgeom := initial_large_bin_geometry p hp Finset.univ R a b Z σ θ ν (initialExcludedNorm S)
++  · have hgeom := initial_large_bin_geometry p hp Finset.univ R a b Z σ θ ν
++      ((1:ℝ)/20) (initialExcludedNorm S)
+       j hZ (initialExcludedNorm_ge_one S) hR hj hσ hmargin (hthreshold Z hzlarge) hrad
+     dsimp only at hgeom
++    rw [show -((1 : ℝ)/20)=(-1 : ℝ)/20 by ring] at hgeom
+     by_cases hxlarge : 1 ≤ X
+     · exact (hcanonical D Z X lengthScale Kr R ray T hZ hpool hxlarge hL hKr
+         hgeom.1 hgeom.2.1 hgeom.2.2.1 hgeom.2.2.2.1 hgeom.2.2.2.2.1 hgeom.2.2.2.2.2 hT).trans
+diff --git a/lean/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean b/lean/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean
+index 41953ce61..d58caebab 100644
+--- a/lean/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean
++++ b/lean/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.RowCompletion.InitialDensity
+ 
+ namespace OAI
+@@ -85,12 +86,13 @@ open FirstPassCubeLabels (primeProductNorm normalizedColumn columnLog)
+ 
+ theorem HasInitialCanonicalDensityAtRadius.nonzero_source_bound {q : ℕ} (χ : DirichletCharacter ℂ q)
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes ⊆ S) (hSp : ∀P∈S,Prime P)
+-    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad)
++    (reserve : ℝ) (hreserve : 0<reserve)
++    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad reserve)
+     (U : ℝ → ℂ) (hUc : HasCompactSupport U) (hUs : ContDiff ℝ ∞ U)
+     (g W : 𝓢(ℝ,ℂ)) (a b σ ε : ℝ)
+     (hU : ∀ t,g t ≠ 0 → U t=1)
+     (hgs : ∀ t,g t ≠ 0 → |t| ≤ initialErrorWindow a b)
+-    (hσ : (1 : ℝ)/20 < σ) (hε : 0 < ε) :
++    (hσ : reserve < σ) (hε : 0 < ε) :
+     ∃ (C Cpool : ℝ) (E : ℕ),0 < C ∧ 1 ≤ Cpool ∧ 20 ≤ E ∧
+       ∀ (D : ℕ) (Z : ℝ),1 ≤ Z → Cpool*Z^E ≤ D →
+       let p := outsidePrime S D
+@@ -104,7 +106,7 @@ theorem HasInitialCanonicalDensityAtRadius.nonzero_source_bound {q : ℕ} (χ :
+         (fun V => normalizedColumn p (fun T => g (columnLog p Z T)) V)
+         W H (fun _ _ => (initialErrorCutoff a b Z H).erase 0)‖ ≤ C*H*Z^ε := by
+   let η := min 1 (ε/100)
+-  let ν := (σ-(1 : ℝ)/20)/3
++  let ν := (σ-reserve)/3
+   have hη : 0 < η := lt_min zero_lt_one (by positivity)
+   have hη1 : η ≤ 1 := min_le_left _ _
+   have hηε : 35*η ≤ ε := by
+@@ -112,8 +114,9 @@ theorem HasInitialCanonicalDensityAtRadius.nonzero_source_bound {q : ℕ} (χ :
+     linarith
+   have hν : 0 < ν := by dsimp [ν]; linarith
+   have hσ0 : 0 ≤ σ := by linarith
+-  have hmargin : ν+ν ≤ σ-(1 : ℝ)/20 := by dsimp [ν]; linarith
+-  obtain ⟨Cl,Cpool,E,hCl,hCpool,hPE,hlow⟩ := HasInitialCanonicalDensityAtRadius.retained_source χ S hbad hSp hcan U hUc hUs g W
++  have hmargin : ν+ν ≤ σ-reserve := by dsimp [ν]; linarith
++  obtain ⟨Cl,Cpool,E,hCl,hCpool,hPE,hlow⟩ := HasInitialCanonicalDensityAtRadius.retained_source
++    χ S hbad hSp reserve hreserve hcan U hUc hUs g W
+     a b σ ν ν η hU hgs hσ0 hν hη hmargin
+   obtain ⟨Ch,hCh,hhigh⟩ := initial_high_radial_source U hUc hUs g W a b ν 1 η hU hgs hν hη hη1
+   refine ⟨Cl+Ch,Cpool,E,by positivity,hCpool,hPE,?_⟩
+@@ -191,10 +194,11 @@ open FirstPassCubeLabels (normalizedColumn columnLog)
+ 
+ theorem outside_mean_square_of_canonical_density_at_radius {q : ℕ} (χ : DirichletCharacter ℂ q)
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes ⊆ S) (hSp : ∀ P ∈ S,Prime P)
+-    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad)
++    (reserve : ℝ) (hreserve : 0<reserve)
++    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad reserve)
+     (W : ℝ → ℂ) (a b : ℝ) (ha : 0 < a)
+     (hs : Function.support W ⊆ Set.Icc a b) (hW : ContDiff ℝ ∞ W)
+-    (σ ε : ℝ) (hσ : (1 : ℝ)/20 < σ) (hε : 0 < ε) :
++    (σ ε : ℝ) (hσ : reserve < σ) (hε : 0 < ε) :
+     ∃ C : ℝ,0 < C ∧ ∀ (D : ℕ) (Z : ℝ),1 ≤ Z → b*Z ≤ D →
+       ∀ T : Finset ActualEisensteinCubic.O,
+       (∀ z ∈ T,(Ideal.absNorm (Ideal.span {z}) : ℝ) ≤ Z^(1+σ)) →
+@@ -209,7 +213,8 @@ theorem outside_mean_square_of_canonical_density_at_radius {q : ℕ} (χ : Diric
+   have hg : ∀ t,g t ≠ 0 → |t| ≤ M := conjugateProfile_support_bound g0 M hg0
+   obtain ⟨U,hUc,hUs,hUeq,hUsupp,hUzero⟩ := FourierBridge.exists_complex_smooth_cutoff M hM
+   have hU : ∀ t,g t ≠ 0 → U t=1 := fun t ht => hUeq t (hg t ht)
+-  obtain ⟨Cs,Cpool,E,hCs,hCpool,hE,hsource⟩ := HasInitialCanonicalDensityAtRadius.nonzero_source_bound χ S hbad hSp hcan
++  obtain ⟨Cs,Cpool,E,hCs,hCpool,hE,hsource⟩ :=
++    HasInitialCanonicalDensityAtRadius.nonzero_source_bound χ S hbad hSp reserve hreserve hcan
+     U hUc hUs g rowMajorant a b σ ε hU hg hσ hε
+   obtain ⟨Ce,hCe,herrors⟩ := outside_mean_square_source_with_errors W a b ha hs hW
+   refine ⟨Cs+Ce,by positivity,?_⟩
+@@ -266,6 +271,34 @@ open CanonicalQuadraticSieve hiding O
+ open SecondPassArithmetic hiding O
+ open CanonicalRowCompletion
+ 
++theorem outside_mean_square_of_theta_models_pos {q₀ : ℕ}
++    (χ : DirichletCharacter ℂ q₀)
++    (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes⊆S) (hSp : ∀P∈S,Prime P)
++    (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
++    (hmodels : HasCanonicalThetaModels S (conjugateMonoid (normCharacter χ)) ρ q levelBound)
++    (W : ℝ→ℂ) (a b : ℝ) (ha : 0<a)
++    (hs : Function.support W⊆Set.Icc a b) (hW : ContDiff ℝ ∞ W)
++    (σ ε : ℝ) (hσ : 0<σ) (hε : 0<ε) :
++    ∃C : ℝ,0<C ∧ ∀(D : ℕ) (Z : ℝ),1≤Z → b*Z≤D →
++      ∀T : Finset ActualEisensteinCubic.O,
++      (∀z∈T,(Ideal.absNorm (Ideal.span {z}):ℝ)≤Z^(1+σ)) →
++      (∀z∈T,z≠0) →
++      (∑z∈T,‖idealRowSum (outsideIdealsUpTo S D) (outsideIdealsUpTo_ne_bot S D)
++        (outside_good S D hbad) χ (fun n=>W (n/Z)) z‖^2)≤C*Z*(Z^(1+σ))*Z^ε := by
++  let reserve : ℝ:=σ/2
++  have hreserve : 0<reserve:=by dsimp [reserve];linarith
++  let scale:=CanonicalDescentScale.ofReserve reserve hreserve
++  letI : CanonicalDescentScale:=scale
++  have hgap : scale.reserve<σ:=by
++    change σ/2<σ
++    linarith
++  exact outside_mean_square_of_canonical_density_at_radius χ S hbad hSp scale.reserve
++    scale.reserve_pos
++    (hasInitialCanonicalDensityAtRadius_of_theta χ S hSp hbad ρ q levelBound hρ hq hlevel hmodels)
++    W a b ha hs hW σ ε hgap hε
++
++/-- Compatibility entry point at the historical `Q = 1000`, reserve `1/20`
++scale.  New applications should use `outside_mean_square_of_theta_models_pos`. -/
+ theorem outside_mean_square_of_theta_models {q₀ : ℕ}
+     (χ : DirichletCharacter ℂ q₀)
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes⊆S) (hSp : ∀P∈S,Prime P)
+@@ -279,10 +312,16 @@ theorem outside_mean_square_of_theta_models {q₀ : ℕ}
+       (∀z∈T,(Ideal.absNorm (Ideal.span {z}):ℝ)≤Z^(1+σ)) →
+       (∀z∈T,z≠0) →
+       (∑z∈T,‖idealRowSum (outsideIdealsUpTo S D) (outsideIdealsUpTo_ne_bot S D)
+-        (outside_good S D hbad) χ (fun n=>W (n/Z)) z‖^2)≤C*Z*(Z^(1+σ))*Z^ε :=
+-  outside_mean_square_of_canonical_density_at_radius χ S hbad hSp
++        (outside_good S D hbad) χ (fun n=>W (n/Z)) z‖^2)≤C*Z*(Z^(1+σ))*Z^ε := by
++  let scale : CanonicalDescentScale:=CanonicalDescentScale.historical
++  letI : CanonicalDescentScale:=scale
++  have hgap : scale.reserve<σ:=by
++    change (1:ℝ)/20<σ
++    exact hσ
++  exact outside_mean_square_of_canonical_density_at_radius χ S hbad hSp
++    scale.reserve scale.reserve_pos
+     (hasInitialCanonicalDensityAtRadius_of_theta χ S hSp hbad ρ q levelBound hρ hq hlevel hmodels)
+-    W a b ha hs hW σ ε hσ hε
++    W a b ha hs hW σ ε hgap hε
+ 
+ end InitialMeanSquare
+ 
+diff --git a/lean/OAI/NumberTheory/DirichletL/MeanSquare/UniformPolynomialHeight.lean b/lean/OAI/NumberTheory/DirichletL/MeanSquare/UniformPolynomialHeight.lean
+index 1a6d6b089..cfc63d239 100644
+--- a/lean/OAI/NumberTheory/DirichletL/MeanSquare/UniformPolynomialHeight.lean
++++ b/lean/OAI/NumberTheory/DirichletL/MeanSquare/UniformPolynomialHeight.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.MeanSquare.PolynomialHeight
+ import OAI.NumberTheory.DirichletL.CubicSieve.RankMargins
+ 
+@@ -378,18 +379,18 @@ theorem uniform_polynomial_mean_square_of_exact_reflection {κ : Type*}
+ 
+     _ = _ := by dsimp [C]; ring
+ 
+-theorem uniform_polynomial_short_completed_average {κ : Type*}
++theorem uniform_polynomial_short_completed_average [scale : CanonicalDescentScale] {κ : Type*}
+     (Wfamily : κ→ℝ→ℝ→ℂ) (hWfamily : HasUniformPolynomialKernel Wfamily)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∀w : κ,∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal ActualEisensteinCubic.O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal ActualEisensteinCubic.O→ActualEisensteinCubic.O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) (Wfamily w θ) (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily w θ) X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily w θ) X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨heightDegree,hheight⟩ := uniform_polynomial_mean_square_of_exact_reflection
+     Wfamily hWfamily ε ρ q levelBound hε hρ hq hlevel
+@@ -406,7 +407,7 @@ theorem uniform_polynomial_short_completed_average {κ : Type*}
+     exact_mod_cast Nat.one_le_iff_ne_zero.mpr (fun hz => hG (Ideal.absNorm_eq_zero_iff.mp hz))
+   let A : ℝ := Cr*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε
+   have hA : 0≤A := by dsimp [A]; positivity
+-  have hcompleted (f : idealRange F) (H : Ideal ActualEisensteinCubic.O) (hH : H∈shortCubeRange (Z^(1/1000:ℝ))) :
++  have hcompleted (f : idealRange F) (H : Ideal ActualEisensteinCubic.O) (hH : H∈shortCubeRange (Z^scale.step)) :
+       (∑I : rows,‖completedT (Ψ f I.val) (Wfamily w θ) (X/(Ideal.absNorm H:ℝ)^3)‖^2)≤
+         A*(K+K^2*(Ideal.absNorm G:ℝ)*(Ideal.absNorm f.val:ℝ)*(Ideal.absNorm H:ℝ)^3/X) := by
+     have hf0 := (mem_idealRange.mp f.property).1.1
+@@ -442,9 +443,9 @@ theorem uniform_polynomial_short_completed_average {κ : Type*}
+   have hb := hs Z K (Ideal.absNorm G:ℝ) X F A hZ hK hG1 hF hFZ hA hmargin
+     (fun f (I : rows) => Ψ f I.val) (fun f I z => hΨ f I.val z) (Wfamily w θ) hcompleted
+   have hsum (f : idealRange F) :
+-      (∑I : rows,‖shortCompletedSum (Ψ f I.val) (Wfamily w θ) X (Z^(1/1000:ℝ))‖^2)=
+-      ∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily w θ) X (Z^(1/1000:ℝ))‖^2 :=
+-    Finset.sum_coe_sort (s := rows) (f := fun I : Ideal ActualEisensteinCubic.O => ‖shortCompletedSum (Ψ f I) (Wfamily w θ) X (Z^(1/1000:ℝ))‖^2)
++      (∑I : rows,‖shortCompletedSum (Ψ f I.val) (Wfamily w θ) X (Z^scale.step)‖^2)=
++      ∑I∈rows,‖shortCompletedSum (Ψ f I) (Wfamily w θ) X (Z^scale.step)‖^2 :=
++    Finset.sum_coe_sort (s := rows) (f := fun I : Ideal ActualEisensteinCubic.O => ‖shortCompletedSum (Ψ f I) (Wfamily w θ) X (Z^scale.step)‖^2)
+   simp_rw [hsum] at hb
+   apply hb.trans_eq
+   dsimp [A,Cr]
+@@ -473,18 +474,18 @@ theorem completed_mean_square_uniform_height
+   intro W hsupp hW
+   exact hn ⟨W,hsupp,hW⟩
+ 
+-theorem short_completed_average_uniform_height
++theorem short_completed_average_uniform_height [scale : CanonicalDescentScale]
+     (a b : ℝ) (ha : 0<a)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∀W : ℝ→ℂ, Function.support W⊆Set.Icc a b → ContDiff ℝ ∞ W → ∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal ActualEisensteinCubic.O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal ActualEisensteinCubic.O→ActualEisensteinCubic.O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) (normTwistedSource W θ) (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (normTwistedSource W θ) X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (Ψ f I) (normTwistedSource W θ) X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨n,hn⟩ := uniform_polynomial_short_completed_average
+     (fun W : SupportedSmoothSource a b => normTwistedSource W.val)
+@@ -513,18 +514,18 @@ theorem completed_mean_square_uniform_twist
+   simp_rw [completedT_normHeight_norm _ _ _ _ (lt_of_lt_of_le zero_lt_one hX)]
+   exact h θ rays K X hK hX rows F Q hQ hbad hrows Ψ lengthScale hmodel
+ 
+-theorem short_completed_average_uniform_twist
++theorem short_completed_average_uniform_twist [scale : CanonicalDescentScale]
+     (a b : ℝ) (ha : 0<a)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∀W : ℝ→ℂ, Function.support W⊆Set.Icc a b → ContDiff ℝ ∞ W → ∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀rows : Finset (Ideal ActualEisensteinCubic.O),(∀I∈rows,I≠0 ∧ (Ideal.absNorm I:ℝ)≤K) →
+     ∀Ψ : idealRange F→Ideal ActualEisensteinCubic.O→ActualEisensteinCubic.O→*ℂ,(∀f I z,‖Ψ f I z‖≤1) → ∀lengthScale : ℂ,
+-      (∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays rows K (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound
+           f.val (G*f.val) (normTwistedSource W θ) (Ψ f) lengthScale) →
+-      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (SecondPassArithmetic.normHeightTwist (Ψ f I) θ) W X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑I∈rows,‖shortCompletedSum (SecondPassArithmetic.normHeightTwist (Ψ f I) θ) W X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨n,hn⟩ := short_completed_average_uniform_height a b ha ε ρ q levelBound hε hρ hq hlevel
+   refine ⟨n,?_⟩
+@@ -533,9 +534,9 @@ theorem short_completed_average_uniform_twist
+   refine ⟨C,hC,?_⟩
+   intro θ rays Z K X F hZ hK hF hFZ G hG hbad hmargin rows hrows Ψ hΨ lengthScale hmodel
+   have hGpos : 0<(Ideal.absNorm G:ℝ) := lt_of_lt_of_le zero_lt_one (norm_at_least_one G hG)
+-  have hright : 0 < F*Z^(-(1/40:ℝ)) := mul_pos (lt_of_lt_of_le zero_lt_one hF)
++  have hright : 0 < F*Z^(-scale.shortMargin) := mul_pos (lt_of_lt_of_le zero_lt_one hF)
+     (Real.rpow_pos_of_pos (lt_of_lt_of_le zero_lt_one hZ) _)
+-  have hprod : 0 < X*(F*Z^(-(1/40:ℝ))) := by
++  have hprod : 0 < X*(F*Z^(-scale.shortMargin)) := by
+     have hh := lt_of_lt_of_le (mul_pos (lt_of_lt_of_le zero_lt_one hK) hGpos) hmargin
+     simpa only [mul_assoc] using hh
+   have hX : 0<X := (mul_pos_iff_of_pos_right hright).mp hprod
+diff --git a/lean/OAI/NumberTheory/DirichletL/MeanSquare/UnitRows.lean b/lean/OAI/NumberTheory/DirichletL/MeanSquare/UnitRows.lean
+index 8d05eacee..0891ccca3 100644
+--- a/lean/OAI/NumberTheory/DirichletL/MeanSquare/UnitRows.lean
++++ b/lean/OAI/NumberTheory/DirichletL/MeanSquare/UnitRows.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.MeanSquare.UniformPolynomialHeight
+ 
+ namespace OAI
+@@ -96,22 +97,22 @@ lemma rowTwist_normHeight (Ψ : ActualEisensteinCubic.O→*ℂ) (mask f z : Actu
+   unfold rowTwist
+   exact (SecondPassArithmetic.normHeightTwist_mul Ψ _ θ).symm
+ 
+-theorem short_completed_elements_uniform_twist
++theorem short_completed_elements_uniform_twist [scale : CanonicalDescentScale]
+     (a b : ℝ) (ha : 0<a)
+     (ε ρ q levelBound : ℝ) (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃heightDegree : ℕ,∀W : ℝ→ℂ,Function.support W⊆Set.Icc a b → ContDiff ℝ ∞ W →
+     ∃C : ℝ,0<C ∧ ∀(θ : ℝ) (rays : ℕ) (Z K X F : ℝ),1≤Z → 1≤K → 1≤F →
+-      F≤Z^(1/1000:ℝ) → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
+-      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-(1/40:ℝ)) →
++      F≤Z^scale.step → ∀G : Ideal ActualEisensteinCubic.O,G≠0 → (∀P∈fixedBadPrimes,P∣G) →
++      K*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) →
+     ∀T : Finset ActualEisensteinCubic.O,(∀z∈T,z≠0 ∧ (Ideal.absNorm (Ideal.span {z}):ℝ)≤K) →
+     ∀(Ψ : ActualEisensteinCubic.O→*ℂ),(∀x,‖Ψ x‖≤1) → ∀(mask : ActualEisensteinCubic.O) (lengthScale : ℂ),
+-      (∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+         HasExactCompletedDyadicModels rays (T.image (fun z=>Ideal.span {z})) K
+           (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound f.val (G*f.val)
+           (CompletedHeight.normTwistedSource W θ) (unitRowFamily Ψ mask u f) lengthScale) →
+       (∑f : idealRange F,∑z∈T,
+         ‖shortCompletedSum (rowTwist (SecondPassArithmetic.normHeightTwist Ψ θ)
+-          mask (idealGenerator f.val) z) W X (Z^(1/1000:ℝ))‖^2)/F≤
++          mask (idealGenerator f.val) z) W X (Z^scale.step)‖^2)/F≤
+         (C*(1+‖θ‖)^heightDegree)*(rays:ℝ)^2*‖lengthScale‖^2*(K*(Ideal.absNorm G:ℝ)*F)^ε*K*Z^ε := by
+   obtain ⟨n,hn⟩ := CompletedHeight.short_completed_average_uniform_twist
+     a b ha ε ρ q levelBound hε hρ hq hlevel
+@@ -126,17 +127,17 @@ theorem short_completed_elements_uniform_twist
+   have hu (u : ActualEisensteinCubic.Oˣ) :
+       (∑f : idealRange F,∑I∈rows,
+         ‖shortCompletedSum (rowTwist (SecondPassArithmetic.normHeightTwist Ψ θ)
+-          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^(1/1000:ℝ))‖^2)/F≤R := by
++          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^scale.step)‖^2)/F≤R := by
+     simp_rw [rowTwist_normHeight]
+     exact hbound θ rays Z K X F hZ hK hF hFZ G hG hbad hmargin rows hrows
+       (unitRowFamily Ψ mask u) (unitRowFamily_norm Ψ hΨ mask u) lengthScale (hmodels u)
+   have hsum :
+       (∑f : idealRange F,∑z∈T,
+         ‖shortCompletedSum (rowTwist (SecondPassArithmetic.normHeightTwist Ψ θ)
+-          mask (idealGenerator f.val) z) W X (Z^(1/1000:ℝ))‖^2)≤
++          mask (idealGenerator f.val) z) W X (Z^scale.step)‖^2)≤
+       ∑u : ActualEisensteinCubic.Oˣ,∑f : idealRange F,∑I∈rows,
+         ‖shortCompletedSum (rowTwist (SecondPassArithmetic.normHeightTwist Ψ θ)
+-          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^(1/1000:ℝ))‖^2 := by
++          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^scale.step)‖^2 := by
+     conv_rhs => rw [Finset.sum_comm]
+     apply Finset.sum_le_sum
+     intro f _
+@@ -144,11 +145,11 @@ theorem short_completed_elements_uniform_twist
+   calc
+     _ ≤ (∑u : ActualEisensteinCubic.Oˣ,∑f : idealRange F,∑I∈rows,
+         ‖shortCompletedSum (rowTwist (SecondPassArithmetic.normHeightTwist Ψ θ)
+-          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^(1/1000:ℝ))‖^2)/F :=
++          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^scale.step)‖^2)/F :=
+       div_le_div_of_nonneg_right hsum (by linarith)
+     _ = ∑u : ActualEisensteinCubic.Oˣ,(∑f : idealRange F,∑I∈rows,
+         ‖shortCompletedSum (rowTwist (SecondPassArithmetic.normHeightTwist Ψ θ)
+-          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^(1/1000:ℝ))‖^2)/F :=
++          mask (idealGenerator f.val) (u.val*idealGenerator I)) W X (Z^scale.step)‖^2)/F :=
+       Finset.sum_div _ _ _
+     _ ≤ ∑u : ActualEisensteinCubic.Oˣ,R := Finset.sum_le_sum (fun u _=>hu u)
+     _ = _ := by simp only [Finset.sum_const,Finset.card_univ,unit_card,nsmul_eq_mul]; dsimp [R]; ring
+@@ -165,7 +166,8 @@ open ConcreteTraceCRT (eisEmbedding)
+ open CanonicalCoefficientClass (IsBaseRayTwist)
+ open RayFourExpansion (RayCharacter)
+ 
+-structure CanonicalStateCondition (base : ActualEisensteinCubic.O→*ℂ) (bad : Ideal ActualEisensteinCubic.O) (Z η : ℝ)
++structure CanonicalStateCondition [scale : CanonicalDescentScale]
++    (base : ActualEisensteinCubic.O→*ℂ) (bad : Ideal ActualEisensteinCubic.O) (Z η : ℝ)
+     (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O) (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ) : Prop where
+   coefficient : IsBaseRayTwist base Ψ
+   mask_ne_zero : m≠0
+@@ -173,35 +175,41 @@ structure CanonicalStateCondition (base : ActualEisensteinCubic.O→*ℂ) (bad :
+   label_ge_one : 1≤F
+   row_ge_one : 1≤K
+   row_le_global : K≤Z^3
+-  mass_le : X*F≤canonicalRankMass Z (fixedDepthRank Z K)
++  mass_le : X*F≤scale.rankMass Z (scale.depthRank Z K)
+   invariant : K*‖eisEmbedding m‖^2≤
+-    (X*F)*Z^(-canonicalRankMargin ((1:ℝ)/20) η (fixedDepthRank Z K))
++    (X*F)*Z^(-scale.rankMargin scale.reserve η (scale.depthRank Z K))
+   label_bounds : ∀I∈labels,I≠⊥ ∧ Squarefree I ∧ IsCoprime I bad ∧ (Ideal.absNorm I:ℝ)≤F
+ 
+-theorem CanonicalStateCondition.invariant_reserved
++theorem CanonicalStateCondition.invariant_reserved [scale : CanonicalDescentScale]
+     {base : ActualEisensteinCubic.O→*ℂ} {bad : Ideal ActualEisensteinCubic.O} {Z η : ℝ} {Ψ : ActualEisensteinCubic.O→*ℂ} {m : ActualEisensteinCubic.O}
+     {labels : Finset (Ideal ActualEisensteinCubic.O)} {X F K : ℝ}
+     (h : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+-    (hZ : 1≤Z) (hη : 0≤η) (hbudget : 3000*η≤(1:ℝ)/40) :
+-    K*‖eisEmbedding m‖^2≤(X*F)*Z^(-((1:ℝ)/40)) :=
+-  canonicalRankMargin_final_bound Z η _ _ _ hZ hη
+-    (mul_nonneg h.column_pos.le (zero_le_one.trans h.label_ge_one)) hbudget h.invariant
+-
+-theorem CanonicalStateCondition.small_or_live
++    (hZ : 1≤Z) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) :
++    K*‖eisEmbedding m‖^2≤(X*F)*Z^(-scale.shortMargin) :=
++  scale.rankMargin_final_bound Z scale.reserve scale.shortMargin η _ _ _ hZ hη
++    (mul_nonneg h.column_pos.le (zero_le_one.trans h.label_ge_one))
++    (by
++      rw [show scale.reserve - scale.shortMargin = scale.shortMargin by
++        unfold CanonicalDescentScale.shortMargin
++        ring]
++      exact hbudget) h.invariant
++
++theorem CanonicalStateCondition.small_or_live [scale : CanonicalDescentScale]
+     {base : ActualEisensteinCubic.O→*ℂ} {bad : Ideal ActualEisensteinCubic.O} {Z η : ℝ} {Ψ : ActualEisensteinCubic.O→*ℂ} {m : ActualEisensteinCubic.O}
+     {labels : Finset (Ideal ActualEisensteinCubic.O)} {X F K : ℝ}
+     (h : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+-    (hZ : Real.exp 9000≤Z) (hZ1 : 1≤Z) (hη : 0≤η)
+-    (hbudget : 3000*η≤(1:ℝ)/40) :
++    (hZ : scale.largeThreshold≤Z) (hZ1 : 1≤Z) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) :
+     K≤F ∨ (1<X ∧ X≤Z^3 ∧ F≤Z^3) := by
+   have hi := h.invariant_reserved hZ1 hη hbudget
+-  have hr : Z^(-((1:ℝ)/40))≤1 := by
++  have hr : Z^(-scale.shortMargin)≤1 := by
+     simpa only [Real.rpow_zero] using
+-      (Real.rpow_le_rpow_of_exponent_le hZ1 (by norm_num : -((1:ℝ)/40)≤0))
++      (Real.rpow_le_rpow_of_exponent_le hZ1 (neg_nonpos.mpr scale.shortMargin_pos.le))
+   have hi' : K*‖eisEmbedding m‖^2≤X*F :=
+     hi.trans ((mul_le_mul_of_nonneg_left hr
+       (mul_nonneg h.column_pos.le (zero_le_one.trans h.label_ge_one))).trans_eq (mul_one _))
+-  exact canonical_small_or_live Z X F K _ m hZ h.column_pos h.label_ge_one
++  exact scale.small_or_live Z X F K _ m hZ h.column_pos h.label_ge_one
+     (zero_le_one.trans h.row_ge_one) h.mask_ne_zero h.mass_le hi'
+ 
+ variable {ι : Type*} [DecidableEq ι] (p : ι→ActualEisensteinCubic.O) (hp : ∀i,p i≠0)
+@@ -209,7 +217,7 @@ variable {ι : Type*} [DecidableEq ι] (p : ι→ActualEisensteinCubic.O) (hp :
+ 
+ include hp in
+ 
+-theorem canonicalStateCondition_retained
++theorem canonicalStateCondition_retained [scale : CanonicalDescentScale]
+     (base : ActualEisensteinCubic.O→*ℂ) (bad : Ideal ActualEisensteinCubic.O) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+     (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ)
+     (hstate : CanonicalStateCondition base bad Z η Ψ m labels X F K)
+@@ -218,8 +226,8 @@ theorem canonicalStateCondition_retained
+     (q : Ideal ActualEisensteinCubic.O×Ideal ActualEisensteinCubic.O×Ideal ActualEisensteinCubic.O) (j : GlobalLogIndex)
+     (hq : q∈globalBinTriples p source side j)
+     (a : RayCharacter) (r : FirstCoreIndex) (ray : SecondRayIndex) (B : ℝ)
+-    (hZ : 1<Z) (hZbig : Real.exp 9000≤Z) (hη : 0≤η) (hηsmall : η≤(1:ℝ)/1000)
+-    (hB : 0<B) (hprogress : Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F)
++    (hZ : 1<Z) (hZbig : scale.largeThreshold≤Z) (hη : 0≤η) (hηsmall : η≤scale.step)
++    (hB : 0<B) (hprogress : Z^scale.step≤(Real.exp 1*B)*F)
+     (hk : ∀x∈source,x.source.frequency≠0)
+     (hb₁ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2≤Real.exp 1*B)
+     (hb₂ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.rightExponent)‖^2≤Real.exp 1*B)
+@@ -230,13 +238,13 @@ theorem canonicalStateCondition_retained
+     let K':=globalLogRep j 8*Real.exp 1
+     let labels':=globalCanonicalLabels p source side q j
+     let m':=fixedTripleMask m q
+-    fixedDepthRank Z K'+1≤fixedDepthRank Z K ∧
++    scale.depthRank Z K'+1≤scale.depthRank Z K ∧
+     CanonicalStateCondition base bad Z η (secondRayMinus (firstCoreTwist side a Ψ r) ray)
+       m' labels' X' F' K' ∧
+     CanonicalStateCondition base bad Z η (secondRayPlus (firstCoreTwist side a Ψ r) ray)
+       m' labels' X' F' K' := by
+   obtain ⟨hXc,hFc,hKc,hrank,hKglobal,hmass,hinvariant,hm,hlabels⟩ :=
+-    canonical_retained_unpadded_closure p hp source side q j hq Z ((1:ℝ)/20) η X B F K m
++    canonical_retained_unpadded_closure p hp source side q j hq Z scale.reserve η X B F K m
+       hZ hZbig hη hηsmall hstate.column_pos hB hstate.label_ge_one hstate.row_ge_one
+       hstate.mask_ne_zero hprogress hstate.row_le_global hstate.mass_le hstate.invariant
+       hk hb₁ hb₂ hretained
+@@ -264,7 +272,7 @@ variable {ι : Type*} [DecidableEq ι] (p : ι→ActualEisensteinCubic.O) (hp :
+ 
+ include hp in
+ 
+-theorem canonicalStateCondition_cutoff_retained
++theorem canonicalStateCondition_cutoff_retained [scale : CanonicalDescentScale]
+     (base : ActualEisensteinCubic.O→*ℂ) (bad : Ideal ActualEisensteinCubic.O) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+     (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F Ksrc : ℝ)
+     (hstate : CanonicalStateCondition base bad Z η Ψ m labels X F Ksrc)
+@@ -273,8 +281,8 @@ theorem canonicalStateCondition_cutoff_retained
+     (q : Ideal ActualEisensteinCubic.O×Ideal ActualEisensteinCubic.O×Ideal ActualEisensteinCubic.O) (j : GlobalLogIndex)
+     (hq : q∈globalBinTriples p source side j)
+     (a : RayCharacter) (r : FirstCoreIndex) (ray : SecondRayIndex) (B : ℝ)
+-    (hZ : 1<Z) (hZbig : Real.exp 9000≤Z) (hη : 0≤η) (hηsmall : η≤(1:ℝ)/1000)
+-    (hB : 0<B) (hprogress : Z^((1:ℝ)/1000)≤(Real.exp 1*B)*F)
++    (hZ : 1<Z) (hZbig : scale.largeThreshold≤Z) (hη : 0≤η) (hηsmall : η≤scale.step)
++    (hB : 0<B) (hprogress : Z^scale.step≤(Real.exp 1*B)*F)
+     (hk : ∀x∈source,x.source.frequency≠0)
+     (hb₁ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.leftExponent)‖^2≤Real.exp 1*B)
+     (hb₂ : ∀x∈source,‖eisEmbedding (primeProduct p x.cube.support x.cube.rightExponent)‖^2≤Real.exp 1*B)
+@@ -285,24 +293,24 @@ theorem canonicalStateCondition_cutoff_retained
+     let K':=globalLogRep j 8*Real.exp 1
+     let labels':=globalCanonicalLabels p source side q j
+     let m':=fixedTripleMask m q
+-    fixedDepthRank Z K'+1≤fixedDepthRank Z Ksrc ∧
++    scale.depthRank Z K'+1≤scale.depthRank Z Ksrc ∧
+     CanonicalStateCondition base bad Z η (secondRayMinus (firstCoreTwist side a Ψ r) ray)
+       m' labels' X' F' K' ∧
+     CanonicalStateCondition base bad Z η (secondRayPlus (firstCoreTwist side a Ψ r) ray)
+       m' labels' X' F' K' := by
+   obtain ⟨hXc,hFc,hKc,hrank,hKglobal,hmass,hinvariant,hm,hlabels⟩ :=
+     canonical_retained_scale_closure p hp source side q j hq Z
+-      (canonicalRankMargin ((1:ℝ)/20) η (fixedDepthRank Z Ksrc)) η X B F Ksrc m
++      (scale.rankMargin scale.reserve η (scale.depthRank Z Ksrc)) η X B F Ksrc m
+       hZ hZbig hη hηsmall hstate.column_pos hB hstate.label_ge_one hstate.row_ge_one
+       hstate.mask_ne_zero hprogress hstate.row_le_global hstate.mass_le hstate.invariant
+       hk hb₁ hb₂ hretained
+   have hinvariant' : (globalLogRep j 8*Real.exp 1)*‖eisEmbedding (fixedTripleMask m q)‖^2≤
+       (globalPooledColumnScale (X/B^3) j*globalPooledLabelScale j)*
+-        Z^(-canonicalRankMargin ((1:ℝ)/20) η (fixedDepthRank Z (globalLogRep j 8*Real.exp 1))) := by
++        Z^(-scale.rankMargin scale.reserve η (scale.depthRank Z (globalLogRep j 8*Real.exp 1))) := by
+     apply hinvariant.trans
+     apply mul_le_mul_of_nonneg_left _ (mul_nonneg hXc.le (zero_le_one.trans hFc))
+-    have hmargin := canonicalRankMargin_step ((1:ℝ)/20) η hη _ _
+-      (fixedDepthRank_initial Z Ksrc hZ (zero_lt_one.trans_le hstate.row_ge_one) hstate.row_le_global) hrank
++    have hmargin := scale.rankMargin_step scale.reserve η hη _ _
++      (scale.depthRank_initial Z Ksrc hZ (zero_lt_one.trans_le hstate.row_ge_one) hstate.row_le_global) hrank
+     exact Real.rpow_le_rpow_of_exponent_le hZ.le (by linarith)
+   have hbad := globalCanonicalLabels_coprime p bad hpbad source side q j
+   have hbnd : ∀I∈globalCanonicalLabels p source side q j,
+diff --git a/lean/OAI/NumberTheory/DirichletL/QuadraticSieve/ProductColumns.lean b/lean/OAI/NumberTheory/DirichletL/QuadraticSieve/ProductColumns.lean
+index 08444faec..8fa99a15e 100644
+--- a/lean/OAI/NumberTheory/DirichletL/QuadraticSieve/ProductColumns.lean
++++ b/lean/OAI/NumberTheory/DirichletL/QuadraticSieve/ProductColumns.lean
+@@ -1,4 +1,6 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.MeanSquare.TransformedColumns
++import OAI.NumberTheory.DirichletL.CubicSieve.DescentScale
+ 
+ namespace OAI
+ 
+@@ -305,37 +307,37 @@ theorem short_cube_scale_algebra (z K R X F h : ℝ)
+   apply (div_le_iff₀ hX).mpr
+   nlinarith [mul_le_mul_of_nonneg_left hprod (show 0≤K by linarith)]
+ 
+-theorem short_cube_scales (Z K R X F h : ℝ)
++theorem short_cube_scales [scale : CanonicalDescentScale] (Z K R X F h : ℝ)
+     (hZ : 1≤Z) (hK : 1≤K) (hR : 1≤R) (hF : 1≤F)
+-    (hFZ : F≤Z^(1/1000:ℝ)) (hh : 1≤h) (hhZ : h≤Z^(1/1000:ℝ))
+-    (hmargin : K*R≤X*F*Z^(-(1/40:ℝ))) :
++    (hFZ : F≤Z^scale.step) (hh : 1≤h) (hhZ : h≤Z^scale.step)
++    (hmargin : K*R≤X*F*Z^(-scale.shortMargin)) :
+     1≤X/h^3 ∧ K^2*R*F*h^3/X≤K := by
+   have hZ0 : 0<Z := by linarith
+-  have hz : 1≤Z^(1/1000:ℝ) := Real.one_le_rpow hZ (by norm_num)
+-  have he : (Z^(1/1000:ℝ))^25=Z^(1/40:ℝ) := by
++  have hz : 1≤Z^scale.step := Real.one_le_rpow hZ scale.step_pos.le
++  have he : (Z^scale.step)^25≤Z^scale.shortMargin := by
+     rw [←Real.rpow_natCast,←Real.rpow_mul hZ0.le]
+-    norm_num
++    exact Real.rpow_le_rpow_of_exponent_le hZ (by simpa [mul_comm] using scale.short_spend)
+   apply short_cube_scale_algebra _ K R X F h hz hK hR hF hFZ hh hhZ
+-  rw [he]
+-  have hm := mul_le_mul_of_nonneg_right hmargin (Real.rpow_nonneg hZ0.le (1/40:ℝ))
+-  have hp : Z^(-(1/40:ℝ))*Z^(1/40:ℝ)=1 := by
++  apply (mul_le_mul_of_nonneg_left he (by positivity)).trans
++  have hm := mul_le_mul_of_nonneg_right hmargin (Real.rpow_nonneg hZ0.le scale.shortMargin)
++  have hp : Z^(-scale.shortMargin)*Z^scale.shortMargin=1 := by
+     rw [←Real.rpow_add hZ0]
+-    norm_num
++    simp
+   calc
+-    _ ≤ X*F*Z^(-(1/40:ℝ))*Z^(1/40:ℝ) := hm
++    _ ≤ X*F*Z^(-scale.shortMargin)*Z^scale.shortMargin := hm
+     _ = X*F := by rw [mul_assoc (X*F),hp,mul_one]
+ 
+-theorem short_completed_branch {κ : Type*} [Fintype κ]
++theorem short_completed_branch [scale : CanonicalDescentScale] {κ : Type*} [Fintype κ]
+     (Ψ : κ → O →* ℂ) (hΨ : ∀k z,‖Ψ k z‖≤1)
+     (W : ℝ → ℂ) (Z K R X F A : ℝ)
+     (hZ : 1≤Z) (hK : 1≤K) (hR : 1≤R) (hF : 1≤F)
+-    (hFZ : F≤Z^(1/1000:ℝ)) (hA : 0≤A)
+-    (hmargin : K*R≤X*F*Z^(-(1/40:ℝ)))
+-    (hcompleted : ∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++    (hFZ : F≤Z^scale.step) (hA : 0≤A)
++    (hmargin : K*R≤X*F*Z^(-scale.shortMargin))
++    (hcompleted : ∀H∈shortCubeRange (Z^scale.step),
+       (∑k,‖completedT (Ψ k) W (X/(Ideal.absNorm H:ℝ)^3)‖^2)≤
+         A*(K+K^2*R*F*(Ideal.absNorm H:ℝ)^3/X)) :
+-    (∑k,‖shortCompletedSum (Ψ k) W X (Z^(1/1000:ℝ))‖^2)≤
+-      (2*A*K)*(256*(columnDyadicLength (Z^(1/1000:ℝ))+1:ℝ))^2 := by
++    (∑k,‖shortCompletedSum (Ψ k) W X (Z^scale.step)‖^2)≤
++      (2*A*K)*(256*(columnDyadicLength (Z^scale.step)+1:ℝ))^2 := by
+   apply short_completed_energy Ψ hΨ W X _ (2*A*K) (by positivity)
+   intro H hH
+   have hs := (mem_shortCubeRange _ H).mp hH
+@@ -346,24 +348,24 @@ theorem short_completed_branch {κ : Type*} [Fintype κ]
+   apply (hcompleted H hH).trans
+   nlinarith
+ 
+-theorem short_completed_average {κ : Type*} [Fintype κ]
++theorem short_completed_average [scale : CanonicalDescentScale] {κ : Type*} [Fintype κ]
+     (Z K R X F A : ℝ) (hZ : 1≤Z) (hK : 1≤K) (hR : 1≤R) (hF : 1≤F)
+-    (hFZ : F≤Z^(1/1000:ℝ)) (hA : 0≤A)
+-    (hmargin : K*R≤X*F*Z^(-(1/40:ℝ)))
++    (hFZ : F≤Z^scale.step) (hA : 0≤A)
++    (hmargin : K*R≤X*F*Z^(-scale.shortMargin))
+     (Ψ : idealRange F → κ → O →* ℂ) (hΨ : ∀f k z,‖Ψ f k z‖≤1) (W : ℝ → ℂ)
+-    (hcompleted : ∀f : idealRange F, ∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++    (hcompleted : ∀f : idealRange F, ∀H∈shortCubeRange (Z^scale.step),
+       (∑k,‖completedT (Ψ f k) W (X/(Ideal.absNorm H:ℝ)^3)‖^2)≤
+         A*(K+K^2*R*(Ideal.absNorm f.val:ℝ)*(Ideal.absNorm H:ℝ)^3/X)) :
+-    (∑f : idealRange F,∑k,‖shortCompletedSum (Ψ f k) W X (Z^(1/1000:ℝ))‖^2)/F≤
+-      256*A*K*(256*(columnDyadicLength (Z^(1/1000:ℝ))+1:ℝ))^2 := by
++    (∑f : idealRange F,∑k,‖shortCompletedSum (Ψ f k) W X (Z^scale.step)‖^2)/F≤
++      256*A*K*(256*(columnDyadicLength (Z^scale.step)+1:ℝ))^2 := by
+   have hZ0 : 0<Z := by linarith
+-  have hh : 1≤Z^(1/1000:ℝ) := Real.one_le_rpow hZ (by norm_num)
++  have hh : 1≤Z^scale.step := Real.one_le_rpow hZ scale.step_pos.le
+   have hx := (short_cube_scales Z K R X F 1 hZ hK hR hF hFZ le_rfl hh hmargin).1
+   norm_num at hx
+   have hX : 0<X := by linarith
+-  let B := (256*(columnDyadicLength (Z^(1/1000:ℝ))+1:ℝ))^2
++  let B := (256*(columnDyadicLength (Z^scale.step)+1:ℝ))^2
+   have hb (f : idealRange F) :
+-      (∑k,‖shortCompletedSum (Ψ f k) W X (Z^(1/1000:ℝ))‖^2)≤2*A*K*B := by
++      (∑k,‖shortCompletedSum (Ψ f k) W X (Z^scale.step)‖^2)≤2*A*K*B := by
+     apply short_completed_branch (Ψ f) (hΨ f) W Z K R X F A hZ hK hR hF hFZ hA hmargin
+     intro H hH
+     apply (hcompleted f H hH).trans
+@@ -375,7 +377,7 @@ theorem short_completed_average {κ : Type*} [Fintype κ]
+       exact (mem_idealRange.mp hI).1.1
+     · intro I hI
+       exact (mem_idealRange.mp hI).2
+-  have hsum : (∑f : idealRange F,∑k,‖shortCompletedSum (Ψ f k) W X (Z^(1/1000:ℝ))‖^2)≤
++  have hsum : (∑f : idealRange F,∑k,‖shortCompletedSum (Ψ f k) W X (Z^scale.step)‖^2)≤
+       (128*F)*(2*A*K*B) := by
+     calc
+       _ ≤ ∑_f : idealRange F,2*A*K*B := Finset.sum_le_sum (fun f _ => hb f)
+@@ -386,31 +388,32 @@ theorem short_completed_average {κ : Type*} [Fintype κ]
+     _ ≤ ((128*F)*(2*A*K*B))/F := div_le_div_of_nonneg_right hsum (by linarith)
+     _ = _ := by field_simp; ring
+ 
+-theorem short_completed_normalized_small_power (ε : ℝ) (hε : 0<ε) :
++theorem short_completed_normalized_small_power [scale : CanonicalDescentScale]
++    (ε : ℝ) (hε : 0<ε) :
+     ∃ C : ℝ, 0<C ∧ ∀ (Z K R X F A : ℝ),
+-      1≤Z → 1≤K → 1≤R → 1≤F → F≤Z^(1/1000:ℝ) → 0≤A →
+-      K*R≤X*F*Z^(-(1/40:ℝ)) →
++      1≤Z → 1≤K → 1≤R → 1≤F → F≤Z^scale.step → 0≤A →
++      K*R≤X*F*Z^(-scale.shortMargin) →
+       ∀ {κ : Type*} [Fintype κ],
+       ∀ (Ψ : idealRange F → κ → O →* ℂ), (∀f k z,‖Ψ f k z‖≤1) →
+       ∀W : ℝ → ℂ,
+-      (∀f : idealRange F, ∀H∈shortCubeRange (Z^(1/1000:ℝ)),
++      (∀f : idealRange F, ∀H∈shortCubeRange (Z^scale.step),
+         (∑k,‖completedT (Ψ f k) W (X/(Ideal.absNorm H:ℝ)^3)‖^2)≤
+           A*(K+K^2*R*(Ideal.absNorm f.val:ℝ)*(Ideal.absNorm H:ℝ)^3/X)) →
+-      (∑f : idealRange F,∑k,‖shortCompletedSum (Ψ f k) W X (Z^(1/1000:ℝ))‖^2)/F≤
++      (∑f : idealRange F,∑k,‖shortCompletedSum (Ψ f k) W X (Z^scale.step)‖^2)/F≤
+         C*A*K*Z^ε := by
+   let D := 256*(2+1/((ε/2)*Real.log 2))
+   have hD : 0<D := by have hlog : 0<Real.log 2 := Real.log_pos (by norm_num); dsimp [D]; positivity
+   refine ⟨256*D^2,by positivity,?_⟩
+   intro Z K R X F A hZ hK hR hF hFZ hA hmargin κ _ Ψ hΨ W hcompleted
+-  have hz : 1≤Z^(1/1000:ℝ) := Real.one_le_rpow hZ (by norm_num)
++  have hz : 1≤Z^scale.step := Real.one_le_rpow hZ scale.step_pos.le
+   have hZ0 : 0<Z := by linarith
+-  have hzZ : Z^(1/1000:ℝ)≤Z := by
+-    simpa only [Real.rpow_one] using Real.rpow_le_rpow_of_exponent_le hZ (show (1/1000:ℝ)≤1 by norm_num)
+-  have hl : 256*(columnDyadicLength (Z^(1/1000:ℝ))+1:ℝ)≤D*Z^(ε/2) := by
++  have hzZ : Z^scale.step≤Z := by
++    simpa only [Real.rpow_one] using Real.rpow_le_rpow_of_exponent_le hZ scale.step_le_one
++  have hl : 256*(columnDyadicLength (Z^scale.step)+1:ℝ)≤D*Z^(ε/2) := by
+     apply (mul_le_mul_of_nonneg_left (columnDyadicLength_small_power (ε/2) (by positivity) _ hz) (by norm_num : (0:ℝ)≤256)).trans
+-    have hp := Real.rpow_le_rpow (by positivity : 0≤Z^(1/1000:ℝ)) hzZ (show 0≤ε/2 by positivity)
++    have hp := Real.rpow_le_rpow (by positivity : 0≤Z^scale.step) hzZ (show 0≤ε/2 by positivity)
+     calc
+-      _ = D*(Z^(1/1000:ℝ))^(ε/2) := by dsimp [D]; ring
++      _ = D*(Z^scale.step)^(ε/2) := by dsimp [D]; ring
+       _ ≤ D*Z^(ε/2) := mul_le_mul_of_nonneg_left hp hD.le
+   have hb := short_completed_average Z K R X F A hZ hK hR hF hFZ hA hmargin Ψ hΨ W hcompleted
+   apply hb.trans
+diff --git a/lean/OAI/NumberTheory/DirichletL/RowCompletion/CompletedEnergy.lean b/lean/OAI/NumberTheory/DirichletL/RowCompletion/CompletedEnergy.lean
+index d4a04b6d0..273e76af4 100644
+--- a/lean/OAI/NumberTheory/DirichletL/RowCompletion/CompletedEnergy.lean
++++ b/lean/OAI/NumberTheory/DirichletL/RowCompletion/CompletedEnergy.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.Eisenstein.UnitNormalization
+ 
+ namespace OAI
+@@ -106,27 +107,27 @@ def HasCanonicalThetaModels (S : Finset (Ideal ActualEisensteinCubic.O)) (base :
+   ∀(A : ℝ),0≤A → ∀(W : ℝ→ℂ),
+     Function.support W⊆Set.Icc (Real.exp (-A)) (Real.exp A) → ContDiff ℝ ∞ W →
+     ∀κ : ℝ,0<κ → ∃C : ℝ,0≤C ∧
+-    ∀(Z K X F θ : ℝ),1≤Z → 1≤K → 0<X → 1≤F → F≤Z^((1:ℝ)/1000) →
++    ∀(Z K X F θ H₀ : ℝ),1≤Z → 1≤K → 0<X → 1≤F →
+     ∀(Ψ : ActualEisensteinCubic.O→*ℂ),IsBaseRayTwist base Ψ → ∀m : ActualEisensteinCubic.O,m≠0 →
+-    let G : Ideal ActualEisensteinCubic.O:=Ideal.span {m*excludedGenerator S}
+-    (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-((1:ℝ)/40)) →
+     ∃(rays : ℕ) (lengthScale : ℂ),(rays:ℝ)^2*‖lengthScale‖^2≤C*Z^κ ∧
+-      ∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^((1:ℝ)/1000)),
++      ∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange H₀,
+         HasExactCompletedDyadicModels rays
+           (((firstFrequencyDisk (2*K)).erase 0).image (fun z=>Ideal.span {z})) (2*K)
+-          (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound f.val (G*f.val)
++          (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound f.val
++            ((Ideal.span {m*excludedGenerator S})*f.val)
+           (CompletedHeight.normTwistedSource W θ)
+           (CompletedUnitRows.unitRowFamily Ψ (m*excludedGenerator S) u f) lengthScale
+ 
+-theorem outsideLogEnergy_terminal_constant
++theorem outsideLogEnergy_terminal_constant [scale : CanonicalDescentScale]
+     (V : ℝ→ℂ) (hVs : ContDiff ℝ ∞ V) (A : ℝ)
+     (hV : ∀s,V s≠0→|s|≤A) :
+     ∃C : ℝ,0≤C ∧ ∀(S : Finset (Ideal ActualEisensteinCubic.O)) (D : ℕ) (hbad : fixedBadPrimes⊆S)
+       (base : ActualEisensteinCubic.O→*ℂ) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O) (labels : Finset (Ideal ActualEisensteinCubic.O))
+       (X F K t : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      (∀u,‖base u‖≤1) → 1<Z → 0≤η → 3000*η≤(1:ℝ)/40 →
+-      (fixedDepthRank Z K=0 ∨ X≤1) →
++      (∀u,‖base u‖≤1) → 1<Z → 0≤η →
++      (scale.rankCap:ℝ)*η≤scale.shortMargin →
++      (scale.depthRank Z K=0 ∨ X≤1) →
+       outsideLogEnergy S D hbad (normHeightTwist Ψ t) m labels V X K≤C*(X*F)^2 := by
+   have hVc : HasCompactSupport V :=
+     HasCompactSupport.of_support_subset_isCompact isCompact_Icc
+@@ -426,17 +427,18 @@ open CanonicalQuadraticSieve hiding O
+ open SecondPassArithmetic hiding O
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem canonicalShortState_geometry (S : Finset (Ideal ActualEisensteinCubic.O))
++theorem canonicalShortState_geometry [scale : CanonicalDescentScale]
++    (S : Finset (Ideal ActualEisensteinCubic.O))
+     (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (base : ActualEisensteinCubic.O→*ℂ) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+     (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ)
+     (hstate : CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K)
+-    (hZ : 1≤Z) (hZbig : Real.exp 9000≤Z) (hη : 0≤η)
+-    (hbudget : 3000*η≤(1:ℝ)/80)
+-    (hfixed : 2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80)) :
++    (hZ : 1≤Z) (hZbig : scale.largeThreshold≤Z) (hη : 0≤η)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent)
++    (hfixed : 2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent) :
+     let G:=Ideal.span {m*excludedGenerator S}
+     G≠0 ∧ (∀P∈fixedBadPrimes,P∣G) ∧ labels⊆idealRange F ∧
+-      X*F≤Z^3 ∧ (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-((1:ℝ)/40)) := by
++      X*F≤Z^3 ∧ (2*K)*(Ideal.absNorm G:ℝ)≤X*F*Z^(-scale.shortMargin) := by
+   have hprod : (∏P∈S,P)≠0:=Finset.prod_ne_zero_iff.mpr (fun P hP=>(hSp P hP).ne_zero)
+   have he : excludedGenerator S≠0:=idealGenerator_ne_zero _ hprod
+   have hG : (Ideal.span {m*excludedGenerator S}:Ideal ActualEisensteinCubic.O)≠0:=
+@@ -448,25 +450,32 @@ theorem canonicalShortState_geometry (S : Finset (Ideal ActualEisensteinCubic.O)
+     exact Set.singleton_subset_iff.mpr (P.mul_mem_left m (excludedGenerator_mem S (hbad hP)))
+   have hlabels : labels⊆idealRange F:=canonicalLabels_subset_idealRange base (∏P∈S,P) Z η Ψ m labels X F K hstate
+     (fun P hP=>Finset.dvd_prod_of_mem (fun Q:Ideal ActualEisensteinCubic.O=>Q) (hbad hP))
+-  have hmass : X*F≤Z^3:=hstate.mass_le.trans (canonicalRankMass_global Z hZbig _)
++  have hmass : X*F≤Z^3:=hstate.mass_le.trans (scale.rankMass_global Z hZbig _)
+   refine ⟨hG,hpG,hlabels,hmass,?_⟩
+   have hZ0 : 0<Z:=zero_lt_one.trans_le hZ
+   have hXF : 0≤X*F:=mul_nonneg hstate.column_pos.le (zero_le_one.trans hstate.label_ge_one)
+-  have hm : (3:ℝ)/80≤canonicalRankMargin ((1:ℝ)/20) η (fixedDepthRank Z K) :=
+-    (by linarith : (3:ℝ)/80≤(1:ℝ)/20-3000*η).trans (canonicalRankMargin_lower _ η hη _)
+-  have hi : K*‖eisEmbedding m‖^2≤(X*F)*Z^(-((3:ℝ)/80)):=
++  have hm : scale.strictReserve≤scale.rankMargin scale.reserve η (scale.depthRank Z K) :=
++    (by
++      unfold CanonicalDescentScale.strictReserve
++      unfold CanonicalDescentScale.fixedFactorExponent at hbudget
++      linarith : scale.strictReserve≤scale.reserve-(scale.rankCap:ℝ)*η).trans
++      (scale.rankMargin_lower _ η hη _)
++  have hi : K*‖eisEmbedding m‖^2≤(X*F)*Z^(-scale.strictReserve):=
+     hstate.invariant.trans (mul_le_mul_of_nonneg_left
+       (Real.rpow_le_rpow_of_exponent_le hZ (neg_le_neg hm)) hXF)
+   rw [←eisEmbedding_norm_sq_eq_absNorm_span,map_mul,norm_mul,mul_pow]
+   calc
+     (2*K)*(‖eisEmbedding m‖^2*‖eisEmbedding (excludedGenerator S)‖^2)=
+         (2*‖eisEmbedding (excludedGenerator S)‖^2)*(K*‖eisEmbedding m‖^2):=by ring
+-    _ ≤ Z^((1:ℝ)/80)*((X*F)*Z^(-((3:ℝ)/80))):=
++    _ ≤ Z^scale.fixedFactorExponent*((X*F)*Z^(-scale.strictReserve)):=
+       mul_le_mul hfixed hi (mul_nonneg (zero_le_one.trans hstate.row_ge_one) (sq_nonneg _)) (by positivity)
+-    _ = (X*F)*(Z^((1:ℝ)/80)*Z^(-((3:ℝ)/80))):=by ring
+-    _ = _:=by rw [←Real.rpow_add hZ0]; norm_num
++    _ = (X*F)*(Z^scale.fixedFactorExponent*Z^(-scale.strictReserve)):=by ring
++    _ = _:=by
++      rw [←Real.rpow_add hZ0]
++      congr 2
++      linarith [scale.reserve_decomposition]
+ 
+-theorem canonicalShortState_uniform_twist
++theorem canonicalShortState_uniform_twist [scale : CanonicalDescentScale]
+     (a b : ℝ) (ha : 0<a) (ε ρ q levelBound : ℝ)
+     (hε : 0<ε) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound) :
+     ∃d : ℕ,∀W : ℝ→ℂ,Function.support W⊆Set.Icc a b → ContDiff ℝ ∞ W →
+@@ -475,24 +484,25 @@ theorem canonicalShortState_uniform_twist
+     ∀(base : ActualEisensteinCubic.O→*ℂ) (Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+       (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ),
+     CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-    (∀x,‖base x‖≤1) → 1≤Z → Real.exp 9000≤Z → 0≤η → 3000*η≤(1:ℝ)/80 →
+-    2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) → ∀lengthScale : ℂ,
+-    (F<Z^((1:ℝ)/1000) → ∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^((1:ℝ)/1000)),
++    (∀x,‖base x‖≤1) → 1≤Z → scale.largeThreshold≤Z → 0≤η →
++    (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent →
++    2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent → ∀lengthScale : ℂ,
++    (F<Z^scale.step → ∀u : ActualEisensteinCubic.Oˣ,∀f : idealRange F,∀H∈shortCubeRange (Z^scale.step),
+       HasExactCompletedDyadicModels rays (((firstFrequencyDisk (2*K)).erase 0).image (fun z=>Ideal.span {z})) (2*K)
+         (X/(Ideal.absNorm H:ℝ)^3) ρ q levelBound f.val ((Ideal.span {m*excludedGenerator S})*f.val)
+         (CompletedHeight.normTwistedSource W θ)
+         (CompletedUnitRows.unitRowFamily Ψ (m*excludedGenerator S) u f) lengthScale) →
+     2*X*rowFamilyEnergy labels (fun I z=>shortCompletedSum
+       (rowTwist (normHeightTwist Ψ θ) (m*excludedGenerator S) (idealGenerator I) z)
+-      W X (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0)) K≤
+-    (C*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*(X*F)^2*Z^(7*ε-(1:ℝ)/40) := by
++      W X (if F<Z^scale.step then Z^scale.step else 0)) K≤
++    (C*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*(X*F)^2*Z^(7*ε-scale.shortMargin) := by
+   obtain ⟨d,hbound⟩:=canonicalShortEnergy_normalized_uniform_twist a b ha ε ρ q levelBound hε hρ hq hlevel
+   refine ⟨d,?_⟩
+   intro W hs hW
+   obtain ⟨C,hC,hb⟩:=hbound W hs hW
+   refine ⟨C,hC,?_⟩
+   intro θ rays S hSp hbad base Z η Ψ m labels X F K hstate hbase hZ hZbig hη hbudget hfixed lengthScale hmodels
+-  by_cases hF : F<Z^((1:ℝ)/1000)
++  by_cases hF : F<Z^scale.step
+   · rw [ite_eq_left hF]
+     obtain ⟨hG,hpG,hlabels,hmass,hmargin⟩:=canonicalShortState_geometry S hSp hbad base Z η Ψ m labels X F K
+       hstate hZ hZbig hη hbudget hfixed
+diff --git a/lean/OAI/NumberTheory/DirichletL/RowCompletion/CubicReopening.lean b/lean/OAI/NumberTheory/DirichletL/RowCompletion/CubicReopening.lean
+index 9050c8888..a900abdc7 100644
+--- a/lean/OAI/NumberTheory/DirichletL/RowCompletion/CubicReopening.lean
++++ b/lean/OAI/NumberTheory/DirichletL/RowCompletion/CubicReopening.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.Eisenstein.UnitNormalization
+ 
+ namespace OAI
+@@ -136,12 +137,12 @@ open SecondPassArithmetic hiding O
+ open CanonicalCubeSeparation JointLogSeparation
+ open FirstPassCubeLabels (columnLog)
+ 
+-theorem progressingCanonicalBin_closed_step
++theorem progressingCanonicalBin_closed_step [scale : CanonicalDescentScale]
+     (g V : 𝓢(ℝ,ℂ)) (A M Nv : ℝ) (hM : 0≤M) (hNv : 0≤Nv)
+     (hgM : ∀t,g t≠0→|t|≤M) (hV : ∀t,V t≠0→|t|≤Nv)
+     (hWin : ∀t,g t≠0→V t=1)
+     (ε deltaLoss η : ℝ) (hε : 0<ε) (hδ : 0<deltaLoss) (hη : 0<η)
+-    (hηsmall : η≤(1:ℝ)/1000) (hbudget : 3000*η≤(1:ℝ)/40) (J : ℕ) :
++    (hηsmall : η≤scale.step) (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) (J : ℕ) :
+     ∃(windows₁ windows₂ : Fin 7→ℝ→ℂ) (C : ℝ), 0≤C ∧
+       (∀i,HasCompactSupport (windows₁ i)) ∧ (∀i,ContDiff ℝ ∞ (windows₁ i)) ∧
+       (∀i t,windows₁ i t≠0→|t|≤M+7) ∧
+@@ -151,7 +152,7 @@ theorem progressingCanonicalBin_closed_step
+       (base : ActualEisensteinCubic.O→*ℂ) (Z : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O) (labels : Finset (Ideal ActualEisensteinCubic.O))
+       (X F K E oldHeight : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      (∀u,‖base u‖≤1) → 1<Z → Real.exp 9000≤Z → 1≤X → X≤Z^3 → F≤Z^3 → 1≤E →
++      (∀u,‖base u‖≤1) → 1<Z → scale.largeThreshold≤Z → 1≤X → X≤Z^3 → F≤Z^3 → 1≤E →
+       let P:=InitialMeanSquare.outsideSquarefreeIdeals S D
+       let hP:=InitialMeanSquare.outsideSquarefree_admissible S D hbad
+       letI : ∀i : primePool P,(Ideal.span {poolPrimary P i}).IsMaximal :=
+@@ -159,7 +160,7 @@ theorem progressingCanonicalBin_closed_step
+       (∀side : Bool, let windows:=if side then windows₁ else windows₂
+         ∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base (∏Q∈S,Q) Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z K → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z K → ∀s : ℝ,
+         (canonicalLogEnergy (poolPrimary P) (poolPrimary_ne_zero P hP) (poolPrimary_coprime P hP)
+           (poolPrimary_good P hP) Finset.univ (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+@@ -168,7 +169,7 @@ theorem progressingCanonicalBin_closed_step
+           (orientedLogProfile false (windows 6)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J))) →
+       ∀j∈cubeLogRange (Real.exp A) X,
+       let B:=normLogScale j
+-      let H₀:=if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0
++      let H₀:=if F<Z^scale.step then Z^scale.step else 0
+       let Q':=progressingCubes S D H₀ (activeCubeLogBin S D (Real.exp A) X j)
+       Q'.Nonempty → ∀ξ : ℝ,
+       B*rowFamilyEnergy labels (fun I z=>
+@@ -196,7 +197,7 @@ theorem progressingCanonicalBin_closed_step
+     fun i=>by rw [poolPrimary_span P hP i];infer_instance
+   intro ih j hj hQ ξ
+   let B:=normLogScale j
+-  let H₀:=if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0
++  let H₀:=if F<Z^scale.step then Z^scale.step else 0
+   let Q':=progressingCubes S D H₀ (activeCubeLogBin S D (Real.exp A) X j)
+   let β:=fun I v=>separatedCubeCoefficient
+     (fun u=>reopenedCubeCoefficient H₀
+@@ -607,13 +608,13 @@ open CanonicalQuadraticSieve hiding O
+ open SecondPassArithmetic hiding O
+ open CanonicalCubeSeparation JointLogSeparation
+ 
+-theorem progressingCanonicalFamily_closed_step
++theorem progressingCanonicalFamily_closed_step [scale : CanonicalDescentScale]
+     (g V : 𝓢(ℝ,ℂ)) (A M Nv : ℝ) (hM : 0≤M) (hNv : 0≤Nv)
+     (hgM : ∀t,g t≠0→|t|≤M) (hV : ∀t,V t≠0→|t|≤Nv)
+     (hWin : ∀t,g t≠0→V t=1)
+     (hgOne : ∀u,|u|≤columnWindowRadius (Real.exp (-A)) (Real.exp A)→g u=1)
+     (ε deltaLoss η : ℝ) (hε : 0<ε) (hδ : 0<deltaLoss) (hη : 0<η)
+-    (hηsmall : η≤(1:ℝ)/1000) (hbudget : 3000*η≤(1:ℝ)/40) (J : ℕ) :
++    (hηsmall : η≤scale.step) (hbudget : (scale.rankCap:ℝ)*η≤scale.shortMargin) (J : ℕ) :
+     ∃(windows₁ windows₂ : Fin 7→ℝ→ℂ),
+       (∀i,HasCompactSupport (windows₁ i)) ∧ (∀i,ContDiff ℝ ∞ (windows₁ i)) ∧
+       (∀i t,windows₁ i t≠0→|t|≤M+7) ∧
+@@ -626,7 +627,7 @@ theorem progressingCanonicalFamily_closed_step
+       (base : ActualEisensteinCubic.O→*ℂ) (Z : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O) (labels : Finset (Ideal ActualEisensteinCubic.O))
+       (X F K E oldHeight : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      (∀u,‖base u‖≤1) → 1<Z → Real.exp 9000≤Z → 1≤X → X≤Z^3 → F≤Z^3 → 1≤E →
++      (∀u,‖base u‖≤1) → 1<Z → scale.largeThreshold≤Z → 1≤X → X≤Z^3 → F≤Z^3 → 1≤E →
+       Real.exp A*X≤D →
+       let P:=InitialMeanSquare.outsideSquarefreeIdeals S D
+       let hP:=InitialMeanSquare.outsideSquarefree_admissible S D hbad
+@@ -635,7 +636,7 @@ theorem progressingCanonicalFamily_closed_step
+       (∀side : Bool, let windows:=if side then windows₁ else windows₂
+         ∀(Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base (∏Q∈S,Q) Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z K → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z K → ∀s : ℝ,
+         (canonicalLogEnergy (poolPrimary P) (poolPrimary_ne_zero P hP) (poolPrimary_coprime P hP)
+           (poolPrimary_good P hP) Finset.univ (normHeightTwist Ψ' s) m' labels'
+           (orientedLogProfile true (windows 5)) X' K'≤E*(X'*F')^2*(1+‖s‖)^(2*J)) ∧
+@@ -646,7 +647,7 @@ theorem progressingCanonicalFamily_closed_step
+         m (idealGenerator I) z W X) K≤
+       2*X*rowFamilyEnergy labels (fun I z=>
+         shortCompletedSum (rowTwist (normHeightTwist Ψ oldHeight) (m*excludedGenerator S) (idealGenerator I) z)
+-          W X (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0)) K+
++          W X (if F<Z^scale.step then Z^scale.step else 0)) K+
+       C*(X*F)^2*Z^(η+17*deltaLoss+39*ε)*E*(1+|oldHeight|)^(2*J) := by
+   obtain ⟨w₁,w₂,C₀,hC₀,hwc₁,hws₁,hwb₁,hwc₂,hws₂,hwb₂,hstep⟩:=
+     progressingCanonicalBin_closed_step g V A M Nv hM hNv hgM hV hWin
+@@ -667,7 +668,7 @@ theorem progressingCanonicalFamily_closed_step
+     hstate hbase hZ hZbig hX hXZ hFZ hE ih
+   have hwhole:=progressingCanonicalFamily_energy S D hbad hSp labels Ψ m W
+     (Real.exp (-A)) (Real.exp A) (Real.exp_pos _) (Real.exp_pos _).le hs hW hWc
+-    g hgOne X (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0) K
++    g hgOne X (if F<Z^scale.step then Z^scale.step else 0) K
+     (C₀*(X*F)^2*Z^(η+17*deltaLoss+38*ε)*E) oldHeight J hstate.column_pos
+     (zero_lt_one.trans_le hstate.row_ge_one) (by positivity) hD hsource
+   have hcount:=hcard X Z hstate.column_pos.le hZ.le hXZ
+diff --git a/lean/OAI/NumberTheory/DirichletL/RowCompletion/DensityTransfer.lean b/lean/OAI/NumberTheory/DirichletL/RowCompletion/DensityTransfer.lean
+index 98d2caf53..43da8063d 100644
+--- a/lean/OAI/NumberTheory/DirichletL/RowCompletion/DensityTransfer.lean
++++ b/lean/OAI/NumberTheory/DirichletL/RowCompletion/DensityTransfer.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.RowCompletion.CubicReopening
+ import OAI.NumberTheory.DirichletL.RowCompletion.CompletedEnergy
+ 
+@@ -85,7 +86,7 @@ open CanonicalQuadraticSieve hiding O
+ open SecondPassArithmetic hiding O
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem canonicalShortState_from_certificate
++theorem canonicalShortState_from_certificate [scale : CanonicalDescentScale]
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (base : ActualEisensteinCubic.O→*ℂ) (hbase : ∀u,‖base u‖≤1)
+     (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
+@@ -96,12 +97,13 @@ theorem canonicalShortState_from_certificate
+       ∃C : ℝ,0≤C ∧ ∀(θ Z η : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+       (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      1≤Z → Real.exp 9000≤Z → 0≤η → 3000*η≤(1:ℝ)/80 →
+-      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) →
++      1≤Z → scale.largeThreshold≤Z → 0≤η →
++      (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent →
++      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent →
+       2*X*rowFamilyEnergy labels (fun I z=>shortCompletedSum
+         (rowTwist (normHeightTwist Ψ θ) (m*excludedGenerator S) (idealGenerator I) z)
+-        W X (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0)) K≤
+-      C*(X*F)^2*Z^(κ+7*ε-(1:ℝ)/40)*(1+|θ|)^d := by
++        W X (if F<Z^scale.step then Z^scale.step else 0)) K≤
++      C*(X*F)^2*Z^(κ+7*ε-scale.shortMargin)*(1+|θ|)^d := by
+   obtain ⟨d,hshort⟩:=canonicalShortState_uniform_twist
+     (Real.exp (-A)) (Real.exp A) (Real.exp_pos _) ε ρ q levelBound hε hρ hq hlevel
+   refine ⟨d,?_⟩
+@@ -110,28 +112,27 @@ theorem canonicalShortState_from_certificate
+   obtain ⟨Cm,hCm,hm⟩:=hmodels A hA W hs hW κ hκ
+   refine ⟨Cs*Cm,mul_nonneg hCs hCm,?_⟩
+   intro θ Z η Ψ m labels X F K hstate hZ hZbig hη hbudget hfixed
+-  by_cases hF : F<Z^((1:ℝ)/1000)
+-  · have hgeometry:=canonicalShortState_geometry S hSp hbad base Z η Ψ m labels X F K
+-      hstate hZ hZbig hη hbudget hfixed
+-    obtain ⟨rays,lengthScale,hsize,hformula⟩:=hm Z K X F θ hZ hstate.row_ge_one hstate.column_pos
+-      hstate.label_ge_one hF.le Ψ hstate.coefficient m hstate.mask_ne_zero hgeometry.2.2.2.2
++  by_cases hF : F<Z^scale.step
++  · obtain ⟨rays,lengthScale,hsize,hformula⟩:=hm Z K X F θ (Z^scale.step)
++      hZ hstate.row_ge_one hstate.column_pos
++      hstate.label_ge_one Ψ hstate.coefficient m hstate.mask_ne_zero
+     have hb:=hsbound θ rays S hSp hbad base Z η Ψ m labels X F K hstate hbase hZ hZbig
+       hη hbudget hfixed lengthScale (fun _=>hformula)
+     calc
+-      _ ≤ (Cs*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*(X*F)^2*Z^(7*ε-(1:ℝ)/40):=hb
+-      _ = Cs*(1+|θ|)^d*((rays:ℝ)^2*‖lengthScale‖^2)*(X*F)^2*Z^(7*ε-(1:ℝ)/40):=by
++      _ ≤ (Cs*(1+‖θ‖)^d)*(rays:ℝ)^2*‖lengthScale‖^2*(X*F)^2*Z^(7*ε-scale.shortMargin):=hb
++      _ = Cs*(1+|θ|)^d*((rays:ℝ)^2*‖lengthScale‖^2)*(X*F)^2*Z^(7*ε-scale.shortMargin):=by
+         rw [Real.norm_eq_abs]
+         ring
+-      _ ≤ Cs*(1+|θ|)^d*(Cm*Z^κ)*(X*F)^2*Z^(7*ε-(1:ℝ)/40):=by gcongr
++      _ ≤ Cs*(1+|θ|)^d*(Cm*Z^κ)*(X*F)^2*Z^(7*ε-scale.shortMargin):=by gcongr
+       _ = _ := by
+-        rw [show κ+7*ε-(1:ℝ)/40=κ+(7*ε-(1:ℝ)/40) by ring,
++        rw [show κ+7*ε-scale.shortMargin=κ+(7*ε-scale.shortMargin) by ring,
+           Real.rpow_add (zero_lt_one.trans_le hZ)]
+         ring
+   · have hb:=hsbound θ 0 S hSp hbad base Z η Ψ m labels X F K hstate hbase hZ hZbig
+       hη hbudget hfixed 0 (fun hf=>False.elim (hF hf))
+     have hz : 2*X*rowFamilyEnergy labels (fun I z=>shortCompletedSum
+         (rowTwist (normHeightTwist Ψ θ) (m*excludedGenerator S) (idealGenerator I) z)
+-        W X (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0)) K≤0 := by
++        W X (if F<Z^scale.step then Z^scale.step else 0)) K≤0 := by
+       simpa only [Nat.cast_zero,zero_pow (by decide : (2:ℕ)≠0),mul_zero,zero_mul] using hb
+     exact hz.trans (by positivity)
+ 
+@@ -146,13 +147,13 @@ open SecondPassArithmetic hiding O
+ open CanonicalCubeSeparation JointLogSeparation
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem canonicalLog_actual_step
++theorem canonicalLog_actual_step [scale : CanonicalDescentScale]
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (base : ActualEisensteinCubic.O→*ℂ) (hbase : ∀u,‖base u‖≤1)
+     (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
+     (hmodels : HasCanonicalThetaModels S base ρ q levelBound)
+-    (A : ℝ) (hA : 0≤A) (η : ℝ) (hη : 0<η) (hηsmall : η≤(1:ℝ)/1000)
+-    (hbudget : 3000*η≤(1:ℝ)/80) :
++    (A : ℝ) (hA : 0≤A) (η : ℝ) (hη : 0<η) (hηsmall : η≤scale.step)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent) :
+     ∃d : ℕ,∀J : ℕ,d≤2*J →
+     ∃child : Bool→Bool→ℝ→ℂ,
+       (∀side neg,ContDiff ℝ ∞ (child side neg)) ∧
+@@ -161,12 +162,12 @@ theorem canonicalLog_actual_step
+       ∃C : ℝ,0≤C ∧ ∀(D : ℕ) (Z : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+       (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K E t : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      1<Z → Real.exp 9000≤Z →
+-      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) →
++      1<Z → scale.largeThreshold≤Z →
++      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent →
+       1≤X → Real.exp A*X≤D → 1≤E →
+       (∀side neg (Ψ' : ActualEisensteinCubic.O→*ℂ) (m' : ActualEisensteinCubic.O) (labels' : Finset (Ideal ActualEisensteinCubic.O)) (X' F' K' : ℝ),
+         CanonicalStateCondition base (∏P∈S,P) Z η Ψ' m' labels' X' F' K' →
+-        fixedDepthRank Z K'<fixedDepthRank Z K → ∀s : ℝ,
++        scale.depthRank Z K'<scale.depthRank Z K → ∀s : ℝ,
+         outsideLogEnergy S D hbad (normHeightTwist Ψ' s) m' labels' (child side neg) X' K'≤
+           E*(X'*F')^2*(1+‖s‖)^(2*J)) →
+       outsideLogEnergy S D hbad (normHeightTwist Ψ t) m labels V X K≤
+@@ -176,7 +177,8 @@ theorem canonicalLog_actual_step
+   refine ⟨d,?_⟩
+   intro J hJ
+   obtain ⟨g,v,hgc,hvc,hgone,hgb,hwin,hvb⟩:=fixed_reopening_profiles A hA
+-  have hbudget' : 3000*η≤(1:ℝ)/40:=by linarith
++  have hbudget' : (scale.rankCap:ℝ)*η≤scale.shortMargin:=
++    hbudget.trans scale.fixedFactorExponent_le_shortMargin
+   obtain ⟨w₁,w₂,hwc₁,hws₁,hwb₁,hwc₂,hws₂,hwb₂,hlarge⟩:=
+     progressingCanonicalFamily_closed_step g v A (2*A+4) (2*A+5) (by linarith) (by linarith)
+       hgb hvb hwin hgone η η η hη hη hη hηsmall hbudget' J
+@@ -214,7 +216,7 @@ theorem canonicalLog_actual_step
+   obtain ⟨Cl,hCl,hlong⟩:=hlarge W hs hW (radialFromLog_hasCompactSupport V hVs A hV)
+   refine ⟨Cs+Cl,add_nonneg hCs hCl,?_⟩
+   intro D Z Ψ m labels X F K E t hstate hZ hZbig hfixed hX hD hE ih
+-  obtain ⟨hXZ,hFZ⟩:=canonical_live_scale_bounds Z X F (fixedDepthRank Z K)
++  obtain ⟨hXZ,hFZ⟩:=scale.live_scale_bounds Z X F (scale.depthRank Z K)
+     hZbig hX hstate.label_ge_one hstate.mass_le
+   have hsbound:=hsmall t Z η Ψ m labels X F K hstate hZ.le hZbig hη.le hbudget hfixed
+   have hb:=hlong S D hbad hSp base Z Ψ m labels X F K E t hstate hbase hZ hZbig
+@@ -226,16 +228,18 @@ theorem canonicalLog_actual_step
+       ih side false Ψ' m' labels' X' F' K' hs' hr s⟩)
+   have he : η+17*η+39*η=57*η:=by ring
+   rw [he] at hlbound
+-  have hp : Z^(η+7*η-(1:ℝ)/40)≤Z^(57*η):=
+-    Real.rpow_le_rpow_of_exponent_le hZ.le (by linarith)
++  have hp : Z^(η+7*η-scale.shortMargin)≤Z^(57*η):=
++    Real.rpow_le_rpow_of_exponent_le hZ.le (by
++      have := scale.shortMargin_pos
++      linarith)
+   have ht : (1+|t|)^d≤(1+|t|)^(2*J):=
+     pow_le_pow_right₀ (by linarith [abs_nonneg t]) hJ
+   have hs' : 2*X*rowFamilyEnergy labels (fun I z=>shortCompletedSum
+       (rowTwist (normHeightTwist Ψ t) (m*excludedGenerator S) (idealGenerator I) z)
+-      W X (if F<Z^((1:ℝ)/1000) then Z^((1:ℝ)/1000) else 0)) K≤
++      W X (if F<Z^scale.step then Z^scale.step else 0)) K≤
+       Cs*E*(X*F)^2*Z^(57*η)*(1+|t|)^(2*J) := by
+     calc
+-      _ ≤ Cs*(X*F)^2*Z^(η+7*η-(1:ℝ)/40)*(1+|t|)^d:=hsbound
++      _ ≤ Cs*(X*F)^2*Z^(η+7*η-scale.shortMargin)*(1+|t|)^d:=hsbound
+       _ ≤ Cs*(X*F)^2*Z^(57*η)*(1+|t|)^(2*J):=by gcongr
+       _ ≤ (Cs*(X*F)^2*Z^(57*η)*(1+|t|)^(2*J))*E:=
+         le_mul_of_one_le_right (by positivity) hE
+@@ -253,24 +257,25 @@ open SecondPassArithmetic hiding O
+ open CanonicalCubeSeparation
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem outsideLogEnergy_finite_rank
++theorem outsideLogEnergy_finite_rank [scale : CanonicalDescentScale]
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (base : ActualEisensteinCubic.O→*ℂ) (hbase : ∀u,‖base u‖≤1)
+     (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
+     (hmodels : HasCanonicalThetaModels S base ρ q levelBound)
+-    (η : ℝ) (hη : 0<η) (hηsmall : η≤(1:ℝ)/1000)
+-    (hbudget : 3000*η≤(1:ℝ)/80) (r : ℕ) :
++    (η : ℝ) (hη : 0<η) (hηsmall : η≤scale.step)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent) (r : ℕ) :
+     ∀(A : ℝ),0≤A → ∃d : ℕ,∀(V : ℝ→ℂ),ContDiff ℝ ∞ V →
+     (∀s,V s≠0→|s|≤A) → ∃C : ℝ,1≤C ∧
+     ∀(D : ℕ) (Z : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O) (labels : Finset (Ideal ActualEisensteinCubic.O))
+       (X F K t : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      1<Z → Real.exp 9000≤Z →
+-      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) →
+-      fixedDepthRank Z K≤r → Real.exp (radiusIter A r)*Z^3≤D →
++      1<Z → scale.largeThreshold≤Z →
++      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent →
++      scale.depthRank Z K≤r → Real.exp (radiusIter A r)*Z^3≤D →
+       outsideLogEnergy S D hbad (normHeightTwist Ψ t) m labels V X K≤
+         C*Z^(57*η*(r:ℝ))*(X*F)^2*(1+|t|)^d := by
+-  have hbudget' : 3000*η≤(1:ℝ)/40:=by linarith
++  have hbudget' : (scale.rankCap:ℝ)*η≤scale.shortMargin:=
++    hbudget.trans scale.fixedFactorExponent_le_shortMargin
+   induction r with
+   | zero =>
+     intro A hA
+@@ -319,7 +324,7 @@ theorem outsideLogEnergy_finite_rank
+     have hpow : 1≤Z^(57*η*((r+1:ℕ):ℝ)):=
+       Real.one_le_rpow hZ.le (by positivity)
+     have hheight : 1≤(1+|t|)^(2*J):=one_le_pow₀ (by linarith [abs_nonneg t])
+-    by_cases hstop : fixedDepthRank Z K=0 ∨ X≤1
++    by_cases hstop : scale.depthRank Z K=0 ∨ X≤1
+     · have hb:=hterm S D hbad base Z η Ψ m labels X F K t hstate hbase hZ hη.le hbudget' hstop
+       apply hb.trans
+       calc
+@@ -332,7 +337,7 @@ theorem outsideLogEnergy_finite_rank
+               le_mul_of_one_le_right (by positivity) hheight
+             _ = _:=by ring
+     · have hX : 1≤X:=(lt_of_not_ge (fun hh=>hstop (Or.inr hh))).le
+-      have hXZ : X≤Z^3:=(canonical_live_scale_bounds Z X F (fixedDepthRank Z K)
++      have hXZ : X≤Z^3:=(scale.live_scale_bounds Z X F (scale.depthRank Z K)
+         hZbig hX hstate.label_ge_one hstate.mass_le).1
+       have hDparent : Real.exp A*X≤D:=
+         common_pool_parent A Z X D (r+1) hA hZ0.le hstate.column_pos.le hXZ hD
+@@ -345,7 +350,7 @@ theorem outsideLogEnergy_finite_rank
+       have hbound : outsideLogEnergy S D hbad (normHeightTwist Ψ t) m labels V X K≤
+           Cp*E*(X*F)^2*Z^(57*η)*(1+|t|)^(2*J):=hb (by
+         intro side neg Ψ' m' labels' X' F' K' hs hr' s
+-        have hrchild : fixedDepthRank Z K'≤r:=by omega
++        have hrchild : scale.depthRank Z K'≤r:=by omega
+         have hDchild : Real.exp (radiusIter (2*A+11) r)*Z^3≤D:=by
+           simpa only [radiusIter_succ] using hD
+         have hh:=(hchildC side neg).2 D Z Ψ' m' labels' X' F' K' s hs hZ hZbig hfixed hrchild hDchild
+@@ -371,51 +376,58 @@ theorem outsideLogEnergy_finite_rank
+         _ = (Cp*E0)*Z^(57*η*((r+1:ℕ):ℝ))*(X*F)^2*(1+|t|)^(2*J):=by rw [hexp]
+         _ ≤ _:=by gcongr
+ 
+-def canonicalDescentPadding (ε : ℝ) : ℝ:=canonicalPadding ε 57/2
++def canonicalDescentPadding [scale : CanonicalDescentScale] (ε : ℝ) : ℝ :=
++  scale.padding ε 57 / 2
+ 
+-theorem canonicalDescentPadding_budget (ε : ℝ) (hε : 0<ε) :
+-    0<canonicalDescentPadding ε ∧ canonicalDescentPadding ε≤(1:ℝ)/1000 ∧
+-    3000*canonicalDescentPadding ε≤(1:ℝ)/80 ∧
+-    171000*canonicalDescentPadding ε≤ε := by
+-  have h:=canonicalPadding_budget ε 57 hε (by norm_num)
++theorem canonicalDescentPadding_budget [scale : CanonicalDescentScale]
++    (ε : ℝ) (hε : 0<ε) :
++    0<canonicalDescentPadding ε ∧ canonicalDescentPadding ε≤scale.step ∧
++    (scale.rankCap:ℝ)*canonicalDescentPadding ε≤scale.fixedFactorExponent ∧
++    57*(scale.rankCap:ℝ)*canonicalDescentPadding ε≤ε := by
++  have h:=scale.padding_budget ε 57 hε (by norm_num)
+   dsimp [canonicalDescentPadding]
+-  refine ⟨by linarith [h.1],by linarith [h.2.1],by linarith [h.2.2.1],?_⟩
+-  have ht:=h.2.2.2.2.1
+-  nlinarith [h.1]
++  have hcap : (0:ℝ)≤scale.rankCap:=Nat.cast_nonneg _
++  refine ⟨div_pos h.1 (by norm_num),by linarith [h.2.1],by nlinarith [h.2.2.1],?_⟩
++  have ht:=h.2.2.2
++  nlinarith [hcap, h.1]
+ 
+-theorem outsideLogEnergy_state_small_power
++theorem outsideLogEnergy_state_small_power [scale : CanonicalDescentScale]
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (base : ActualEisensteinCubic.O→*ℂ) (hbase : ∀u,‖base u‖≤1)
+     (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
+     (hmodels : HasCanonicalThetaModels S base ρ q levelBound)
+-    (ε η : ℝ) (hη : 0<η) (hηsmall : η≤(1:ℝ)/1000)
+-    (hbudget : 3000*η≤(1:ℝ)/80) (hloss : 171000*η≤ε)
++    (ε η : ℝ) (hη : 0<η) (hηsmall : η≤scale.step)
++    (hbudget : (scale.rankCap:ℝ)*η≤scale.fixedFactorExponent)
++    (hloss : 57*(scale.rankCap:ℝ)*η≤ε)
+     (A : ℝ) (hA : 0≤A) :
+     ∃d : ℕ,∀(V : ℝ→ℂ),ContDiff ℝ ∞ V → (∀s,V s≠0→|s|≤A) →
+     ∃C : ℝ,1≤C ∧ ∀(D : ℕ) (Z : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+       (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K t : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z η Ψ m labels X F K →
+-      1<Z → Real.exp 9000≤Z →
+-      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) →
+-      Real.exp (radiusIter A 3000)*Z^3≤D →
++      1<Z → scale.largeThreshold≤Z →
++      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent →
++      Real.exp (radiusIter A scale.rankCap)*Z^3≤D →
+       outsideLogEnergy S D hbad (normHeightTwist Ψ t) m labels V X K≤
+         C*Z^ε*(X*F)^2*(1+|t|)^d := by
+   obtain ⟨d,hd⟩:=outsideLogEnergy_finite_rank S hSp hbad base hbase ρ q levelBound
+-    hρ hq hlevel hmodels η hη hηsmall hbudget 3000 A hA
++    hρ hq hlevel hmodels η hη hηsmall hbudget scale.rankCap A hA
+   refine ⟨d,?_⟩
+   intro V hVs hV
+   obtain ⟨C,hC,hbound⟩:=hd V hVs hV
+   refine ⟨C,hC,?_⟩
+   intro D Z Ψ m labels X F K t hstate hZ hZbig hfixed hD
+-  have hr:=fixedDepthRank_initial Z K hZ (zero_lt_one.trans_le hstate.row_ge_one) hstate.row_le_global
++  have hr:=scale.depthRank_initial Z K hZ (zero_lt_one.trans_le hstate.row_ge_one) hstate.row_le_global
+   have hb:=hbound D Z Ψ m labels X F K t hstate hZ hZbig hfixed hr hD
+-  have he : 57*η*(3000:ℝ)≤ε:=by linarith
++  have he : 57*η*(scale.rankCap:ℝ)≤ε:=by
++    calc
++      57*η*(scale.rankCap:ℝ)=57*(scale.rankCap:ℝ)*η:=by ring
++      _≤ε:=hloss
+   apply hb.trans
+   apply mul_le_mul_of_nonneg_right _ (by positivity)
+   apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)
+   exact mul_le_mul_of_nonneg_left (Real.rpow_le_rpow_of_exponent_le hZ.le he) (zero_le_one.trans hC)
+ 
+-theorem outsideLogEnergy_small_power
++theorem outsideLogEnergy_small_power [scale : CanonicalDescentScale]
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (base : ActualEisensteinCubic.O→*ℂ) (hbase : ∀u,‖base u‖≤1)
+     (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
+@@ -425,9 +437,9 @@ theorem outsideLogEnergy_small_power
+     ∃C : ℝ,1≤C ∧ ∀(D : ℕ) (Z : ℝ) (Ψ : ActualEisensteinCubic.O→*ℂ) (m : ActualEisensteinCubic.O)
+       (labels : Finset (Ideal ActualEisensteinCubic.O)) (X F K t : ℝ),
+       CanonicalStateCondition base (∏P∈S,P) Z (canonicalDescentPadding ε) Ψ m labels X F K →
+-      1<Z → Real.exp 9000≤Z →
+-      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) →
+-      Real.exp (radiusIter A 3000)*Z^3≤D →
++      1<Z → scale.largeThreshold≤Z →
++      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent →
++      Real.exp (radiusIter A scale.rankCap)*Z^3≤D →
+       outsideLogEnergy S D hbad (normHeightTwist Ψ t) m labels V X K≤
+         C*Z^ε*(X*F)^2*(1+|t|)^d := by
+   have h:=canonicalDescentPadding_budget ε hε
+@@ -450,14 +462,14 @@ open InitialMeanSquare hiding O
+ open CanonicalCoefficientClass (IsBaseRayTwist)
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem initialCanonicalState
++theorem initialCanonicalState [scale : CanonicalDescentScale]
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (D : ℕ) (hbad : fixedBadPrimes⊆S)
+     (base Ψ : ActualEisensteinCubic.O→*ℂ) (hΨ : IsBaseRayTwist base Ψ) (Z η X lengthScale K : ℝ)
+     (hZ : 1≤Z) (hη : 0≤η) (hX : 1≤X) (hL : 1≤lengthScale) (hK : 1≤K)
+     (R : Finset (OutsidePrimeIndex S D)) (T : Finset (Ideal ActualEisensteinCubic.O×ActualEisensteinCubic.O))
+     (hmass : X*lengthScale≤Z^2)
+     (hinv : K*(initialExcludedNorm S*primeProductNorm (outsidePrime S D) R)≤
+-      X*lengthScale*Z^(-(1:ℝ)/20))
++      X*lengthScale*Z^(-scale.reserve))
+     (hlabels : ∀z∈T,Admissible z.1 ∧ (Ideal.absNorm z.1:ℝ)≤lengthScale)
+     (houtside : ∀z∈T,IsCoprime z.1 (∏P∈S,P)) :
+     CanonicalStateCondition base (∏P∈S,P) Z η Ψ
+@@ -470,51 +482,57 @@ theorem initialCanonicalState
+   have hN0 : 0≤primeProductNorm p R:=zero_le_one.trans hN
+   have hmod : 1 ≤ initialExcludedNorm S*primeProductNorm p R:=
+     one_le_mul_of_one_le_of_one_le (initialExcludedNorm_ge_one S) hN
+-  have hdecay : Z^(-(1:ℝ)/20)≤1:=by
+-    simpa only [Real.rpow_zero] using Real.rpow_le_rpow_of_exponent_le hZ (by norm_num : -(1:ℝ)/20≤0)
++  have hdecay : Z^(-scale.reserve)≤1:=by
++    simpa only [Real.rpow_zero] using
++      Real.rpow_le_rpow_of_exponent_le hZ (neg_nonpos.mpr scale.reserve_nonneg)
+   have hKmass : K≤X*lengthScale := by
+     calc
+       K ≤ K*(initialExcludedNorm S*primeProductNorm p R):=
+         le_mul_of_one_le_right (zero_le_one.trans hK) hmod
+-      _ ≤ X*lengthScale*Z^(-(1:ℝ)/20):=hinv
++      _ ≤ X*lengthScale*Z^(-scale.reserve):=hinv
+       _ ≤ X*lengthScale:=mul_le_of_le_one_right (by positivity) hdecay
+   have hKg : K≤Z^3 :=
+     (hKmass.trans hmass).trans (pow_le_pow_right₀ hZ (by decide : (2:ℕ)≤3))
+   refine ⟨hΨ,primeSubsetGenerator_ne_zero _ _,by linarith,hL,hK,hKg,
+-    hmass.trans (canonicalRankMass_initial Z _),?_,?_⟩
++    hmass.trans (scale.rankMass_initial Z _),?_,?_⟩
+   · rw [primeSubsetGenerator_norm_eq_productNorm]
+     calc
+       K*primeProductNorm p R ≤ K*(initialExcludedNorm S*primeProductNorm p R) := by
+         apply mul_le_mul_of_nonneg_left _ (zero_le_one.trans hK)
+         exact le_mul_of_one_le_left hN0 (initialExcludedNorm_ge_one S)
+-      _ ≤ X*lengthScale*Z^(-(1:ℝ)/20):=hinv
+-      _ ≤ X*lengthScale*Z^(-canonicalRankMargin ((1:ℝ)/20) η (fixedDepthRank Z K)) := by
++      _ ≤ X*lengthScale*Z^(-scale.reserve):=hinv
++      _ ≤ X*lengthScale*Z^(-scale.rankMargin scale.reserve η (scale.depthRank Z K)) := by
+         apply mul_le_mul_of_nonneg_left _ (by positivity)
+         apply Real.rpow_le_rpow_of_exponent_le hZ
+-        unfold canonicalRankMargin
+-        have hn : 0≤η*((3000-fixedDepthRank Z K:ℕ):ℝ):=mul_nonneg hη (Nat.cast_nonneg _)
+-        linarith
++        exact neg_le_neg (scale.rankMargin_le scale.reserve η hη _)
+   · intro I hI
+     obtain ⟨z,hz,rfl⟩:=Finset.mem_image.mp hI
+     exact ⟨(hlabels z hz).1.1,(hlabels z hz).1.2.1,houtside z hz,(hlabels z hz).2⟩
+ 
+-theorem canonicalInitialThreshold (S : Finset (Ideal ActualEisensteinCubic.O)) :
++theorem canonicalInitialThreshold [scale : CanonicalDescentScale]
++    (S : Finset (Ideal ActualEisensteinCubic.O)) :
+     ∃Z₀ : ℝ,1≤Z₀ ∧ ∀Z : ℝ,Z₀≤Z →
+-      1<Z ∧ Real.exp 9000≤Z ∧
+-      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^((1:ℝ)/80) := by
++      1<Z ∧ scale.largeThreshold≤Z ∧
++      2*‖eisEmbedding (excludedGenerator S)‖^2≤Z^scale.fixedFactorExponent := by
+   let c:=2*‖eisEmbedding (excludedGenerator S)‖^2
+-  let Z₀:=2+Real.exp 9000+c^80
++  let reserveExponent:=scale.fixedFactorExponent
++  let Z₀:=2+scale.largeThreshold+c^(reserveExponent⁻¹)
+   have hc : 0≤c:=by dsimp only [c];positivity
+-  have hp : 0≤c^80:=pow_nonneg hc _
+-  have he:=Real.exp_pos (9000:ℝ)
++  have hp : 0≤c^(reserveExponent⁻¹):=Real.rpow_nonneg hc _
++  have he : 0<scale.largeThreshold:=by
++    unfold CanonicalDescentScale.largeThreshold
++    positivity
+   refine ⟨Z₀,by dsimp only [Z₀];linarith,?_⟩
+   intro Z hZ
+   have hZ1 : 1<Z:=by dsimp only [Z₀] at hZ;linarith
+   refine ⟨hZ1,by dsimp only [Z₀] at hZ;linarith,?_⟩
+-  have hpow : c^80≤Z:=by dsimp only [Z₀] at hZ;linarith
+-  have hh := (Real.le_rpow_inv_iff_of_pos hc (by linarith : 0≤Z) (by norm_num : (0:ℝ)<80)).mpr
+-    (show c^(80:ℝ)≤Z by simpa only [Real.rpow_ofNat] using hpow)
+-  simpa only [one_div] using hh
++  have hpow : c^(reserveExponent⁻¹)≤Z:=by dsimp only [Z₀] at hZ;linarith
++  have hreserveExponent : 0<reserveExponent:=by
++    dsimp only [reserveExponent]
++    exact scale.fixedFactorExponent_pos
++  have hh := (Real.le_rpow_inv_iff_of_pos hc (by linarith : 0≤Z)
++    (inv_pos.mpr hreserveExponent)).mpr hpow
++  simpa only [inv_inv, reserveExponent] using hh
+ 
+ end CanonicalRowCompletion
+ 
+diff --git a/lean/OAI/NumberTheory/DirichletL/RowCompletion/InitialDensity.lean b/lean/OAI/NumberTheory/DirichletL/RowCompletion/InitialDensity.lean
+index 61a44ffa0..15d55d623 100644
+--- a/lean/OAI/NumberTheory/DirichletL/RowCompletion/InitialDensity.lean
++++ b/lean/OAI/NumberTheory/DirichletL/RowCompletion/InitialDensity.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.RowCompletion.DensityTransfer
+ import OAI.NumberTheory.DirichletL.Eisenstein.SeedHeight
+ 
+@@ -88,12 +89,13 @@ open CanonicalCoefficientClass (IsBaseRayTwist)
+ open FirstPassCubeLabels (primeProductNorm firstLogDensity)
+ open ConcreteTraceCRT (eisEmbedding)
+ 
+-theorem hasInitialCanonicalDensityAtRadius_of_theta {q₀ : ℕ}
++theorem hasInitialCanonicalDensityAtRadius_of_theta [scale : CanonicalDescentScale]
++    {q₀ : ℕ}
+     (χ : DirichletCharacter ℂ q₀)
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hSp : ∀P∈S,Prime P) (hbad : fixedBadPrimes⊆S)
+     (ρ q levelBound : ℝ) (hρ : 0<ρ) (hq : 1<q) (hlevel : 1≤levelBound)
+     (hmodels : HasCanonicalThetaModels S (conjugateMonoid (normCharacter χ)) ρ q levelBound) :
+-    HasInitialCanonicalDensityAtRadius χ S hbad := by
++    HasInitialCanonicalDensityAtRadius χ S hbad scale.reserve := by
+   intro deltaLoss hδ P A hA
+   let base:=conjugateMonoid (normCharacter χ)
+   have hbase : ∀u,‖base u‖≤1:=conjugateMonoid_norm_le_one (normCharacter χ) (normCharacter_norm_le_one χ)
+@@ -127,8 +129,8 @@ theorem hasInitialCanonicalDensityAtRadius_of_theta {q₀ : ℕ}
+   have heleC : Cele*Z₀^3≤C:=by
+     dsimp only [C]
+     linarith
+-  let Cpool:=Real.exp (radiusIter A 3000)
+-  refine ⟨C,Cpool,max P 3,hC,Real.one_le_exp (radiusIter_nonneg A hA 3000),le_max_left _ _,?_⟩
++  let Cpool:=Real.exp (radiusIter A scale.rankCap)
++  refine ⟨C,Cpool,max P 3,hC,Real.one_le_exp (radiusIter_nonneg A hA scale.rankCap),le_max_left _ _,?_⟩
+   intro D Z X lengthScale K R ray T hZ hpool hX hL hK hXP hLP hKP hRP hmass hinv hT hout
+   let p:=outsidePrime S D
+   let hp:=outsidePrime_ne_zero S hbad D
+@@ -148,7 +150,7 @@ theorem hasInitialCanonicalDensityAtRadius_of_theta {q₀ : ℕ}
+     Z (canonicalDescentPadding deltaLoss) X lengthScale K hZ hη hX hL hK R T hmass hinv
+     (fun z hz=>⟨(hT z hz).1,(hT z hz).2.1⟩) hout
+   have hZδ : 1≤Z^deltaLoss:=Real.one_le_rpow hZ hδ.le
+-  have hD : Real.exp (radiusIter A 3000)*Z^3≤D :=
++  have hD : Real.exp (radiusIter A scale.rankCap)*Z^3≤D :=
+     (mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hZ (le_max_right P 3)) (Real.exp_pos _).le).trans hpool
+   have hlabels : ∀z∈T,z.1∈labels:=fun z hz=>Finset.mem_image.mpr ⟨z,hz,rfl⟩
+   have hrows : ∀z∈T,‖eisEmbedding z.2‖^2≤K:=fun z hz=>(hT z hz).2.2.2
+@@ -384,9 +386,10 @@ open FirstPassCubeLabels (primeProductNorm firstLogDensity)
+ 
+ theorem HasInitialCanonicalDensityAtRadius.retained_density {q : ℕ} (χ : DirichletCharacter ℂ q)
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes ⊆ S)
+-    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad)
++    (reserve : ℝ) (hreserve : 0<reserve)
++    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad reserve)
+     (a b σ θ ν η : ℝ) (hσ : 0 ≤ σ) (hν : 0 < ν) (hη : 0 < η)
+-    (hmargin : ν+θ ≤ σ-(1 : ℝ)/20) (A : ℝ) (hA : 0≤A) :
++    (hmargin : ν+θ ≤ σ-reserve) (A : ℝ) (hA : 0≤A) :
+     ∃ J : ℕ,∀ V₁ V₂ : ℝ → ℂ,HasCompactSupport V₁ → HasCompactSupport V₂ →
+       ContDiff ℝ ∞ V₁ → ContDiff ℝ ∞ V₂ →
+       (∀s,V₁ s≠0→|s|≤A) → (∀s,V₂ s≠0→|s|≤A) →
+@@ -457,7 +460,8 @@ theorem HasInitialCanonicalDensityAtRadius.retained_density {q : ℕ} (χ : Diri
+       outsideCanonicalDensity χ S hbad D ray R T V₁ V₂ X J ≤ C*Z^η*(X*lengthScale)^2 :=
+     he.trans (mul_le_mul_of_nonneg_right (hd.trans (le_mul_of_one_le_right hC.le hZη)) (sq_nonneg _))
+   by_cases hzlarge : Z0 ≤ Z
+-  · have hgeom := initial_large_bin_geometry p hp Finset.univ R a b Z σ θ ν (initialExcludedNorm S)
++  · have hgeom := initial_large_bin_geometry p hp Finset.univ R a b Z σ θ ν reserve
++      (initialExcludedNorm S)
+       j hZ (initialExcludedNorm_ge_one S) hR hj hσ hmargin (hthreshold Z hzlarge) hrad
+     dsimp only at hgeom
+     by_cases hxlarge : 1 ≤ X
+@@ -465,10 +469,10 @@ theorem HasInitialCanonicalDensityAtRadius.retained_density {q : ℕ} (χ : Diri
+         hgeom.1 hgeom.2.1 hgeom.2.2.1 hgeom.2.2.2.1 hgeom.2.2.2.2.1 hgeom.2.2.2.2.2 hT hTc).trans
+         (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hCcC (Real.rpow_nonneg hZp.le _)) (sq_nonneg _))
+     · have hKL : Kr ≤ lengthScale := initial_subunit_row_le_label Z X lengthScale Kr
+-        (initialExcludedNorm S*primeProductNorm p R) ((1 : ℝ)/20) hZ (le_of_not_ge hxlarge)
++        (initialExcludedNorm S*primeProductNorm p R) reserve hZ (le_of_not_ge hxlarge)
+         (zero_le_one.trans hL) (zero_le_one.trans hKr)
+         (one_le_mul_of_one_le_of_one_le (initialExcludedNorm_ge_one S) hB)
+-        (by norm_num) (by simpa only [Kr,X,lengthScale,neg_div] using hgeom.2.2.2.2.2)
++        hreserve.le (by simpa only [Kr,X,lengthScale] using hgeom.2.2.2.2.2)
+       apply promote Ce hCeC
+       exact initial_subunit_density_bound p hp hcop hg (outsidePrime_odd S hbad D)
+         (outsidePrime_injective S hbad D) Finset.univ (secondRayMinus Ψ ray) (secondRayPlus Ψ ray)
+@@ -500,13 +504,14 @@ open FirstPassCubeLabels (primeProductNorm firstLogDensity normalizedColumn colu
+ 
+ theorem HasInitialCanonicalDensityAtRadius.retained_source {q : ℕ} (χ : DirichletCharacter ℂ q)
+     (S : Finset (Ideal ActualEisensteinCubic.O)) (hbad : fixedBadPrimes ⊆ S) (hSp : ∀P∈S,Prime P)
+-    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad)
++    (reserve : ℝ) (hreserve : 0<reserve)
++    (hcan : HasInitialCanonicalDensityAtRadius χ S hbad reserve)
+     (U : ℝ → ℂ) (hUc : HasCompactSupport U) (hUs : ContDiff ℝ ∞ U)
+     (g W : 𝓢(ℝ,ℂ)) (a b σ θ ν η : ℝ)
+     (hU : ∀ t,g t ≠ 0 → U t=1)
+     (hgs : ∀ t,g t ≠ 0 → |t| ≤ initialErrorWindow a b)
+     (hσ : 0 ≤ σ) (hν : 0 < ν) (hη : 0 < η)
+-    (hmargin : ν+θ ≤ σ-(1 : ℝ)/20) :
++    (hmargin : ν+θ ≤ σ-reserve) :
+     ∃ (C Cpool : ℝ) (E : ℕ),0 < C ∧ 1 ≤ Cpool ∧ 20 ≤ E ∧
+       ∀ (D : ℕ) (Z : ℝ),1 ≤ Z → Cpool*Z^E ≤ D →
+       let p := outsidePrime S D
+@@ -524,7 +529,8 @@ theorem HasInitialCanonicalDensityAtRadius.retained_source {q : ℕ} (χ : Diric
+           ‖secondExpansionSource p hp hcop hg Finset.univ Ψ 1 1 1 ray
+             (initialSquarefreeSector p (secondLogSector p ∅ Finset.univ K R Z (initialErrorWindow a b) j))
+             G G W H‖ else 0) ≤ C*H*Z^(35*η) := by
+-  obtain ⟨J,hJ⟩ := HasInitialCanonicalDensityAtRadius.retained_density χ S hbad hcan a b σ θ ν η hσ hν hη hmargin
++  obtain ⟨J,hJ⟩ := HasInitialCanonicalDensityAtRadius.retained_density χ S hbad reserve hreserve
++    hcan a b σ θ ν η hσ hν hη hmargin
+     (initialErrorWindow a b+2+1) (by unfold initialErrorWindow; positivity)
+   have hM : 0 ≤ initialErrorWindow a b := by unfold initialErrorWindow; positivity
+   obtain ⟨windows,Ct,Cs,hCt,hCs,hwc,hws,hwb,ht⟩ :=
+diff --git a/lean/OAI/NumberTheory/DirichletL/RowCompletion/RowAmplitudes.lean b/lean/OAI/NumberTheory/DirichletL/RowCompletion/RowAmplitudes.lean
+index c8720f933..ab9479f1d 100644
+--- a/lean/OAI/NumberTheory/DirichletL/RowCompletion/RowAmplitudes.lean
++++ b/lean/OAI/NumberTheory/DirichletL/RowCompletion/RowAmplitudes.lean
+@@ -1,3 +1,4 @@
++-- Modified in quasi-rh-eleven-twelfths to parameterize the canonical descent scale.
+ import OAI.NumberTheory.DirichletL.GaussSum.ResidualEquivalence
+ 
+ namespace OAI
+@@ -434,9 +435,7 @@ theorem hasCanonicalThetaModels_of_fixed_shell_models
+     HasCanonicalThetaModels S base ρ q level := by
+   intro A hA W hs hW κ hκ
+   refine ⟨(rays:ℝ)^2*‖scale‖^2,by positivity,?_⟩
+-  intro Z K X F θ hZ hK hX hF hFZ Ψ hΨ m hm
+-  dsimp only
+-  intro hmargin
++  intro Z K X F θ H₀ hZ hK hX hF Ψ hΨ m hm
+   refine ⟨rays,scale,?_,?_⟩
+   · exact le_mul_of_one_le_right (by positivity) (Real.one_le_rpow hZ hκ.le)
+   · intro u f H hH
