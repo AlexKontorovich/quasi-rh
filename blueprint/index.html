@@ -396,14 +396,11 @@
             Since there are very roughly \(H^{1/6}\) (again, ignoring epsilons) such, we get, roughly, that
             \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
             </p><p class="hero-lede">
-            Opening the square and applying Poisson summation gives schematically
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\sum_{n,m\asymp X}\mu_K(n)\mu_K(m)\sum_{h\in\mathcal O\atop h\asymp X^2/H}\mathcal G_{n,m}(h)\)</span>
-            The dual frequency has norm scale \(X^2/H\). The Gauss factor is assembled prime by prime:
-            <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(h)\sim\prod_{\mathfrak p\mid(nm)}\sum_{x\bmod\mathfrak p}\psi_{n,m,\mathfrak p}(x)\,e_{\mathfrak p}(hx)\)</span>
-            Here \(\psi_{n,m,\mathfrak p}\) is the local character from \(\chi_n\overline{\chi_m}\), and \(e_{\mathfrak p}\) is the additive character modulo \(\mathfrak p\).
-            Gauss–Jacobi identities absorb the Möbius coefficients outside into
-            cubic Gauss sums, which we recognize as Fourier coefficients of
-            Kubota’s cubic theta series. After completing the series, its
+            Opening the square and applying Poisson summation gives schematically (ignoring the diagonal and issues with coprimality)
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\sum_{h\asymp X^2/H}\sum_{m\asymp X}\mu_K(m)\sum_{n\asymp X}\mu_K(n)\,\mathcal G_{n,m}(h).\)</span>
+            Fixing \(h,m\), Gauss–Jacobi absorbs \(\mu_K(n)\) into the \(n\)-side Gauss factors, converting them to cubic ones; \(\mu_K(m)\) stays with the outer \(m\)-sum.
+            We then complete the inner \(n\)-sum into a twisted version of Kubota’s cubic theta series: \(n\) supplies the coefficient index, while \(h,m\) determine the twist.
+            Its
             modularity gives a Voronoi-type transformation. (The formal proof of modularity follows the standard path, obtaining the theta
             function as the residue of a metaplectic Eisenstein series,
             whose meromorphic continuation is proved by Selberg’s
