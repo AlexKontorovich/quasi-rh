@@ -28,6 +28,9 @@
       --radius: 18px;
     }
     * { box-sizing: border-box; }
+    /* Keep scrolling available while removing visible scrollbar tracks. */
+    * { scrollbar-width: none; }
+    *::-webkit-scrollbar { display: none; }
     html { scroll-behavior: smooth; scroll-padding-top: 24px; }
     body {
       margin: 0;
