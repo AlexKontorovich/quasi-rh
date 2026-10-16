@@ -451,13 +451,13 @@ noncomputable def μ_K (n : 𝒪) : ℤ :=
         <article class="beat" id="beat-2">
           <section class="story">
             <div class="beat-topline"><span class="beat-number">02</span><span class="phase">Set up</span></div>
-            <h3>Build \(A_u(X)\) and its finite second moment</h3>
+            <h3>Build \(M_u(X)\) and its finite second moment</h3>
             <p>Now make every ingredient visible in the summand: primaryness, Möbius, the actual sextic twist, and a smooth cutoff supported in \([1/2,1]\). Thus only \(X/2\leq \mathcal N(n)\leq X\) contributes.</p>
             <div class="math-card">\[
-              A_u(X)=\sum_{\substack{n\ {\rm primary}\\\mathcal N(n)\le X}}
+              M_u(X)=\sum_{\substack{n\ {\rm primary}\\\mathcal N(n)\le X}}
                 \mu_K(n)\chi_n(u)W\!\left(\frac{\mathcal N(n)}X\right),
               \quad
-              S(X,H)=\sum_{\mathcal N(u)\le H}V\!\left(\frac{\mathcal N(u)}H\right)|A_u(X)|^2.
+              S(X,H)=\sum_{\mathcal N(u)\le H}V\!\left(\frac{\mathcal N(u)}H\right)|M_u(X)|^2.
             \]</div>
             <p>The public \(S\) is deliberately a <em>finite</em> sum. At the precise boundary where Poisson is needed, compact support proves it equal to a whole-lattice <code>tsum</code>.</p>
             <p class="plain-note"><strong>Lineage.</strong> Deforming a problem in a family has a geometric analogy in <a href="https://numdam.org/articles/10.1007/BF02684373/">Deligne’s proof of the Weil Riemann hypothesis</a>, through a Lefschetz pencil and monodromy; that is an analogy, not an input here. The modern amplification line runs through <a href="https://doi.org/10.1515/crll.1992.428.139">Iwaniec</a>, <a href="https://doi.org/10.1007/BF01232422">Duke–Friedlander–Iwaniec</a>, and <a href="https://annals.math.princeton.edu/1995/141-2/p03">Iwaniec–Sarnak</a>. <strong>New here.</strong> The specific sextic deformation and sixth-power rows that recover the original sum belong to this argument.</p>
@@ -488,7 +488,7 @@ noncomputable def outsideSexticTwist
     (outsideIdealsUpTo_ne_bot S X)
     (outside_good S X hbad) (Ideal.span {n}) u
 
-noncomputable def outsideA
+noncomputable def outsideM
     (S : Finset (Ideal 𝒪))
     (hbad : fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ :=
@@ -505,14 +505,14 @@ noncomputable def outsideS
     (X H : ℕ) : ℝ :=
   ∑ u ∈ exactRowBall H,
     V ((𝒩 u : ℝ) / (H : ℝ)) *
-      ‖outsideA S hbad W u X‖ ^ 2</code></pre>
+      ‖outsideM S hbad W u X‖ ^ 2</code></pre>
             <details>
               <summary>The exact element-to-ideal and finite-to-lattice statements</summary>
-              <pre><code>theorem outsideA_eq_idealRowSum
+              <pre><code>theorem outsideM_eq_idealRowSum
     (S : Finset (Ideal 𝒪))
     (hbad : fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) :
-    outsideA S hbad W u X =
+    outsideM S hbad W u X =
       idealRowSum (outsideIdealsUpTo S X)
         (outsideIdealsUpTo_ne_bot S X)
         (outside_good S X hbad)
@@ -532,7 +532,7 @@ theorem outsideS_eq_idealRowSum_tsum
           (1 : DirichletCharacter ℂ 1)
           (fun n ↦ W ((n : ℝ) / (X : ℝ))) u‖ ^ 2</code></pre>
             </details>
-            <p class="formal-note">These theorems certify the readable (A_u(X)) and (S(X,H)) notation. The analytic assembly starts from the equal <code>idealRowSum</code> expression rather than invoking the public wrappers again.</p>
+            <p class="formal-note">These theorems certify the readable (M_u(X)) and (S(X,H)) notation. The analytic assembly starts from the equal <code>idealRowSum</code> expression rather than invoking the public wrappers again.</p>
           </section>
         </article>
 
@@ -542,7 +542,7 @@ theorem outsideS_eq_idealRowSum_tsum
           <section class="story">
             <div class="beat-topline"><span class="beat-number">03</span><span class="phase transform">Transform</span></div>
             <h3>Open the square and apply the first Poisson summation</h3>
-            <p>Expand \(|A_u(N)|^2\), reverse the row and column sums, and run Poisson summation in the Eisenstein variable \(u\). Coprimality masks are removed by inclusion–exclusion.</p>
+            <p>Expand \(|M_u(X)|^2\), reverse the row and column sums, and run Poisson summation in the Eisenstein variable \(u\). Coprimality masks are removed by inclusion–exclusion.</p>
             <div class="math-card">\[
               \sum_{u\in\mathcal O}W_u\,\overline{\chi_I(u)}\chi_J(u)
               \quad\stackrel{\rm Poisson}{\longrightarrow}\quad
@@ -864,7 +864,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
             <h3>Close the mean square at every positive radius</h3>
             <p>The completion and sieve estimates are iterated through a finite descent. The crucial modification for \(11/12\) is that the descent reserve is not frozen at \(1/20\): for any \(\theta&gt;0\), Lean installs <code>CanonicalDescentScale.ofReserve (θ / 2)</code>.</p>
             <div class="math-card">\[
-              \sum_{\substack{z\in T\\N(z)\le Z^{1+\theta}}}|A_z(Z)|^2
+              \sum_{\substack{z\in T\\N(z)\le Z^{1+\theta}}}|M_z(Z)|^2
               \ \ll_{\theta,\varepsilon}\ Z\cdot Z^{1+\theta}\cdot Z^\varepsilon.
             \]</div>
             <p>Being able to make \(\theta\) arbitrarily small is what lets the later sixth-power average reach \(11/12+\varepsilon\).</p>

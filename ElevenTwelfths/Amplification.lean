@@ -16,7 +16,7 @@ Two facts are isolated here:
   over `b` is pushed forward to the sixth-power rows.
 
 The arithmetic statement identifying a sextic character on `b ^ 6` with a
-coprimality mask is represented by `A_sixthPower_eq_coprimeSum`.  Its local
+coprimality mask is represented by `M_sixthPower_eq_coprimeM`.  Its local
 proof for Eisenstein residue symbols belongs in `Arithmetic.lean`.
 -/
 
@@ -109,7 +109,7 @@ section Mask
 variable {R : Type*} [CommRing R]
 
 /-- The untwisted, smoothly localized Mobius sum. -/
-noncomputable def untwistedA (norm : R → ℕ) (normBall : ℕ → Finset R)
+noncomputable def untwistedM (norm : R → ℕ) (normBall : ℕ → Finset R)
     (primary : R → Prop) (mobius : R → ℤ) (W : SmoothDyadicWeight ℂ)
     (N : ℕ) : ℂ := by
   classical
@@ -117,7 +117,7 @@ noncomputable def untwistedA (norm : R → ℕ) (normBall : ℕ → Finset R)
     if primary n then (mobius n : ℂ) * W ((norm n : ℝ) / (N : ℝ)) else 0
 
 /-- The untwisted sum with terms not coprime to `b` removed. -/
-noncomputable def coprimeA (norm : R → ℕ) (normBall : ℕ → Finset R)
+noncomputable def coprimeM (norm : R → ℕ) (normBall : ℕ → Finset R)
     (primary : R → Prop) (coprime : R → R → Prop) (mobius : R → ℤ)
     (W : SmoothDyadicWeight ℂ) (b : R) (N : ℕ) : ℂ := by
   classical
@@ -130,16 +130,16 @@ noncomputable def coprimeA (norm : R → ℕ) (normBall : ℕ → Finset R)
 On sixth powers a sextic character is exactly the coprimality mask.  This is
 the formal bridge from a twisted row to the original Mobius sum.
 -/
-theorem A_sixthPower_eq_coprimeA
+theorem M_sixthPower_eq_coprimeM
     (norm : R → ℕ) (normBall : ℕ → Finset R)
     (primary : R → Prop) (coprime : R → R → Prop) (mobius : R → ℤ)
     [DecidablePred primary] [DecidableRel coprime]
     (sexticTwist : R → R → ℂ) (W : SmoothDyadicWeight ℂ) (b : R) (N : ℕ)
     (hsixth : ∀ n, sexticTwist (b ^ 6) n = if coprime b n then 1 else 0) :
-    A norm normBall primary mobius sexticTwist W (b ^ 6) N =
-      coprimeA norm normBall primary coprime mobius W b N := by
+    M norm normBall primary mobius sexticTwist W (b ^ 6) N =
+      coprimeM norm normBall primary coprime mobius W b N := by
   classical
-  unfold A coprimeA
+  unfold M coprimeM
   apply Finset.sum_congr rfl
   intro n hn
   rw [hsixth]

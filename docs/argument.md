@@ -49,7 +49,7 @@ contains the canonical primary generators of the admissible ideals of norm
 at most `N`. The actual twisted sum is
 
 ```lean
-noncomputable def outsideA ... (W : SmoothDyadicWeight ℂ)
+noncomputable def outsideM ... (W : SmoothDyadicWeight ℂ)
     (u : 𝒪) (N : ℕ) : ℂ :=
   ∑ n ∈ outsidePrimaryBall S N,
     if primary n then
@@ -71,7 +71,7 @@ noncomputable def outsideS ...
     (N H : ℕ) : ℝ :=
   ∑ u ∈ exactRowBall H,
     V ((𝒩 u : ℝ) / (H : ℝ)) *
-      ‖outsideA S hbad W u N‖ ^ 2
+      ‖outsideM S hbad W u N‖ ^ 2
 ```
 
 Columns and rows deliberately use different finite balls. Columns are
@@ -79,8 +79,8 @@ admissible ideals represented by primary generators; Poisson summation runs
 over every Eisenstein integer in the row lattice. The two bridge theorems are
 
 ```lean
-theorem outsideA_eq_idealRowSum ... :
-    outsideA S hbad W u N = idealRowSum ... u
+theorem outsideM_eq_idealRowSum ... :
+    outsideM S hbad W u N = idealRowSum ... u
 
 theorem outsideS_eq_idealRowSum_tsum ... :
     outsideS S hbad W V N H = ∑' u : 𝒪,
@@ -220,7 +220,7 @@ theorem outside_totient_moebius_bound_of_mean_square ... :
 Suppose the mean square is written with loss `2 * eta`:
 
 \[
-  \sum_z |A_z(Z)|^2\ll Z^{2+\theta+2\eta}.
+  \sum_z |M_z(Z)|^2\ll Z^{2+\theta+2\eta}.
 \]
 
 Cauchy--Schwarz applied to an amplifier of mass `Y` gives a numerator bounded

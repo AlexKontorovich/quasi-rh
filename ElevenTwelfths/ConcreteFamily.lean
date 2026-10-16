@@ -86,9 +86,9 @@ noncomputable def outsideSexticTwist
     (outsideIdealsUpTo_ne_bot S N) (outside_good S N hbad)
     (Ideal.span {n}) u
 
-/-- The concrete public `A_u(N)`.  Its summand visibly contains primaryness,
+/-- The concrete public `M_u(N)`.  Its summand visibly contains primaryness,
 ideal Möbius, the sextic twist, and the `[1/2,1]` smooth cutoff. -/
-noncomputable def outsideA
+noncomputable def outsideM
     (S : Finset (Ideal 𝒪))
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ :=
@@ -98,27 +98,27 @@ noncomputable def outsideA
         W ((𝒩 n : ℝ) / (N : ℝ))
     else 0
 
-theorem outsideA_eq_eisensteinA
+theorem outsideM_eq_eisensteinA
     (S : Finset (Ideal 𝒪))
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) :
-    outsideA S hbad W u N =
+    outsideM S hbad W u N =
       eisensteinA (outsidePrimaryBall S) (outsideSexticTwist S hbad N) W u N :=
   rfl
 
 /-- The readable primary-element sum is exactly the ideal row consumed by
 Poisson summation and the mean-square theorem. -/
-theorem outsideA_eq_idealRowSum
+theorem outsideM_eq_idealRowSum
     (S : Finset (Ideal 𝒪))
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) :
-    outsideA S hbad W u N =
+    outsideM S hbad W u N =
       idealRowSum (outsideIdealsUpTo S N)
         (outsideIdealsUpTo_ne_bot S N) (outside_good S N hbad)
         (1 : DirichletCharacter ℂ 1)
         (fun n ↦ W ((n : ℝ) / (N : ℝ))) u := by
   classical
-  unfold outsideA outsidePrimaryBall idealRowSum
+  unfold outsideM outsidePrimaryBall idealRowSum
   rw [Finset.sum_image]
   · apply Finset.sum_congr rfl
     intro I hI
@@ -141,14 +141,14 @@ theorem outsideA_eq_idealRowSum
     rw [← (primaryGenerator_spec I hIgen).1,
       ← (primaryGenerator_spec J hJgen).1, hIJ]
 
-/-- The finite, smoothly weighted mean square attached to `outsideA`. -/
+/-- The finite, smoothly weighted mean square attached to `outsideM`. -/
 noncomputable def outsideS
     (S : Finset (Ideal 𝒪))
     (hbad : OAI.CanonicalQuadraticSieve.fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
   ∑ u ∈ exactRowBall H,
     V ((𝒩 u : ℝ) / (H : ℝ)) *
-      ‖outsideA S hbad W u N‖ ^ 2
+      ‖outsideM S hbad W u N‖ ^ 2
 
 /-- Immediately before Poisson summation, the finite row sum becomes a
 whole-lattice `tsum`. -/
@@ -158,7 +158,7 @@ theorem outsideS_eq_tsum
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
     outsideS S hbad W V N H = ∑' u : 𝒪,
       V ((𝒩 u : ℝ) / (H : ℝ)) *
-        ‖outsideA S hbad W u N‖ ^ 2 := by
+        ‖outsideM S hbad W u N‖ ^ 2 := by
   classical
   unfold outsideS
   rw [tsum_eq_sum (s := exactRowBall H)]
@@ -190,7 +190,7 @@ theorem outsideS_eq_idealRowSum_tsum
   rw [outsideS_eq_tsum]
   apply tsum_congr
   intro u
-  rw [outsideA_eq_idealRowSum]
+  rw [outsideM_eq_idealRowSum]
 
 end
 

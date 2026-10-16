@@ -33,11 +33,11 @@ noncomputable def eisensteinS
     V ((𝒩 u : ℝ) / (H : ℝ)) *
       ‖eisensteinA columnBall sexticTwist W u N‖ ^ 2
 
-theorem eisensteinA_eq_A
+theorem eisensteinM_eq_M
     (normBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) :
     eisensteinA normBall sexticTwist W u N =
-      A 𝒩 normBall primary μ_K sexticTwist W u N := rfl
+      M 𝒩 normBall primary μ_K sexticTwist W u N := rfl
 
 theorem eisensteinS_eq_S
     (columnBall rowBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)

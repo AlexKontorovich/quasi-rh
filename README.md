@@ -30,7 +30,7 @@ Let `W` and `V` be smooth weights supported in `[1 / 2, 1]`. For an
 Eisenstein integer `u`, the public family is
 
 \[
-  A_u(N)=
+  M_u(N)=
   \sum_{\substack{n\ \mathrm{primary}\\N(n)\le N}}
     \mu_K((n))\,\chi_{(n)}(u)\,
     W\!\left(\frac{N(n)}N\right).
@@ -42,12 +42,12 @@ the finite sum
 
 \[
   S(N,H)=\sum_{N(u)\le H}
-    V\!\left(\frac{N(u)}H\right)|A_u(N)|^2.
+    V\!\left(\frac{N(u)}H\right)|M_u(N)|^2.
 \]
 
 Immediately before entering the Poisson-summation interface, compact support
 converts this finite sum to a `tsum` over the full Eisenstein lattice. The
-checked bridges are `outsideA_eq_idealRowSum` and
+checked bridges are `outsideM_eq_idealRowSum` and
 `outsideS_eq_idealRowSum_tsum`.
 
 The reused analytic core opens the square, applies Eisenstein Poisson
@@ -58,7 +58,7 @@ parameterization of its finite descent gives, for every `theta > 0`, the
 schematic estimate
 
 \[
-  \sum_{N(z)\le Z^{1+\theta}} |A_z(Z)|^2
+  \sum_{N(z)\le Z^{1+\theta}} |M_z(Z)|^2
   \ll_{\theta,\varepsilon} Z^{2+\theta+\varepsilon}.
 \]
 
@@ -123,7 +123,7 @@ specialization; the direct `11 / 12` assembly does not use it.
 | --- | --- |
 | Weights supported in `[1 / 2, 1]` | `ElevenTwelfths.SmoothDyadic` |
 | Eisenstein norm, primaryness, and `mu_K ((n))` | `ElevenTwelfths.Arithmetic` |
-| Explicit finite `A_u(N)` and `S(N,H)` | `ElevenTwelfths.ConcreteFamily` |
+| Explicit finite `M_u(N)` and `S(N,H)` | `ElevenTwelfths.ConcreteFamily` |
 | Finite-to-`tsum` boundary | `outsideS_eq_idealRowSum_tsum` |
 | Theta/reflection model built from branch decoding | `ElevenTwelfths.ActualFixedShellModels` |
 | Arbitrary-positive-radius mean square | `outside_mean_square_of_theta_models_pos` |
