@@ -150,7 +150,7 @@
     }
     .hero h2 em { color: var(--amber); font-style: normal; white-space: nowrap; }
     .hero-lede {
-      max-width: 790px;
+      max-width: none;
       margin: 25px 0 0;
       color: #4e5a55;
       font-family: Georgia, "Times New Roman", serif;
@@ -159,9 +159,10 @@
     }
     .hero-equation {
       display: block;
+      width: max-content;
       max-width: 100%;
       margin: 0.18em 0 0.28em;
-      overflow-x: auto;
+      overflow: visible;
       color: #302b26;
       font-size: 0.94em;
     }
@@ -322,7 +323,8 @@
       tex: {
         inlineMath: [['\\(', '\\)']],
         displayMath: [['\\[', '\\]']]
-      }
+      },
+      chtml: { linebreaks: { automatic: true, width: "container" } }
     };
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
@@ -374,7 +376,8 @@
             But over \(\mathbb Q\) there are not enough
             harmonics. We therefore lift to the Eisenstein field
             \(K=\mathbb Q(\omega)\):
-            <span class="hero-equation">\(\displaystyle M(X):=\sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp X}}\mu_K(n)\)</span>
+            <span class="hero-equation">\(\displaystyle M(X):=\sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp X}}\mu_K(n),\)</span>
+            and aim to prove that \(M(X) \ll X^{11/12}\).
             Since
             \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
             \(\zeta_K\) forces nonvanishing of both factors. We deform the
@@ -382,7 +385,7 @@
             <span class="hero-equation">\(\displaystyle M_u(X):=\sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp X}}\mu_K(n)\chi_n(u)\)</span>
             and take a second moment:
             <span class="hero-equation">\(\displaystyle S(X,H):=\sum_{\substack{u\in\mathcal O\\\mathcal N(u)\asymp H}}|M_u(X)|^2\)</span>
-            We seek square-root cancellation on average:
+            We seek roughly square-root cancellation on average:
             <span class="hero-equation">\(\displaystyle S(X,H)\ll XH\)</span>.
             By itself, that is not enough, because \(M(X)\) only appears once.
             In the application, \(H\) will be just a little larger than \(X\).
