@@ -382,9 +382,9 @@
             \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
             \(\zeta_K\) forces nonvanishing of both factors. We deform the
             Eisenstein Möbius sum by sextic characters:
-            <span class="hero-equation">\(\displaystyle M_u(X):=\sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp X}}\mu_K(n)\chi_n(u)\)</span>
+            <span class="hero-equation">\(\displaystyle M_u(X):=\sum_{\substack{n\in\mathcal O\\ n\asymp X}}\mu_K(n)\chi_n(u)\)</span>
             and take a second moment:
-            <span class="hero-equation">\(\displaystyle S(X,H):=\sum_{\substack{u\in\mathcal O\\\mathcal N(u)\asymp H}}|M_u(X)|^2\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H):=\sum_{\substack{u\in\mathcal O\\ u\asymp H}}|M_u(X)|^2\)</span>
             We seek roughly square-root cancellation on average:
             <span class="hero-equation">\(\displaystyle S(X,H)\ll XH,\)</span>
             ignoring epsilons.
@@ -397,8 +397,10 @@
             \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
             </p><p class="hero-lede">
             Opening the square and applying Poisson summation gives schematically
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\sum_{n,m\asymp X}\mu_K(n)\mu_K(m)\sum_{h\in\mathcal O\atop \mathcal N(h)\asymp X^2/H}\mathcal G_{n,m}(h)\)</span>
-            The dual frequency has norm scale \(X^2/H\), and \(\mathcal G_{n,m}(h)\) is the resulting Gauss factor.
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\sum_{n,m\asymp X}\mu_K(n)\mu_K(m)\sum_{h\in\mathcal O\atop h\asymp X^2/H}\mathcal G_{n,m}(h)\)</span>
+            The dual frequency has norm scale \(X^2/H\). The Gauss factor is assembled prime by prime:
+            <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(h)\sim\prod_{\mathfrak p\mid(nm)}\sum_{x\bmod\mathfrak p}\psi_{n,m,\mathfrak p}(x)\,e_{\mathfrak p}(hx)\)</span>
+            Here \(\psi_{n,m,\mathfrak p}\) is the local character from \(\chi_n\overline{\chi_m}\), and \(e_{\mathfrak p}\) is the additive character modulo \(\mathfrak p\).
             Gauss–Jacobi identities absorb the Möbius coefficients outside into
             cubic Gauss sums, which we recognize as Fourier coefficients of
             Kubota’s cubic theta series. After completing the series, its
