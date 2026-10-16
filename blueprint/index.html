@@ -401,8 +401,11 @@
             <span class="hero-equation">\(\displaystyle S(X,H)\approx\sum_{h\asymp X^2/H}\sum_{m\asymp X}\mu_K(m)\sum_{n\asymp X}\mu_K(n)\,\mathcal G_{n,m}(h).\)</span>
             Here \(\mathcal G_{n,m}(h)\) is, very roughly, a normalized sextic Gauss sum
             <span class="hero-equation">\(\displaystyle \sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{ha}{nm}\right),\)</span>
-            Fixing \(h,m\), the Gauss–Jacobi identity absorbs \(\mu_K(n)\) into the \(n\)-side sextic Gauss factor, converting it into a cubic Gauss sum of the schematic shape
+            Fixing \(h,m\), the Gauss–Jacobi identity converts (!!) \(\mu_K(n)\) times the \(n\)-side sextic Gauss sum into just a cubic Gauss sum: the mysterious Möbius factor is washed away. Its schematic shape is
             <span class="hero-equation">\(\displaystyle g_3(h,n):=\sum_{a\bmod n}\left(\frac{a}{n}\right)_3 e_K\!\left(\frac{ha}{n}\right).\)</span>
+            Thus we have reached, still schematically,
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\sum_{h\asymp X^2/H}\sum_{m\asymp X}\mu_K(m)\sum_{n\asymp X}g_{3;h,m}(n),\)</span>
+            where the subscript indicates the twists depending on the fixed \(h,m\).
             We then complete the inner \(n\)-sum into a twisted version of Kubota’s cubic theta series: \(n\) supplies the coefficient index, while \(h,m\) determine the twist.
             Its
             modularity gives a Voronoi-type transformation. (The formal proof of modularity follows the standard path, obtaining the theta
