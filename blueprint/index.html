@@ -382,9 +382,9 @@
             \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
             \(\zeta_K\) forces nonvanishing of both factors. We deform the
             Eisenstein Möbius sum by sextic characters:
-            <span class="hero-equation">\(\displaystyle M_u(X):=\sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp X}}\mu_K(n)\chi_n(u)\)</span>
+            <span class="hero-equation">\(\displaystyle M_u(X):=\sum_{\substack{n\in\mathcal O\\\mathcal n\asymp X}}\mu_K(n)\chi_n(u)\)</span>
             and take a second moment:
-            <span class="hero-equation">\(\displaystyle S(X,H):=\sum_{\substack{u\in\mathcal O\\\mathcal N(u)\asymp H}}|M_u(X)|^2\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H):=\sum_{\substack{u\in\mathcal O\\\mathcalu\asymp H}}|M_u(X)|^2\)</span>
             We seek roughly square-root cancellation on average:
             <span class="hero-equation">\(\displaystyle S(X,H)\ll XH,\)</span>
             ignoring epsilons.
@@ -396,9 +396,9 @@
             Since there are very roughly \(H^{1/6}\) (again, ignoring epsilons) such, we get, roughly, that
             \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
             </p><p class="hero-lede">
-            Opening the square gives the schematic expansion
-            <span class="hero-equation">\(\displaystyle S(X,H)=\sum_{\substack{\mathcal N(n),\mathcal N(m)\asymp X\\ n,m\ {\rm primary}}}\mu_K(n)\mu_K(m)W\!\left(\frac{\mathcal N(n)}X\right)\overline{W\!\left(\frac{\mathcal N(m)}X\right)}\sum_{u\in\mathcal O}V\!\left(\frac{\mathcal N(u)}H\right)\chi_n(u)\overline{\chi_m(u)}\)</span>
-            Poisson summation in the inner row sum produces Gauss sums.
+            Opening the square and applying Poisson summation gives schematically
+            <span class="hero-equation">\(\displaystyle S(X,H)\leadsto\sum_{\substack{\mathcal N(n),\mathcal N(m)\asymp X\\ n,m\ {\rm primary}}}\mu_K(n)\mu_K(m)W_n\overline{W_m}\sum_{\mathfrak d\mid\operatorname{mask}(n,m)}\frac{\mu_K(\mathfrak d)}{\mathcal N(\mathfrak d)}\sum_{h\in\mathcal O}\mathcal G_{n,m,\mathfrak d}(h)\widehat V_{H,\mathfrak d}(h)\)</span>
+            Here \(\mathfrak d\) comes from inclusion–exclusion for the coprimality mask; \(\mathcal G\) denotes the finite Gauss factors, and \(\widehat V\) the dual row weight.
             Gauss–Jacobi identities absorb the Möbius coefficients outside into
             cubic Gauss sums, which we recognize as Fourier coefficients of
             Kubota’s cubic theta series. After completing the series, its
