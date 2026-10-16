@@ -389,13 +389,17 @@
             <span class="hero-equation">\(\displaystyle S(X,H)\ll XH,\)</span>
             ignoring epsilons.
             By itself, that is not enough, because \(M(X)\) only appears once in \(S(X,H)\).
-            In the application, \(H\) will be just a little larger than \(X\), so even with square-root cancellation on average, dropping all but one term only shows the trivial bound: \(|M(X)|^2\le S(X,H)\ll X H \) implies \(M(X)\ll X\).
+            In the application, \(H=X^{1+\epsilon}\) will be a hair larger than \(X\), so even with square-root cancellation on average, dropping all but one term only shows the trivial bound: \(|M(X)|^2\le S(X,H)\ll X H \), which implies \(M(X)\ll (XH)^{1/2}\); this is epsilon worse than trivial - but in Sarnak's terminology, "pregnant". ("You have to be pregnant to deliver!")
             But sixth powers act as an amplifier. They recover (almost) the
             original sum:
             <span class="hero-equation">\(\displaystyle |M_{p^6}(X)-M(X)|\ll XH^{-1/6}\quad\bigl(p\text{ prime},\ \mathcal N(p^6)\asymp H\bigr)\).</span>
-            Averaging across these sixth-power rows lets the second moment recover \(M(X)\) with a power saving: roughly \(M(X)\ll X^{1/2}H^{5/12}\), reaching \(X^{11/12+\varepsilon}\) when \(H\) is just above \(X\).
-            Opening the square and applying Poisson summation produces Gauss
-            sums. Gauss–Jacobi identities absorb the Möbius coefficients outside into
+            Since there are very roughly \(H^{1/6}\) (again, ignoring epsilons) such, we get, roughly, that
+            \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
+            </p><p class="hero-lede">
+            Opening the square gives the schematic expansion
+            <span class="hero-equation">\(\displaystyle S(X,H)=\sum_{\substack{\mathcal N(n),\mathcal N(m)\asymp X\\ n,m\ {\rm primary}}}\mu_K(n)\mu_K(m)W\!\left(\frac{\mathcal N(n)}X\right)\overline{W\!\left(\frac{\mathcal N(m)}X\right)}\sum_{u\in\mathcal O}V\!\left(\frac{\mathcal N(u)}H\right)\chi_n(u)\overline{\chi_m(u)}\)</span>
+            Poisson summation in the inner row sum produces Gauss sums.
+            Gauss–Jacobi identities absorb the Möbius coefficients outside into
             cubic Gauss sums, which we recognize as Fourier coefficients of
             Kubota’s cubic theta series. After completing the series, its
             modularity gives a Voronoi-type transformation. (The formal proof of modularity follows the standard path, obtaining the theta
