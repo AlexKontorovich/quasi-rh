@@ -154,6 +154,14 @@
       font-size: clamp(1.1rem, 1.7vw, 1.32rem);
       line-height: 1.55;
     }
+    .hero-equation {
+      display: block;
+      max-width: 100%;
+      margin: 0.18em 0 0.28em;
+      overflow-x: auto;
+      color: #302b26;
+      font-size: 0.94em;
+    }
     .status-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px; }
     .status { padding: 15px 17px; border: 1px solid var(--line); border-radius: 13px; background: rgba(246,243,236,0.62); }
     .status strong { display: block; margin-bottom: 4px; font-size: 0.8rem; letter-spacing: 0.02em; }
@@ -333,7 +341,7 @@
           <li><a href="#beat-3"><span class="nav-number">03</span><span>First Poisson</span></a></li>
           <li><a href="#beat-4"><span class="nav-number">04</span><span>Gauss–Jacobi</span></a></li>
           <li><a href="#beat-5"><span class="nav-number">05</span><span>Complete theta</span></a></li>
-          <li><a href="#beat-6"><span class="nav-number">06</span><span>Modularity</span></a></li>
+          <li><a href="#beat-6"><span class="nav-number">06</span><span>Modularity/Voronoi</span></a></li>
           <li><a href="#beat-7"><span class="nav-number">07</span><span>Second Poisson</span></a></li>
           <li><a href="#beat-8"><span class="nav-number">08</span><span>Quadratic large sieve</span></a></li>
         </ol>
@@ -357,14 +365,20 @@
           <p class="eyebrow">Reading OpenAI’s proof side by side with a Lean formalization</p>
           <h2>A quasi-Riemann Hypothesis in <em>\(\Re(s)>11/12\)</em></h2>
           <p class="hero-lede">
-            We seek cancellation in a smooth dyadic sum on Möbius over
-            \(\mathbb Q\). But over \(\mathbb Q\) there are not enough
+            We seek cancellation in Möbius over \(\mathbb Q\):
+            <span class="hero-equation">\(\displaystyle \sum_{n\asymp N}\mu(n)\)</span>
+            But over \(\mathbb Q\) there are not enough
             harmonics. We therefore lift to the Eisenstein field
-            \(K=\mathbb Q(\omega)\): since
+            \(K=\mathbb Q(\omega)\):
+            <span class="hero-equation">\(\displaystyle \sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp N}}\mu_K(n)\)</span>
+            Since
             \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
             \(\zeta_K\) forces nonvanishing of both factors. We deform the
-            Eisenstein Möbius sum by sextic characters and take a second
-            moment. Sixth powers in the twisting family recover (almost) the original
+            Eisenstein Möbius sum by sextic characters:
+            <span class="hero-equation">\(\displaystyle M_u(N):=\sum_{\substack{n\in\mathcal O\\\mathcal N(n)\asymp N}}\mu_K(n)\chi_n(u)\)</span>
+            and take a second moment:
+            <span class="hero-equation">\(\displaystyle S(N,H):=\sum_{\substack{u\in\mathcal O\\\mathcal N(u)\asymp H}}|M_u(N)|^2\)</span>
+            Sixth powers in the twisting family recover (almost) the original
             sum, and therefore act as an amplifier.
             Opening the square and applying Poisson summation produces Gauss
             sums. Gauss–Jacobi identities absorb the Möbius coefficients outside into
