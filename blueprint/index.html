@@ -147,12 +147,34 @@
     }
     .hero h2 em { color: var(--amber); font-style: normal; white-space: nowrap; }
     .hero-lede {
-      max-width: 790px;
+      max-width: 1020px;
       margin: 25px 0 0;
       color: #4e5a55;
       font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(1.1rem, 1.7vw, 1.32rem);
-      line-height: 1.55;
+      font-size: clamp(1.04rem, 1.45vw, 1.22rem);
+      line-height: 1.58;
+    }
+    .hero-lede p { margin: 0; }
+    .hero-lede p + p { margin-top: 0.95em; }
+    .hero-lede a {
+      color: #315f58;
+      text-decoration-color: rgba(13, 117, 106, 0.42);
+      text-underline-offset: 3px;
+    }
+    .hero-lede a:hover { color: var(--teal); }
+    .new-here {
+      display: inline-block;
+      margin-right: 0.35em;
+      padding: 0.14em 0.5em;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: #8f4c1e;
+      font-family: Inter, ui-sans-serif, sans-serif;
+      font-size: 0.58em;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      vertical-align: 0.15em;
     }
     .status-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 34px; }
     .status { padding: 15px 17px; border: 1px solid var(--line); border-radius: 13px; background: rgba(246,243,236,0.62); }
@@ -355,26 +377,115 @@
         <header class="hero">
           <p class="eyebrow">Reading OpenAI’s proof side by side with a Lean formalization</p>
           <h2>A quasi-Riemann Hypothesis in <em>\(\Re(s)>11/12\)</em></h2>
-          <p class="hero-lede">
-            We seek cancellation in a smooth dyadic sum on Möbius over
-            \(\mathbb Q\). But over \(\mathbb Q\) there are not enough
-            harmonics. We therefore lift to the Eisenstein field
-            \(K=\mathbb Q(\omega)\): since
-            \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
-            \(\zeta_K\) forces nonvanishing of both factors. We deform the
-            Eisenstein Möbius sum by sextic characters and take a second
-            moment. Sixth powers in the twisting family recover (almost) the original
-            sum, and therefore act as an amplifier.
-            Opening the square and applying Poisson summation produces Gauss
-            sums. Gauss–Jacobi identities absorb the Möbius coefficients outside into
-            cubic Gauss sums, which we recognize as Fourier coefficients of
-            Kubota’s cubic theta series. After completing the series, its
-            modularity gives a Voronoi-type transformation. (The formal proof of modularity follows the standard path, obtaining the theta
-            function as the residue of a metaplectic Eisenstein series,
-            whose meromorphic continuation is proved by Selberg’s
-            resolvent/Fredholm method.) A second Poisson summation results in the sextic characters getting cubed, and thus turning into quadratic characters (!!), where the
-            quadratic large sieve supplies the final cancellation.
-          </p>
+          <div class="hero-lede">
+            <p>
+              We seek cancellation in a smooth dyadic Möbius sum over
+              \(\mathbb Q\), but over \(\mathbb Q\) there are not enough
+              harmonics. We therefore lift to the Eisenstein field
+              \(K=\mathbb Q(\omega)\). Eisenstein’s
+              <a href="https://doi.org/10.1515/crll.1844.28.28">1844 cubic-reciprocity work</a>
+              supplies the arithmetic setting, while the ideal and \(L\)-function
+              language comes from
+              <a href="https://www.numdam.org/item/BSMA_1877_2_1_1_17_1/">Dedekind</a>
+              and
+              <a href="https://geodesic.mathdoc.fr/item/MZ_1920__6_167556/">Hecke</a>.
+              The classical factorization
+              \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\) means that nonvanishing
+              of \(\zeta_K\) forces nonvanishing of both factors.
+              <span class="new-here">New strategy here</span>The factorization is
+              classical; using this Eisenstein detour as the entrance to the
+              \(11/12\) argument is specific to the present proof. The larger
+              principle—place one object in a family so that new symmetries become
+              visible—has a celebrated geometric analogue in
+              <a href="https://numdam.org/articles/10.1007/BF02684373/">Deligne’s proof of the Weil Riemann hypothesis</a>:
+              he organized hyperplane sections into a Lefschetz pencil, used its
+              monodromy and \(\ell\)-adic \(L\)-function for Frobenius bounds, and
+              forced the exact weights by a Cartesian-power argument. There is also
+              a close spectral precursor. Selberg’s Eisenstein-series method, in the
+              <a href="https://web.math.princeton.edu/sarnak/ShalikaBday2002.pdf">explicit formulation recorded by Sarnak</a>,
+              turns Fourier coefficients into Dirichlet series of Ramanujan sums;
+              at index \(m=1\), \(c_q(1)=\mu(q)\), so spectral holomorphy
+              yields smoothed Möbius cancellation and hence the prime number
+              theorem. Sarnak credits this formulation to Selberg; his new
+              contribution there is the effective version and its quantitative
+              zero-free region.
+            </p>
+            <p>
+              Here we deform the Eisenstein Möbius sum by sextic characters and
+              take a second moment. This belongs to the modern amplification line
+              running from
+              <a href="https://doi.org/10.1515/crll.1992.428.139">Iwaniec’s spectral amplifier</a>
+              and
+              <a href="https://doi.org/10.1007/BF01232422">Duke–Friedlander–Iwaniec’s amplified moments</a>
+              to
+              <a href="https://annals.math.princeton.edu/1995/141-2/p03">Iwaniec–Sarnak</a>.
+              <span class="new-here">New family here</span>The particular sextic
+              deformation, and the use of sixth-power rows to recover almost the
+              original sum, are new to this argument. Opening the square and
+              applying Poisson summation has a close half-integral-weight analogue
+              in
+              <a href="https://doi.org/10.1007/BF01453602">Duke–Iwaniec’s 1990</a>
+              passage from Poisson summation to Gauss–Ramanujan sums and bilinear
+              estimates. Their
+              <a href="https://doi.org/10.1090/conm/143/00999">1993 cubic-exponential/Kloosterman identity</a>
+              is another nearby precursor, though neither result is a dependency of
+              this sextic proof. The local cubic Gauss-sum algebra follows
+              <a href="https://doi.org/10.1007/978-3-642-52795-1">Hasse’s 1950 treatment</a>,
+              in the form emphasized by equation (2) of
+              <a href="https://doi.org/10.1007/s11856-000-1273-y">Heath-Brown’s 2000 cubic work</a>.
+              <span class="new-here">New recombination</span>The exact mixed
+              sextic/cubic identity that absorbs the Möbius coefficient is derived
+              in the present proof from those classical ingredients.
+            </p>
+            <p>
+              The resulting cubic Gauss sums enter the metaplectic theory created
+              by <a href="https://hdl.handle.net/2433/84907">Kubota</a>, who
+              constructed theta functions as residues of metaplectic Eisenstein
+              series. <a href="https://doi.org/10.1515/crll.1977.296.125">Patterson</a>
+              made the cubic theta series explicit and calculated its
+              cubic-Gauss-sum Fourier coefficients;
+              <a href="https://doi.org/10.1515/crll.1979.310.111">Heath-Brown–Patterson</a>
+              exploited the same connection for Kummer sums. Completing the
+              squarefree sum to the full theta series and later removing the cube
+              factors follows
+              <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł</a>,
+              with precedents in Patterson and Heath-Brown. The theta modularity
+              itself comes from the residue construction: meromorphic continuation
+              uses
+              <a href="https://cds.cern.ch/record/427143">Selberg’s 1956 resolvent/Fredholm method</a>,
+              Kubota applies it metaplectically, Patterson computes the cubic
+              coefficients and cusps, and
+              <a href="https://doi.org/10.1017/S0027763000000817">Yoshimoto</a>
+              develops the twisted functional equations. The explicit
+              level-aspect Voronoi transformation used here is Dunn–Radziwiłł’s
+              extension of Patterson and Yoshimoto.
+            </p>
+            <p>
+              <span class="new-here">New bridge here</span>After theta reflection,
+              the proof arranges a second Poisson summation so that the sextic
+              characters occur through their cubes and therefore become quadratic.
+              The closing sieve descends from Linnik’s large sieve:
+              <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown</a>
+              proved the sharp self-dual quadratic inequality over \(\mathbb Q\),
+              and
+              <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a>
+              proved the number-field form used over \(\mathbb Q(\omega)\). The
+              finite admissible-exponent descent likewise runs from Heath-Brown’s
+              quadratic and cubic work to Goldmakher–Louvel and the higher-order
+              development of
+              <a href="https://doi.org/10.1093/imrn/rns257">Blomer–Goldmakher–Louvel</a>.
+              <span class="new-here">New at 11/12</span>This formal assembly makes
+              the descent radius arbitrarily small and couples it to an all-element
+              sixth-power amplifier; the resulting totient density is removed by
+              an exact Euler correction. Finally, Mellin inversion turns the
+              smoothed estimate into the zero-free half-plane—the Hecke analogue
+              of <a href="https://denisevellachemla.eu/transc-CRAS-1912-Littlewood-Redheffer.pdf">Littlewood’s 1912 Möbius criterion</a>.
+              Thus the Poisson, theta, Voronoi, and sieve engines are inherited;
+              the specific sextic family, the mixed Möbius–Gauss recombination,
+              the sextic-to-quadratic bridge, and their direct \(11/12\) assembly
+              are the new moves.
+            </p>
+          </div>
           <div class="status-row" aria-label="Formalization status">
             <div class="status"><strong>Public endpoint</strong><span><code>11/12 &lt; Re s → riemannZeta s ≠ 0</code></span></div>
             <div class="status"><strong>Proof objects</strong><span>The linked declarations compile; proof bodies remain in source</span></div>
