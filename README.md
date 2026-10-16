@@ -144,6 +144,11 @@ natural-language explanation with the definitions and theorem boundary that
 Lean checks. The [ideal-family notes](docs/ideal-family.md) preserve an earlier
 standalone prototype; they are not the proof spine shown in the blueprint.
 
+Read the [published blueprint](https://alexkontorovich.github.io/quasi-rh/index.html).
+GitHub Actions republishes it whenever `blueprint/index.html` or the Pages
+workflow changes on `main`; it can also be deployed manually from Actions.
+Only the standalone HTML is published. Source links require repository access.
+
 Open `blueprint/index.html` directly, or run `python3 -m http.server 8000`
 and visit <http://localhost:8000/blueprint/>. MathJax requires internet access.
 Edit the HTML directly and keep excerpts synchronized with their linked Lean
