@@ -30,10 +30,10 @@ Let `W` and `V` be smooth weights supported in `[1 / 2, 1]`. For an
 Eisenstein integer `u`, the public family is
 
 \[
-  M_u(N)=
-  \sum_{\substack{n\ \mathrm{primary}\\N(n)\le N}}
+  M_u(X)=
+  \sum_{\substack{n\ \mathrm{primary}\\\mathcal N(n)\le X}}
     \mu_K((n))\,\chi_{(n)}(u)\,
-    W\!\left(\frac{N(n)}N\right).
+    W\!\left(\frac{\mathcal N(n)}X\right).
 \]
 
 Thus the Lean summand visibly contains primaryness, ideal Möbius, the actual
@@ -41,8 +41,8 @@ sextic twist, and the smooth cutoff. The public second moment is defined as
 the finite sum
 
 \[
-  S(N,H)=\sum_{N(u)\le H}
-    V\!\left(\frac{N(u)}H\right)|M_u(N)|^2.
+  S(X,H)=\sum_{\mathcal N(u)\le H}
+    V\!\left(\frac{\mathcal N(u)}H\right)|M_u(X)|^2.
 \]
 
 Immediately before entering the Poisson-summation interface, compact support
@@ -58,7 +58,7 @@ parameterization of its finite descent gives, for every `theta > 0`, the
 schematic estimate
 
 \[
-  \sum_{N(z)\le Z^{1+\theta}} |M_z(Z)|^2
+  \sum_{\mathcal N(z)\le Z^{1+\theta}} |M_z(Z)|^2
   \ll_{\theta,\varepsilon} Z^{2+\theta+\varepsilon}.
 \]
 
@@ -93,7 +93,7 @@ The average is intentionally not forced back to a raw Möbius sum. It produces
 the totient-weighted coefficient
 
 \[
-  \mu_K(I)\prod_{P\mid I}\left(1-\frac1{N(P)}\right).
+  \mu_K(I)\prod_{P\mid I}\left(1-\frac1{\mathcal N(P)}\right).
 \]
 
 The inverse-Mellin stage then restores the corresponding Euler correction,
@@ -123,7 +123,7 @@ specialization; the direct `11 / 12` assembly does not use it.
 | --- | --- |
 | Weights supported in `[1 / 2, 1]` | `ElevenTwelfths.SmoothDyadic` |
 | Eisenstein norm, primaryness, and `mu_K ((n))` | `ElevenTwelfths.Arithmetic` |
-| Explicit finite `M_u(N)` and `S(N,H)` | `ElevenTwelfths.ConcreteFamily` |
+| Explicit finite `M_u(X)` and `S(X,H)` | `ElevenTwelfths.ConcreteFamily` |
 | Finite-to-`tsum` boundary | `outsideS_eq_idealRowSum_tsum` |
 | Theta/reflection model built from branch decoding | `ElevenTwelfths.ActualFixedShellModels` |
 | Arbitrary-positive-radius mean square | `outside_mean_square_of_theta_models_pos` |
@@ -136,8 +136,8 @@ The short mathematical guide is in [`docs/argument.md`](docs/argument.md).
 
 ## Side-by-side blueprint
 
-The [HTML blueprint](blueprint/index.html) presents the complete direct proof
-in twelve mathematical beats, from the explicit Eisenstein family through the
+The [HTML blueprint](blueprint/index.html) presents the direct proof
+in mathematical stages, from the explicit Eisenstein family through the
 two Poisson passages, cubic theta reflection, quadratic sieve, sixth-power
 amplifier, Mellin continuation, and zeta nonvanishing. Each beat pairs a short
 natural-language explanation with the definitions and theorem boundary that
@@ -151,8 +151,33 @@ Only the standalone HTML is published. Source links require repository access.
 
 Open `blueprint/index.html` directly, or run `python3 -m http.server 8000`
 and visit <http://localhost:8000/blueprint/>. MathJax requires internet access.
-Edit the HTML directly and keep excerpts synchronized with their linked Lean
-sources. Use existing mathlib definitions where available, and keep the
+The main readable interfaces are now:
+
+- `ElevenTwelfths.ZetaFamily`: concrete zeta-only `M`, `S`, opening the square,
+  sixth-power coprimality, and the unconditional mean-square bound for those
+  same sums.
+- `ElevenTwelfths.ThetaSums`: actual cubic coefficients, exact cube inversion,
+  quadratic energy, and the sharp `L + Y` large sieve.
+- `ElevenTwelfths.Voronoi`: the fixed-shell Voronoi identity for the same
+  completed `thetaSum`, specialized to conductor one and smooth dyadic weights.
+- `ElevenTwelfths.ZetaBound`: the explicit density-weighted Möbius sum and
+  its unconditional `11/12 + ε` bound.
+
+These are proved interfaces to the existing analytic core, not a replacement
+proof by the introductory heuristics. In particular, the full reflected
+moment is not claimed to equal a single quadratic-energy block: branch
+weights, local phases, cube scales and the descent remain in the core.
+
+Marked HTML panels are generated from actual Lean declarations:
+
+```sh
+node scripts/sync-blueprint.mjs
+node scripts/sync-blueprint.mjs --check
+```
+
+Edit prose directly, but edit marked Lean excerpts in their source modules
+and regenerate them. Definitions are included in full; theorem statements
+omit only their proofs. Use existing mathlib definitions where available, and keep the
 readable mathematical invariant separate from the longer formal interface.
 
 ## Building
@@ -163,6 +188,7 @@ building Mathlib `.olean` files locally.
 ```sh
 lake exe cache get
 lake build
+lake env lean tests/Blueprint.lean
 ```
 
 The Lake configuration automatically applies and verifies the vendored Lean

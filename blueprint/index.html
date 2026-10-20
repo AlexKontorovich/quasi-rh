@@ -508,6 +508,32 @@ noncomputable def μ_K (n : 𝒪) : ℤ :=
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ConcreteFamily.lean#L88">ConcreteFamily.lean</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ZetaFamily.lean">ZetaFamily.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/ZetaFamily.lean" data-lean-decls="excludedPrimes,columns,rows,sexticTwist,M,untwistedM,S,M_one"><code>abbrev excludedPrimes : Finset (Ideal 𝒪) := reflectionExcludedPrimes 1
+
+abbrev columns (X : ℕ) : Finset 𝒪 := outsidePrimaryBall excludedPrimes X
+abbrev rows (H : ℕ) : Finset 𝒪 := exactRowBall H
+
+abbrev rows (H : ℕ) : Finset 𝒪 := exactRowBall H
+
+abbrev sexticTwist (X : ℕ) (n u : 𝒪) : ℂ :=
+  outsideSexticTwist excludedPrimes (reflectionExcludedPrimes_bad 1) X u n
+
+def M (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ :=
+  ∑ n ∈ columns X, if primary n then
+    (μ_K n : ℂ) * sexticTwist X n u * W ((𝒩 n : ℝ) / X) else 0
+
+def untwistedM (W : SmoothDyadicWeight ℂ) (X : ℕ) : ℂ :=
+  ∑ n ∈ columns X, if primary n then
+    (μ_K n : ℂ) * W ((𝒩 n : ℝ) / X) else 0
+
+def S (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) : ℝ :=
+  ∑ u ∈ rows H, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2
+
+theorem M_one (W : SmoothDyadicWeight ℂ) (X : ℕ) :
+    M W 1 X = untwistedM W X</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>structure SmoothDyadicWeight (E : Type*)
     [NormedAddCommGroup E] [NormedSpace ℝ E] where
   toFun : ℝ → E
@@ -544,6 +570,7 @@ noncomputable def outsideS
   ∑ u ∈ exactRowBall H,
     V ((𝒩 u : ℝ) / (H : ℝ)) *
       ‖outsideM S hbad W u X‖ ^ 2</code></pre>
+            </details>
             <details>
               <summary>The exact element-to-ideal and finite-to-lattice statements</summary>
               <pre><code>theorem outsideM_eq_idealRowSum
@@ -598,6 +625,23 @@ theorem outsideS_eq_idealRowSum_tsum
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/PoissonSource.lean#L475">pair Poisson</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ZetaFamily.lean">ZetaFamily.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/ZetaFamily.lean" data-lean-decls="mobiusWeight,S_open_square,S_eq_tsum"><code>def mobiusWeight (W : SmoothDyadicWeight ℂ) (X : ℕ) (n : 𝒪) : ℂ :=
+  if primary n then (μ_K n : ℂ) * W ((𝒩 n : ℝ) / X) else 0
+
+theorem S_open_square (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+    (X H : ℕ) :
+    (S W V X H : ℂ) =
+      ∑ n ∈ columns X, ∑ m ∈ columns X,
+        mobiusWeight W X n * star (mobiusWeight W X m) *
+          ∑ u ∈ rows H, (V ((𝒩 u : ℝ) / H) : ℂ) *
+            sexticTwist X n u * star (sexticTwist X m u)
+
+theorem S_eq_tsum (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+    (X H : ℕ) :
+    S W V X H = ∑' u : 𝒪, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code><span class="comment">-- Exact central equality; parameters encode the two columns.</span>
 theorem canonicalPair_first_poisson
     (hinj : Function.Injective
@@ -624,6 +668,7 @@ theorem canonicalPair_first_poisson
         C₁ C₂ W V₁ V₂ X₁ X₂ K
         (primeSubsetGenerator
           (fun i => Ideal.span {p i}) D) h</code></pre>
+            </details>
             <p class="formal-note">The wrapper <code>outside_mean_square_source</code> connects this equality to the original <code>idealRowSum</code> second moment and isolates zero, truncated, and tail terms.</p>
           </section>
         </article>
@@ -701,6 +746,29 @@ theorem canonicalPair_first_poisson
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/GaussSum/CompletedExpansion.lean#L128">reopening</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ThetaSums.lean">ThetaSums.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/ThetaSums.lean" data-lean-decls="c₃,c₃_eq,cubicSum,thetaSum,cubicSum_eq_cube_inversion"><code>abbrev c₃ (I : Ideal O) : ℂ := squarefreeGaussCoefficient I
+
+theorem c₃_eq (I : Ideal O) (hsq : Squarefree I)
+    (hI : primaryGenerator I ≠ 0) :
+    c₃ I = star (FiniteGaussPhase.angularFactor (primaryGenerator I)) * gaussTwo I hI
+
+def cubicSum (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
+  ∑' I : Ideal O, c₃ I * Ψ (primaryGenerator I) * W ((Ideal.absNorm I : ℝ) / X)
+
+def thetaSum (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
+  ∑' I : Ideal O, ∑' J : Ideal O,
+    (c₃ I * Ψ (primaryGenerator I)) / (Real.sqrt (Ideal.absNorm I : ℝ) : ℂ) *
+      cubeWeight Ψ J *
+      Vstar W ((Ideal.absNorm I : ℝ) * (Ideal.absNorm J : ℝ) ^ 3 / X)
+
+theorem cubicSum_eq_cube_inversion (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ)
+    (X : ℝ) (hX : 0 &lt; X) :
+    (Real.sqrt X : ℂ)⁻¹ * cubicSum Ψ W X =
+      ∑' J : Ideal O, (UniqueFactorizationMonoid.moebius J : ℂ) * cubeWeight Ψ J *
+        thetaSum Ψ W (X / (Ideal.absNorm J : ℝ) ^ 3)</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>def cubeWeight (Ψ : O →* ℂ) : Ideal O →* ℂ where
   toFun I :=
     star (FiniteGaussPhase.angularFactor
@@ -735,6 +803,7 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
     (X : ℝ) : ℂ :=
   ∑' I : Ideal O, ∑' J : Ideal O,
     summand Ψ W X I J</code></pre>
+            </details>
             <pre><code>theorem weighted_completedT_reopen
     (Ψ : O →* ℂ) (W : ℝ → ℂ) (X : ℝ)
     (H : Ideal O) :
@@ -769,6 +838,27 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ActualFixedShellModels.lean#L137">model theorem</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/Voronoi.lean">Voronoi.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/Voronoi.lean" data-lean-decls="@context,theta_voronoi"><code>variable (m : O) (hm : m ≠ 0)
+    (rows : Finset (Ideal O)) (R F : Ideal O) (hR : R ≠ 0)
+    (hF : Squarefree F) (hrows : ∀ I ∈ rows, I ≠ 0) (v : Oˣ)
+
+theorem theta_voronoi
+    (Ψ : O →* ℂ) (hperiod : FactorsModulo (fixedBaseConductor 1) Ψ)
+    (hΨ : ∀ n, ‖Ψ n‖ ≤ 1)
+    (L : ℝ) (hshell : ∀ I ∈ rows,
+      L / 2 ≤ (Ideal.absNorm I : ℝ) ∧ (Ideal.absNorm I : ℝ) ≤ L)
+    (ℓ : RowIndex 1 m rows R F)
+    (W : SmoothDyadicWeight ℂ) (X : ℝ) (hX : 0 &lt; X) :
+    thetaSum
+        (rowTwist Ψ (maskElement 1 m)
+          (OAI.ConcretePrimeRowBridge.idealGenerator F)
+          (v.val * OAI.ConcretePrimeRowBridge.idealGenerator ℓ.val)) W X =
+      ActualFixedShellModels.actualReflectionScale *
+        (reflectedFiber 1 (by norm_num) m hm rows R F hR hF hrows v L Ψ hΨ).idealValue
+          W X 1 completedRamifiedStep (rowResidualPart ℓ.val (maskIdeal 1 m F))</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>def actualReflectionScale : ℂ :=
   4 * thetaDerivativeScalar⁻¹ *
     fixedRadialCoefficientScalar
@@ -796,6 +886,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
         hrows v K Ψ hΨ).idealValue
           W X 1 completedRamifiedStep
           (rowResidualPart J.val (maskIdeal q m F))</code></pre>
+            </details>
             <details>
               <summary>The model interface supplied by that identity</summary>
               <pre><code>theorem exists_actual_fixedShellModels
@@ -831,12 +922,25 @@ theorem completedT_eq_reflectedFiber_idealValue_local
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/GaussSum/SexticNormalization.lean#L40">sextic cube</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ThetaSums.lean">ThetaSums.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/ThetaSums.lean" data-lean-decls="χ₂,χ₂_eq_sextic_cube,quadraticEnergy"><code>abbrev χ₂ (I : Ideal O) (u : O) : ℂ := quadraticRow I u
+
+theorem χ₂_eq_sextic_cube (I : Ideal O) (hI : Admissible I) (u : O) :
+    χ₂ I u =
+      (OAI.ConcretePrimeRowBridge.idealSexticRow {I}
+        (singletonPositive I hI) (singletonGood I hI) I u) ^ 3
+
+def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :=
+  ∑ ℓ ∈ rows, ‖∑ m ∈ cols, a m * χ₂ m (primaryGenerator ℓ)‖ ^ 2</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>theorem canonicalSextic_pow_three_quadratic
     (P : Ideal O) [P.IsMaximal]
     (hgood : lambda ∉ P) :
   canonicalSextic P hgood ^ 3 =
     (quadraticChar (O ⧸ P)).ringHomComp
       (Int.castRingHom ℂ)</code></pre>
+            </details>
             <details>
               <summary>Auxiliary Poisson identity used in the formal sieve argument</summary>
               <p class="formal-note">The repository also proves <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83"><code>masked_pair_second_poisson</code></a>, used in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/ChildTransfer.lean#L560"><code>ChildTransfer.lean</code></a>. This masked-pair identity is distinct from the elementary sextic-cube identity above.</p>
@@ -874,13 +978,27 @@ theorem completedT_eq_reflectedFiber_idealValue_local
             \]</div>
             <p class="plain-note"><strong>Lineage.</strong> The large sieve originates with <a href="https://www.cambridge.org/core/journals/mathematika/article/abs/large-sieve/4DC1EC8072D840195F1EF81F5828BB0F">Linnik (1941)</a>. <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown</a> proved the sharp self-dual quadratic-character inequality over \(\mathbb Q\), and <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a> proved the number-field form used here over \(\mathbb Q(\omega)\).</p>
             <p>For \(|a_m|\le1\), the intro’s heuristic therefore gives \(S(X,H)\ll (HX/L^2)(L+Y)Y=H(L+Y)\ll HX\), ignoring epsilon losses. The full proof must sum the separate blocks with their weights and restrictions.</p>
-            <p>The adjacent Lean statement is the initial \(M+N^2\) estimate, with \(M,N\) denoting row and column bounds. The sharp \(M+N\) result used in the heuristic is <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/LogarithmicLoss.lean#L479"><code>finite_family_quadratic_large_sieve</code></a>, obtained after improving the initial sieve exponent.</p>
+            <p>The adjacent Lean statement now gives the sharp \(L+Y\) bound for the displayed finite quadratic energy. It is proved from <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/LogarithmicLoss.lean#L479"><code>finite_family_quadratic_large_sieve</code></a>; the initial \(M+N^2\) estimate remains available in the expandable implementation details.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
-              <div><p class="formal-kicker">Large sieve</p><h4 class="formal-title">The initial quadratic energy bound</h4></div>
+              <div><p class="formal-kicker">Large sieve</p><h4 class="formal-title">The sharp quadratic energy bound</h4></div>
               <div class="source-links"><a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/InitialBound.lean#L473">InitialBound.lean</a></div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ThetaSums.lean">ThetaSums.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="OAI/NumberTheory/DirichletL/QuadraticSieve/CoprimeBilinearBound.lean" data-lean-decls="Admissible"><code>def Admissible (I : Ideal O) : Prop :=
+  I ≠ 0 ∧ Squarefree I ∧ ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors I,
+    lambda ∉ P ∧ ringChar (O ⧸ P) ≠ 2</code></pre>
+            <pre data-lean-source="ElevenTwelfths/ThetaSums.lean" data-lean-decls="quadratic_large_sieve"><code>theorem quadratic_large_sieve (ε : ℝ) (hε : 0 &lt; ε) :
+    ∃ C : ℝ, 0 &lt; C ∧ ∀ L Y : ℝ, 1 ≤ L → 1 ≤ Y →
+      ∀ rows cols : Finset (Ideal O),
+      (∀ ℓ ∈ rows, Admissible ℓ ∧ (Ideal.absNorm ℓ : ℝ) ≤ L) →
+      (∀ m ∈ cols, Admissible m ∧ (Ideal.absNorm m : ℝ) ≤ Y) →
+      ∀ a : Ideal O → ℂ,
+      quadraticEnergy rows cols a ≤
+        C * (L * Y) ^ ε * (L + Y) * ∑ m ∈ cols, ‖a m‖ ^ 2</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>theorem ideal_initial_quadratic_sieve
     (F : Finset (Ideal O))
     (hFpos : ∀ I ∈ F, I ≠ ⊥)
@@ -900,6 +1018,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
       a I * (idealSexticRow F hFpos hFgood I z) ^ 3‖ ^ 2) ≤
   initialSieveConstant * (M + (N : ℝ) ^ 2) *
     ∑ I ∈ F, ‖a I‖ ^ 2</code></pre>
+            </details>
           </section>
         </article>
 
@@ -914,7 +1033,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
               \sum_{\substack{h\in T\\\mathcal N(h)\le X^{1+\theta}}}|M_h(X)|^2
               \ \ll_{\theta,\varepsilon}\ X\cdot X^{1+\theta}\cdot X^\varepsilon.
             \]</div>
-            <p>This is the intro’s target \(S(X,H)\ll XH X^\varepsilon\) with \(H=X^{1+\theta}\); the theorem applies to finite sets of nonzero rows within that norm bound. Taking \(\theta\) arbitrarily small lets amplification reach \(11/12+\varepsilon\). The formal statement uses \(Z\) for the column scale called \(X\) here.</p>
+            <p>The checked interfaces below bound both finite sets of nonzero rows and the actual smooth moment \(S\), with \(0\le V\le1\). For \(H\) comparable to \(X^{1+\theta}\), this is the intro’s target \(S(X,H)\ll XH X^\varepsilon\). The bound is not asserted uniformly for arbitrarily small \(H\). Taking \(\theta\) arbitrarily small lets amplification reach \(11/12+\varepsilon\).</p>
             <p class="plain-note"><strong>Lineage.</strong> The finite descent draws on <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown’s quadratic and cubic work</a>, the number-field development of <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a>, and the higher-order methods of <a href="https://doi.org/10.1093/imrn/rns257">Blomer–Goldmakher–Louvel</a>. <strong>New at \(11/12\).</strong> The formal assembly makes the descent reserve arbitrarily small.</p>
           </section>
           <section class="formal">
@@ -925,6 +1044,24 @@ theorem completedT_eq_reflectedFiber_idealValue_local
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/MeanSquare/ThetaDensity.lean#L274">ThetaDensity.lean</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ZetaFamily.lean">ZetaFamily.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/ZetaFamily.lean" data-lean-decls="row_mean_square,mean_square_dyadic"><code>theorem row_mean_square (W : SmoothDyadicWeight ℂ)
+    (θ ε : ℝ) (hθ : 0 &lt; θ) (hε : 0 &lt; ε) :
+    ∃ C : ℝ, 0 &lt; C ∧ ∀ X : ℕ, 1 ≤ X →
+      ∀ T : Finset 𝒪,
+      (∀ u ∈ T, (𝒩 u : ℝ) ≤ (X : ℝ) ^ (1 + θ)) →
+      (∀ u ∈ T, u ≠ 0) →
+      (∑ u ∈ T, ‖M W u X‖ ^ 2) ≤
+        C * X * (X : ℝ) ^ (1 + θ) * (X : ℝ) ^ ε
+
+theorem mean_square_dyadic (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
+    (hV : ∀ t, V t ≤ 1) (θ ε : ℝ) (hθ : 0 &lt; θ) (hε : 0 &lt; ε) :
+    ∃ C : ℝ, 0 &lt; C ∧ ∀ X H : ℕ, 1 ≤ X →
+      (H : ℝ) ≤ (X : ℝ) ^ (1 + θ) →
+      (X : ℝ) ^ (1 + θ) ≤ 2 * H →
+      S W V X H ≤ C * X * H * (X : ℝ) ^ ε</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>class CanonicalDescentScale where
   denominator : ℕ
   denominator_pos : 0 &lt; denominator
@@ -949,6 +1086,7 @@ def CanonicalDescentScale.ofReserve
     have := (div_le_iff₀ hκ).1 hdiv
     push_cast at this ⊢
     nlinarith</code></pre>
+            </details>
             <details open>
               <summary>The arbitrary-positive-radius conclusion</summary>
               <pre><code>theorem outside_mean_square_of_theta_models_pos
@@ -1006,6 +1144,25 @@ def CanonicalDescentScale.ofReserve
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/Unconditional.lean#L43">11/12 choice</a>
               </div>
             </div>
+            <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ZetaFamily.lean">ZetaFamily.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
+            <pre data-lean-source="ElevenTwelfths/ZetaBound.lean" data-lean-decls="density,densityM,densityM_bound"><code>abbrev density (I : Ideal 𝒪) : ℂ :=
+  ∏ P ∈ OAI.IdealMobiusDivisorSum.primeSupport I,
+    (1 - (1 : ℂ) / (Ideal.absNorm P : ℂ))
+
+def densityM (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
+  ∑' I : Ideal 𝒪, if ∀ P ∈ excludedPrimes, ¬ P ∣ I then
+    (UniqueFactorizationMonoid.moebius I : ℂ) * density I *
+      W ((Ideal.absNorm I : ℝ) / X) else 0
+
+theorem densityM_bound (W : SmoothDyadicWeight ℂ) (ε : ℝ) (hε : 0 &lt; ε) :
+    (fun X : ℝ ↦ densityM W X) =O[atTop]
+      (fun X : ℝ ↦ X ^ ((11 / 12 : ℝ) + ε))</code></pre>
+            <pre data-lean-source="ElevenTwelfths/ZetaFamily.lean" data-lean-decls="M_sixth_power"><code>theorem M_sixth_power (W : SmoothDyadicWeight ℂ) (b : 𝒪) (X : ℕ) :
+    M W (b ^ 6) X =
+      ∑ I ∈ outsideIdealsUpTo excludedPrimes X with IsCoprime I (Ideal.span {b}),
+        (UniqueFactorizationMonoid.moebius I : ℂ) * W ((Ideal.absNorm I : ℝ) / X)</code></pre>
+            <details>
+              <summary>Underlying general-purpose interface</summary>
             <pre><code>def totientDensity (I : Ideal O) : ℂ :=
   ∏ P ∈ primeSupport I,
     (1 - (1 : ℂ) / (Ideal.absNorm P : ℂ))
@@ -1019,6 +1176,7 @@ theorem idealSexticRow_sixth_mask
     rowCoprimeMask
       (fun i : primePool F => i.val)
       (idealSupport F I) b</code></pre>
+            </details>
             <pre><code>theorem idealRowSum_sixth_eq_coprime_sum
     (F : Finset (Ideal O)) (hF : ∀ I ∈ F, I ≠ ⊥)
     (hg : ∀ I ∈ F, ∀ P ∈ normalizedFactors I,

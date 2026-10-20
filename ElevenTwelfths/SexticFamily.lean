@@ -24,24 +24,24 @@ variable {𝒪 : Type*}
 /--
 The smooth dyadic sextically twisted Mobius sum
 
-`M_u(N) = sum_n mu_K(n) chi_n(u) W(norm(n) / N)`.
+`M_u(X) = sum_n mu_K(n) chi_n(u) W(norm(n) / X)`.
 
-Because `W` is supported on `[1/2, 1]`, only `N/2 ≤ norm(n) ≤ N` contributes.
-The ambient `normBall N` makes this a finite sum from the outset.
+Because `W` is supported on `[1/2, 1]`, only `X/2 ≤ norm(n) ≤ X` contributes.
+The ambient `normBall X` makes this a finite sum from the outset.
 -/
 noncomputable def M (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
     (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (N : ℕ) : ℂ := by
+    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ := by
   classical
-  exact ∑ n ∈ normBall N,
+  exact ∑ n ∈ normBall X,
     if primary n then
-      (mobius n : ℂ) * sexticTwist u n * W ((norm n : ℝ) / (N : ℝ))
+      (mobius n : ℂ) * sexticTwist u n * W ((norm n : ℝ) / (X : ℝ))
     else 0
 
 /--
 The smooth dyadic mean square
 
-`S(N,H) = sum_u V(norm(u) / H) * |M_u(N)|^2`.
+`S(X,H) = sum_u V(norm(u) / H) * |M_u(X)|^2`.
 
 The nonnegative row cutoff `V` is supported on `[1/2, 1]`, so this is a smooth
 version of a sum over rows with norm comparable to `H`.  It is definitionally
@@ -50,20 +50,20 @@ summation.
 -/
 noncomputable def S (norm : 𝒪 → ℕ) (columnBall rowBall : ℕ → Finset 𝒪)
     (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) : ℝ :=
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) : ℝ :=
   ∑ u ∈ rowBall H,
     V ((norm u : ℝ) / (H : ℝ)) *
-      ‖M norm columnBall primary mobius sexticTwist W u N‖ ^ 2
+      ‖M norm columnBall primary mobius sexticTwist W u X‖ ^ 2
 
 /-- Immediately before Poisson summation, compact support lets us regard the
 finite mean square as a `tsum` over the whole row lattice. -/
 theorem S_eq_tsum (norm : 𝒪 → ℕ) (columnBall rowBall : ℕ → Finset 𝒪)
     (mem_rowBall : ∀ {B : ℕ} {x : 𝒪}, x ∈ rowBall B ↔ norm x ≤ B)
     (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
-    S norm columnBall rowBall primary mobius sexticTwist W V N H = ∑' u : 𝒪,
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) :
+    S norm columnBall rowBall primary mobius sexticTwist W V X H = ∑' u : 𝒪,
       V ((norm u : ℝ) / (H : ℝ)) *
-        ‖M norm columnBall primary mobius sexticTwist W u N‖ ^ 2 := by
+        ‖M norm columnBall primary mobius sexticTwist W u X‖ ^ 2 := by
   classical
   unfold S
   rw [tsum_eq_sum (s := rowBall H)]
@@ -82,8 +82,8 @@ theorem S_eq_tsum (norm : 𝒪 → ℕ) (columnBall rowBall : ℕ → Finset �
 
 theorem S_nonnegative (norm : 𝒪 → ℕ) (columnBall rowBall : ℕ → Finset 𝒪)
     (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N H : ℕ) :
-    0 ≤ S norm columnBall rowBall primary mobius sexticTwist W V N H := by
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) :
+    0 ≤ S norm columnBall rowBall primary mobius sexticTwist W V X H := by
   unfold S
   apply Finset.sum_nonneg
   intro u hu
@@ -101,8 +101,8 @@ theorem M_zero_scale (norm : 𝒪 → ℕ) (normBall : ℕ → Finset 𝒪)
 @[simp]
 theorem S_zero_row_scale (norm : 𝒪 → ℕ) (columnBall rowBall : ℕ → Finset 𝒪)
     (primary : 𝒪 → Prop) (mobius : 𝒪 → ℤ) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (N : ℕ) :
-    S norm columnBall rowBall primary mobius sexticTwist W V N 0 = 0 := by
+    (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X : ℕ) :
+    S norm columnBall rowBall primary mobius sexticTwist W V X 0 = 0 := by
   classical
   have hV : V 0 = 0 :=
     V.toSmoothDyadicWeight.eq_zero_of_lt_half (by norm_num)

@@ -24,6 +24,7 @@ open OAI.CanonicalCoefficientClass
 open OAI.CanonicalQuadraticSieve
 open OAI.CompletedGauss
 open OAI.CubicEisenstein
+open OAI.InitialMeanSquare
 open UniqueFactorizationMonoid
 
 namespace ActualFixedShellModels
@@ -160,6 +161,20 @@ theorem exists_actual_fixedShellModels (q : ℕ) [NeZero q]
     actualReflectionScale, actual_fixedShellModels q (NeZero.ne q) chi⟩
 
 end ActualFixedShellModels
+
+/-- The concrete Voronoi construction supplies the theta models used by the
+mean square. Kept separate from amplification and nonvanishing so the family
+estimate can use it directly. -/
+theorem actual_hasCanonicalThetaModels
+    (q : ℕ) [NeZero q] (chi : DirichletCharacter ℂ q) :
+    HasCanonicalThetaModels (reflectionExcludedPrimes q)
+      (conjugateMonoid (normCharacter chi)) 1 completedRamifiedStep
+      (fixedCuspLevelBound (reflectionConductor q)) := by
+  obtain ⟨rays, scale, hfixed⟩ :=
+    ActualFixedShellModels.exists_actual_fixedShellModels q chi
+  exact hasCanonicalThetaModels_of_fixed_shell_models
+    (reflectionExcludedPrimes q) (initialBase chi) rays scale
+    1 completedRamifiedStep (fixedCuspLevelBound (reflectionConductor q)) hfixed
 
 end
 

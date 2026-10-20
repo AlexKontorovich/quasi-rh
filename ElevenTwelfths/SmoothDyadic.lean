@@ -6,8 +6,8 @@ import Mathlib.Analysis.Normed.Module.Basic
 
 The analytic sums in this project are localized by smooth functions supported
 on `[1/2, 1]`.  Keeping the support interval fixed makes the scale parameter
-visible in the argument of the weight: `W (x / N)` localizes `x` to
-`[N/2, N]`.
+visible in the argument of the weight: `W (x / X)` localizes `x` to
+`[X/2, X]`.
 -/
 
 namespace ElevenTwelfths

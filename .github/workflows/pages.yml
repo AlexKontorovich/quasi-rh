@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'blueprint/index.html'
+      - 'ElevenTwelfths/**'
+      - 'scripts/sync-blueprint.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -28,6 +30,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+      - name: Check Lean excerpts against source
+        run: node scripts/sync-blueprint.mjs --check
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Prepare standalone blueprint
