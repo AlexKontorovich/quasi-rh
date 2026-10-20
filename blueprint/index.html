@@ -348,7 +348,7 @@
           <li><a href="#beat-4"><span class="nav-number">04</span><span>Gauss–Jacobi</span></a></li>
           <li><a href="#beat-5"><span class="nav-number">05</span><span>Complete theta</span></a></li>
           <li><a href="#beat-6"><span class="nav-number">06</span><span>Modularity/Voronoi</span></a></li>
-          <li><a href="#beat-7"><span class="nav-number">07</span><span>Second Poisson</span></a></li>
+          <li><a href="#beat-7"><span class="nav-number">07</span><span>Quadratic characters</span></a></li>
           <li><a href="#beat-8"><span class="nav-number">08</span><span>Quadratic large sieve</span></a></li>
         </ol>
         <p class="rail-group">Close</p>
@@ -403,13 +403,15 @@
             <span class="hero-equation">\(\displaystyle S(X,H)\approx \sum_{\ell\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(\ell),\)</span>
             where the unnormalized sextic Gauss factor has the shape
             <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(\ell)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{\ell a}{nm}\right).\)</span>
-            Gauss–Jacobi absorbs the Möbius signs into the Gauss factors on both sides. After rearranging the phases and suppressing coprimality restrictions to reassemble a square, the heuristic becomes
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{m\asymp X}\chi_m(\ell)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
-            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(H/X^2\) to \(H/X\).
+            Gauss–Jacobi absorbs the Möbius signs into the Gauss factors on both sides. Isolate the squarefree theta coefficient in our schematic normalization:
+            <span class="hero-equation">\(\displaystyle c_3(m):=\widetilde g_3(m)\frac{m}{|m|}.\)</span>
+            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm. After rearranging the phases and suppressing coprimality restrictions to reassemble a square, the heuristic becomes
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{m\asymp X}\chi_m(\ell)\,c_3(m)\right|^2.\)</span>
+            Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(H/X^2\) to \(H/X\).
             </p><p class="hero-lede">
-            For each fixed \(\ell\), the inner sum contains only the squarefree part of the twisted cubic theta coefficients. To complete it, we restore the cube multiples \(mj^3\), schematically replacing
-            <span class="hero-equation">\(\displaystyle \sum_{m\asymp X}a_\ell(m)\quad\longrightarrow\quad\sum_{mj^3\asymp X}a_\ell(m)\,w_\ell(j),\qquad a_\ell(m)=\chi_m(\ell)\widetilde g_3(m)\frac{m}{|m|}.\)</span>
-            The cube weights \(w_\ell(j)\) include the required twists and normalizations. The completed coefficient index is \(mj^3\); Möbius inversion in the cube factor recovers the original squarefree sum.
+            For each fixed \(\ell\), restore the cube multiples \(mj^3\) to obtain the completed twisted theta coefficients, which we denote schematically by
+            <span class="hero-equation">\(\displaystyle \tau_\ell(r):=\sum_{\substack{mj^3=r\\m\ {\rm squarefree}}}\chi_m(\ell)c_3(m)\,w_\ell(j).\)</span>
+            The cube weights \(w_\ell(j)\) include the required twists and normalizations. Completion replaces the inner squarefree sum by \(\sum_{r\asymp X}\tau_\ell(r)\); Möbius inversion in the cube factor recovers the original sum.
             We apply modularity to this completed theta sum and then reopen the cube completion. Schematically, the length \(X\) becomes \(L/X\), and the square picks up a factor \(X^2/L\):
             <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L}\sum_{\ell\asymp L}\left|\sum_{m\lesssim L/X}\overline{\chi_m(\ell)}^{\,3}\,\widetilde g(m)\right|^2.\)</span>
             Here \(\widetilde g(m)\) denotes the normalized transformed Gauss coefficient, with the accompanying phases included; smooth weights and completion terms are suppressed throughout this heuristic.
@@ -423,7 +425,7 @@
         <section class="route" aria-label="Twelve-beat route map">
           <div class="route-head">
             <h3>The whole route</h3>
-            <p>setup → two transforms → density estimate → amplification → analytic continuation</p>
+            <p>setup → Poisson → theta transformation → quadratic large sieve → amplification → analytic continuation</p>
           </div>
           <div class="route-grid">
             <a href="#beat-1" aria-label="Beat 1">01</a><a href="#beat-2" aria-label="Beat 2">02</a>
@@ -619,7 +621,7 @@ theorem canonicalPair_first_poisson
             <div class="beat-topline"><span class="beat-number">04</span><span class="phase transform">Transform</span></div>
             <h3>Use Gauss–Jacobi identities to expose cubic coefficients</h3>
             <p>First Poisson produces sextic Gauss sums. Cubic reciprocity and the normalized Gauss–Jacobi relation absorb the squarefree Möbius sign into those local factors.</p>
-            <p>In the coprime heuristic, the conversion acts on both column factors. Rearranging their phases reassembles a square whose inner sum has coefficients \(\chi_m(\ell)\widetilde g_3(m)m/|m|\). Normalizing the two Gauss factors changes the outside factor from \(H/X^2\) to \(H/X\).</p>
+            <p>In the coprime heuristic, the conversion acts on both column factors. Rearranging their phases reassembles a square whose inner sum has coefficients \(\chi_m(\ell)c_3(m)\), where \(c_3(m)=\widetilde g_3(m)m/|m|\). Normalizing the two Gauss factors changes the outside factor from \(H/X^2\) to \(H/X\).</p>
             <div class="math-card">\[
               \mu_K\!\left(\prod p_i\right)
               G\!\left(\prod \chi_{p_i}^{\,e_i}\right)
@@ -664,7 +666,7 @@ theorem canonicalPair_first_poisson
           <section class="story">
             <div class="beat-topline"><span class="beat-number">05</span><span class="phase transform">Transform</span></div>
             <h3>Complete to the full cubic theta series</h3>
-            <p>For each fixed \(\ell\), complete the inner cubic-Gauss sum in the square into a twisted theta sum. The coefficients first appear with squarefree, divisor, unit, and ray restrictions; completion restores the cube multiples and the required local pieces.</p>
+            <p>For each fixed \(\ell\), complete the inner sum of \(\chi_m(\ell)c_3(m)\) into the theta sum with coefficients \(\tau_\ell(r)\). The coefficients first appear with squarefree, divisor, unit, and ray restrictions; completion restores the cube multiples and the required local pieces.</p>
             <div class="math-card">\[
               T_\Psi(W,X)=\sum_{I}\sum_J
               \frac{c_\Psi(I)}{\sqrt{N(I)}}\,w_\Psi(J)\,
@@ -793,25 +795,20 @@ theorem completedT_eq_reflectedFiber_idealValue_local
         <article class="beat" id="beat-7">
           <section class="story">
             <div class="beat-topline"><span class="beat-number">07</span><span class="phase transform">Transform</span></div>
-            <h3>Apply Poisson a second time</h3>
-            <p>The introductory theta transformation summarizes the reflected side as a square with characters \(\overline{\chi_m(\ell)}^{\,3}\). The detailed argument uses a second Poisson passage to organize the reflected rows, retaining their masks and Gauss factors. The resulting characters are quadratic because the original sextic characters occur cubed.</p>
-            <p class="plain-note"><strong>New bridge here.</strong> The identity \(\chi_6^3=\chi_2\) is elementary. The new move is arranging theta reflection and the second Poisson transform so the surviving sextic characters occur through their cubes, placing the result in the quadratic large-sieve regime.</p>
+            <h3>Read off the quadratic characters</h3>
+            <p>After the theta transformation, the reflected inner sum carries \(\overline{\chi_m(\ell)}^{\,3}\). Since \(\chi_m\) is sextic, this is a quadratic character. The reflected mean square is therefore ready for the quadratic large sieve.</p>
             <div class="math-card">\[
-              \chi_6^3=\chi_2,\qquad
-              \sum_{z\in\mathcal O}{\rm mask}(z)\,
-              \overline{\chi_T(z)}\chi_S(z)W_z
-              \longrightarrow
-              \sum_{k\in\mathcal O}\widehat W_k\,
-              {\rm GaussRow}_{S,T}(k).
+              \overline{\chi_m(\ell)}^{\,3}=\chi_{2,m}(\ell),\qquad
+              \sum_{\ell\asymp L}
+              \left|\sum_{m\lesssim L/X}\chi_{2,m}(\ell)\,\widetilde g(m)\right|^2.
             \]</div>
-            <p>The theorem keeps the conductor, coprimality mask, Fourier scale, and active Gauss-row factor explicit.</p>
+            <p>This is the consequence of the theta transformation used in the sketch; no additional Poisson step is needed to read off \(\chi_6^3=\chi_2\).</p>
           </section>
           <section class="formal">
             <div class="formal-head">
-              <div><p class="formal-kicker">Second transform</p><h4 class="formal-title">Sextic cubes become quadratic rows</h4></div>
+              <div><p class="formal-kicker">Character identity</p><h4 class="formal-title">Sextic cubes become quadratic rows</h4></div>
               <div class="source-links">
                 <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/GaussSum/SexticNormalization.lean#L40">sextic cube</a>
-                <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83">second Poisson</a>
               </div>
             </div>
             <pre><code>theorem canonicalSextic_pow_three_quadratic
@@ -820,6 +817,9 @@ theorem completedT_eq_reflectedFiber_idealValue_local
   canonicalSextic P hgood ^ 3 =
     (quadraticChar (O ⧸ P)).ringHomComp
       (Int.castRingHom ℂ)</code></pre>
+            <details>
+              <summary>Auxiliary Poisson identity used in the formal sieve argument</summary>
+              <p class="formal-note">The repository also proves <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83"><code>masked_pair_second_poisson</code></a>, used in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/ChildTransfer.lean#L560"><code>ChildTransfer.lean</code></a>. This masked-pair identity is distinct from the elementary sextic-cube identity above.</p>
             <pre><code><span class="comment">-- Core shape of the exact theorem masked_pair_second_poisson.</span>
 (∑' z : O,
   rowCoprimeMask (fun i => Ideal.span {p i}) M z *
@@ -838,6 +838,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
           (‖eisEmbedding e‖ ^ 2 *
             ‖eisEmbedding n‖ ^ 2)) *
       activeGaussRowFactor p hp hinj hg T S e k</code></pre>
+            </details>
           </section>
         </article>
 
@@ -851,7 +852,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
               \ \ll\ (M+N^2)\sum_{I\in F}|a_I|^2.
             \]</div>
             <p class="plain-note"><strong>Lineage.</strong> The large sieve originates with <a href="https://www.cambridge.org/core/journals/mathematika/article/abs/large-sieve/4DC1EC8072D840195F1EF81F5828BB0F">Linnik (1941)</a>. <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown</a> proved the sharp self-dual quadratic-character inequality over \(\mathbb Q\), and <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a> proved the number-field form used here over \(\mathbb Q(\omega)\).</p>
-            <p>This is the main analytic estimate after the second Poisson passage. Everything later is bookkeeping, descent, and choosing scales so that this gain survives.</p>
+            <p>This is the main analytic estimate for the reflected quadratic mean square. The remaining descent and scale choices preserve this gain.</p>
           </section>
           <section class="formal">
             <div class="formal-head">
