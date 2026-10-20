@@ -398,27 +398,26 @@
             \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
             </p><p class="hero-lede">
             Opening the square in (1), first separate the diagonal \(n=m\): its contribution is \(O(HX)\), already of the required size.
-            To see the mechanism off the diagonal, ignore all but the other extreme, \((n,m)=1\). Intermediate common divisors are handled separately in the proof.
+            To see the mechanism off the diagonal, ignore all but the other extreme, \((n,m)=1\).
             Reversing orders and applying Poisson in \(h\) (write \(L=X^2/H\) for the dual length) gives schematically
-            <span class="hero-equation">\(\displaystyle S_{\mathrm{coprime}}(X,H)\approx \frac{H}{X^2}\sum_{\ell\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(\ell),\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx \frac1L\sum_{\ell\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(\ell),\)</span>
             where the unnormalized sextic Gauss factor has the shape
             <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(\ell)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{\ell a}{nm}\right).\)</span>
-            The Gauss–Jacobi identity absorbs the Möbius signs into the Gauss factors on both sides, leaving cubic Gauss coefficients together with explicit unit-modulus local phases and cross-character factors. With the convention used in Lean, the squarefree theta coefficient is
+            The Gauss–Jacobi identity absorbs the Möbius signs into the Gauss factors on both sides, leaving cubic Gauss sums and explicit phase factors. Write the resulting normalized cubic-Gauss coefficient as
             <span class="hero-equation">\(\displaystyle c_3(m):=\widetilde g_3(m)\,\overline{\frac{m}{|m|}}.\)</span>
-            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm, and \(m\) is the chosen primary generator. The remaining phases must be retained and separated. A model for the energies that arise is
-            <span class="hero-equation">\(\displaystyle S_{\mathrm{model}}(X,H):=\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{m\asymp X}\chi_m(\ell)\,c_3(m)\right|^2.\)</span>
-            This models the resulting energies; dropping the coprimality restriction is not itself an identity or an upper bound.
-            Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(H/X^2\) to \(H/X\).
+            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm, and \(m\) is the chosen primary generator. After rearranging the phases, the \(n\)- and \(m\)-sums recombine heuristically into an absolute square:
+            <span class="hero-equation">\(\displaystyle \begin{aligned} S(X,H)&\approx\frac{X}{L}\sum_{\ell\asymp L}\sum_{n,m\asymp X}\overline{\chi_m(\ell)c_3(m)}\,\chi_n(\ell)c_3(n)\\&=\frac{X}{L}\sum_{\ell\asymp L}\left|\sum_{m\asymp X}\chi_m(\ell)c_3(m)\right|^2.\end{aligned}\)</span>
+            Coprimality restrictions and the remaining phase separation are suppressed in this schematic. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(1/L\) to \(X/L=H/X\). We now recognize \(c_3(m)\) as the squarefree Fourier coefficients of Kubota’s cubic theta series.
             </p><p class="hero-lede">
             For each fixed \(\ell\), restore the cube multiples \(mj^3\) to obtain the completed twisted theta coefficients, which we denote schematically by
             <span class="hero-equation">\(\displaystyle \tau_\ell(r):=\sum_{\substack{mj^3=r\\m\ {\rm squarefree}}}\chi_m(\ell)c_3(m)\,w_\ell(j).\)</span>
             The cube weights \(w_\ell(j)\) include the required twists and normalizations. Completion replaces the inner squarefree sum by \(\sum_{r\asymp X}\tau_\ell(r)\); Möbius inversion in the cube factor recovers the original sum.
-            Modularity of the completed theta series gives a Voronoi-type summation identity, exchanging the original coefficient sum for a dual sum at a reflected cusp. The reflection kernel in Lean has scale \(X/\mathcal N(\ell)^2\): suppressing the auxiliary divisor, cusp, and cube factors, the dual norm length is therefore \(Y=L^2/X\). We then reopen the cube completion. In the model with normalized coefficients, the square picks up a factor \(X/Y=X^2/L^2\), giving a quadratic-energy model
-            <span class="hero-equation">\(\displaystyle S_{\mathrm{model}}(X,H)\ \approx\ \frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2,\qquad Y=\frac{L^2}{X}.\)</span>
-            The stars indicate admissible squarefree rows and columns; \(a_m\) are fixed coefficients within a model block, with \(|a_m|\le1\). The sextic characters now occur cubed, so they are quadratic! The sharp quadratic large sieve gives, ignoring epsilon losses,
+            Modularity of the completed theta series gives a Voronoi-type summation identity, exchanging the original coefficient sum for a dual sum at a reflected cusp. The reflection kernel has scale \(X/\mathcal N(\ell)^2\): suppressing the auxiliary divisor, cusp, and cube factors, the dual norm length is therefore \(Y=L^2/X\). We then reopen the cube completion. With normalized coefficients, the square picks up a factor \(X/Y=X^2/L^2\), giving schematically
+            <span class="hero-equation">\(\displaystyle S(X,H)\ \approx\ \frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2,\qquad Y=\frac{L^2}{X}.\)</span>
+            The stars indicate admissible squarefree rows and columns; \(a_m\) are fixed coefficients within each block, with \(|a_m|\le1\). The sextic characters now occur cubed, so they are quadratic! The sharp quadratic large sieve gives, ignoring epsilon losses,
             <span class="hero-equation">\(\displaystyle \sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2\ll(L+Y)\sum_m^{*}|a_m|^2\ll(L+Y)Y.\)</span>
-            Consequently the model contributes
-            <span class="hero-equation">\(\displaystyle S_{\mathrm{model}}(X,H)\ll\frac{HX}{L^2}(L+Y)Y=H(L+Y)\ll HX,\)</span>
+            Consequently, this heuristic gives
+            <span class="hero-equation">\(\displaystyle S(X,H)\ll\frac{HX}{L^2}(L+Y)Y=H(L+Y)\ll HX,\)</span>
             since \(1\le Y\le L\le X\) when \(H\) is just above \(X\). This explains the target bound. The full proof organizes the extra phases, common divisors, cube scales, and non-squarefree rows through a second Poisson passage and finite descent, obtaining \(S(X,H)\ll_\varepsilon XH\,X^\varepsilon\) in the required range. Sixth-power amplification then yields \(M(X)\ll_\varepsilon X^{11/12+\varepsilon}\).
           </p>
           <div class="status-row" aria-label="Formalization status">
