@@ -412,7 +412,14 @@
             For each fixed \(\ell\), restore the cube multiples \(mj^3\) to obtain the completed twisted theta coefficients, which we denote schematically by
             <span class="hero-equation">\(\displaystyle \tau_\ell(r):=\sum_{\substack{mj^3=r\\m\ {\rm squarefree}}}\chi_m(\ell)c_3(m)\,w_\ell(j).\)</span>
             The cube weights \(w_\ell(j)\) include the required twists and normalizations. Completion replaces the inner squarefree sum by \(\sum_{r\asymp X}\tau_\ell(r)\); Möbius inversion in the cube factor recovers the original sum.
-            Modularity of the completed theta series gives a Voronoi-type summation identity, exchanging the original coefficient sum for a dual sum at a reflected cusp. The reflection kernel has scale \(X/\mathcal N(\ell)^2\): suppressing the auxiliary divisor, cusp, and cube factors, the dual norm length is therefore \(Y=L^2/X\). We then reopen the cube completion. With normalized coefficients, the square picks up a factor \(X/Y=X^2/L^2\), giving schematically
+            Thus the completed sums enter our second moment in the schematic form
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{r\asymp X}\tau_\ell(r)\right|^2,\)</span>
+            with the cube-inversion sums and their scale changes left implicit.
+            Modularity of the completed theta series gives a Voronoi-type summation identity, whose main shape in this normalization is
+            <span class="hero-equation">\(\displaystyle \sum_{r\asymp X}\tau_\ell(r)\ \approx\ \frac{X}{L}\sum_{m\asymp Y}\tau^\vee_\ell(m),\qquad Y=\frac{L^2}{X},\quad \ell\asymp L.\)</span>
+            Here \(\tau^\vee_\ell(m)\) denotes the normalized coefficients at the reflected cusps; the cusp sums and transformed smooth weights are implicit. The reflection kernel has scale \(X/\mathcal N(\ell)^2\), giving the dual norm length \(Y\). Substituting this transformation into the second moment gives
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}\left|\sum_{m\asymp Y}\tau^\vee_\ell(m)\right|^2.\)</span>
+            We then reopen the cube completion and separate the phases. The resulting quadratic energies have the schematic form
             <span class="hero-equation">\(\displaystyle S(X,H)\ \approx\ \frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2,\qquad Y=\frac{L^2}{X}.\)</span>
             The stars indicate admissible squarefree rows and columns; \(a_m\) are fixed coefficients within each block, with \(|a_m|\le1\). The sextic characters now occur cubed, so they are quadratic! The sharp quadratic large sieve gives, ignoring epsilon losses,
             <span class="hero-equation">\(\displaystyle \sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2\ll(L+Y)\sum_m^{*}|a_m|^2\ll(L+Y)Y.\)</span>
