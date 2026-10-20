@@ -399,17 +399,16 @@
             </p><p class="hero-lede">
             Opening the square in (1), first separate the diagonal \(n=m\): its contribution is \(O(HX)\), already of the required size.
             To see the mechanism off the diagonal, consider the other extreme, \((n,m)=1\). Intermediate common divisors are handled separately in the proof.
-            Reversing orders and applying Poisson in \(u\) gives schematically
-            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{X^2}\sum_{h\asymp X^2/H}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(h),\)</span>
+            Reversing orders and applying Poisson in \(u\) (write \(L=X^2/H\) for the dual length) gives schematically
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx \sum_{h\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(h),\)</span>
             where the unnormalized sextic Gauss factor has the shape
             <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(h)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{ha}{nm}\right).\)</span>
-            Write \(L=X^2/H\) for the dual length.
             Gauss–Jacobi absorbs the Möbius signs into the Gauss factors on both sides. After rearranging the phases and suppressing coprimality restrictions to reassemble a square, the heuristic becomes
-            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{X}\sum_{h\asymp X^2/H}\left|\sum_{m\asymp X}\chi_m(h)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{h\asymp X^2/H}\left|\sum_{m\asymp X}\chi_m(h)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
             Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(H/X^2\) to \(H/X\).
             </p><p class="hero-lede">
             It is now the inner sum that we complete into a twisted cubic theta series and transform using modularity. Schematically, the length \(X\) becomes \(L/X\), and the square picks up a factor \(X^2/L\):
-            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{X}\frac{X^2}{L}\sum_{h\asymp L}\left|\sum_{m\lesssim L/X}\overline{\chi_m(h)}^{\,3}\,\widetilde g(m)\right|^2.\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L}\sum_{h\asymp L}\left|\sum_{m\lesssim L/X}\overline{\chi_m(h)}^{\,3}\,\widetilde g(m)\right|^2.\)</span>
             Here \(\widetilde g(m)\) denotes the normalized transformed Gauss coefficient, with the accompanying phases included; smooth weights and completion terms are suppressed throughout this heuristic.
             The characters now occur cubed, so they are quadratic! The quadratic large sieve controls this final mean square. Together with the diagonal and the treatment of intermediate common divisors, this gives the desired bound \(S(X,H)\ll XH\), up to epsilon losses.
           </p>
