@@ -22,7 +22,11 @@ function declaration(file, name) {
     escaped + '(?=\\s|\\()', 'm').exec(source);
   if (!start) throw new Error('Declaration not found: ' + file + '#' + name);
   const rest = source.slice(start.index);
-  const next = rest.indexOf('\n\n');
+  // Adjacent declarations need not have a blank line between them.
+  const boundaries = [rest.indexOf('\n\n'),
+    rest.search(/\n(?:noncomputable )?(?:def|abbrev|theorem) /)]
+    .filter(index => index >= 0);
+  const next = boundaries.length ? Math.min(...boundaries) : -1;
   let text = (next < 0 ? rest : rest.slice(0, next)).trimEnd();
   if (start[1] === 'theorem') {
     const proof = text.indexOf(' :=');
