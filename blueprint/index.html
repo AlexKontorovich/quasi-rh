@@ -398,17 +398,17 @@
             \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
             </p><p class="hero-lede">
             Opening the square in (1), first separate the diagonal \(n=m\): its contribution is \(O(HX)\), already of the required size.
-            To see the mechanism off the diagonal, consider the other extreme, \((n,m)=1\). Write \(N=X\) for the column length in this heuristic; intermediate common divisors are handled separately in the proof.
+            To see the mechanism off the diagonal, consider the other extreme, \((n,m)=1\). Intermediate common divisors are handled separately in the proof.
             Reversing orders and applying Poisson in \(u\) gives schematically
-            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{N^2}\sum_{h\asymp N^2/H}\sum_{\substack{n,m\asymp N\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(h),\)</span>
+            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{X^2}\sum_{h\asymp X^2/H}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(h),\)</span>
             where the unnormalized sextic Gauss factor has the shape
             <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(h)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{ha}{nm}\right).\)</span>
             Gauss–Jacobi absorbs the Möbius signs into the Gauss factors on both sides. After rearranging the phases and suppressing coprimality restrictions to reassemble a square, the heuristic becomes
-            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{N}\sum_{h\asymp N^2/H}\left|\sum_{m\asymp N}\chi_m(h)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
-            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm. Normalizing the two Gauss factors contributes a factor \(N\), changing the prefactor \(H/N^2\) to \(H/N\).
+            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{X}\sum_{h\asymp X^2/H}\left|\sum_{m\asymp X}\chi_m(h)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
+            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(H/X^2\) to \(H/X\).
             </p><p class="hero-lede">
-            It is now the inner sum that we complete into a twisted cubic theta series and transform using modularity. Put \(L=N^2/H\). Schematically, the length \(N\) becomes \(L/N\), and the square picks up a factor \(N^2/L\):
-            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{N}\frac{N^2}{L}\sum_{h\asymp L}\left|\sum_{m\lesssim L/N}\overline{\chi_m(h)}^{\,3}\,\widetilde g(m)\right|^2,\qquad L=\frac{N^2}{H}.\)</span>
+            It is now the inner sum that we complete into a twisted cubic theta series and transform using modularity. Put \(L=X^2/H\). Schematically, the length \(X\) becomes \(L/X\), and the square picks up a factor \(X^2/L\):
+            <span class="hero-equation">\(\displaystyle S_{\rm cop}(X,H)\approx\frac{H}{X}\frac{X^2}{L}\sum_{h\asymp L}\left|\sum_{m\lesssim L/X}\overline{\chi_m(h)}^{\,3}\,\widetilde g(m)\right|^2,\qquad L=\frac{X^2}{H}.\)</span>
             Here \(\widetilde g(m)\) denotes the normalized transformed Gauss coefficient, with the accompanying phases included; smooth weights and completion terms are suppressed throughout this heuristic.
             The characters now occur cubed, so they are quadratic! The quadratic large sieve controls this final mean square. Together with the diagonal and the treatment of intermediate common divisors, this gives the desired bound \(S(X,H)\ll XH\), up to epsilon losses.
           </p>
@@ -616,7 +616,7 @@ theorem canonicalPair_first_poisson
             <div class="beat-topline"><span class="beat-number">04</span><span class="phase transform">Transform</span></div>
             <h3>Use Gauss–Jacobi identities to expose cubic coefficients</h3>
             <p>First Poisson produces sextic Gauss sums. Cubic reciprocity and the normalized Gauss–Jacobi relation absorb the squarefree Möbius sign into those local factors.</p>
-            <p>In the coprime heuristic, the conversion acts on both column factors. Rearranging their phases reassembles a square whose inner sum has coefficients \(\chi_m(h)\widetilde g_3(m)m/|m|\). Normalizing the two Gauss factors changes the outside factor from \(H/N^2\) to \(H/N\).</p>
+            <p>In the coprime heuristic, the conversion acts on both column factors. Rearranging their phases reassembles a square whose inner sum has coefficients \(\chi_m(h)\widetilde g_3(m)m/|m|\). Normalizing the two Gauss factors changes the outside factor from \(H/X^2\) to \(H/X\).</p>
             <div class="math-card">\[
               \mu_K\!\left(\prod p_i\right)
               G\!\left(\prod \chi_{p_i}^{\,e_i}\right)
@@ -727,7 +727,7 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
           <section class="story">
             <div class="beat-topline"><span class="beat-number">06</span><span class="phase transform">Transform</span></div>
             <h3>Prove modularity and reflect the cubic theta series</h3>
-            <p>Apply modularity to the completed inner sum, with \(h\) fixed. In the introductory heuristic, \(h\asymp L=N^2/H\): the length \(N\) becomes \(L/N\), and the squared transformation factor is \(N^2/L\). The reflected coefficients carry \(\overline{\chi_m(h)}^{\,3}\), leading to a quadratic-character mean square.</p>
+            <p>Apply modularity to the completed inner sum, with \(h\) fixed. In the introductory heuristic, \(h\asymp L=X^2/H\): the length \(X\) becomes \(L/X\), and the squared transformation factor is \(X^2/L\). The reflected coefficients carry \(\overline{\chi_m(h)}^{\,3}\), leading to a quadratic-character mean square.</p>
             <p class="plain-note"><strong>Lineage.</strong> Meromorphic continuation uses <a href="https://cds.cern.ch/record/427143">Selberg’s 1956 resolvent/Fredholm method</a>. Kubota applied that machinery metaplectically; Patterson computed the cubic coefficients and cusps; <a href="https://doi.org/10.1017/S0027763000000817">Yoshimoto</a> developed the twisted functional equations. The explicit level-aspect cubic Voronoi transformation used here is <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł’s</a> extension of Patterson and Yoshimoto.</p>
             <p>In this repository the fixed-shell identity is constructed from the Poisson, Gauss-sum, and branch-decoding layers. It is then promoted to the canonical theta-model interface needed by the density argument.</p>
             <div class="math-card">\[
