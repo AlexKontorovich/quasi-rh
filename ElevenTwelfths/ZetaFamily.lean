@@ -36,14 +36,14 @@ abbrev excludedPrimes : Finset (Ideal 𝒪) := reflectionExcludedPrimes 1
 abbrev columns (X : ℕ) : Finset 𝒪 := outsidePrimaryBall excludedPrimes X
 abbrev rows (H : ℕ) : Finset 𝒪 := exactRowBall H
 
-/-- χ_n(u), the actual sextic character used in this finite column family. -/
-abbrev sexticTwist (X : ℕ) (n u : 𝒪) : ℂ :=
-  outsideSexticTwist excludedPrimes (reflectionExcludedPrimes_bad 1) X u n
+/-- χ_n(h), the actual sextic character used in this finite column family. -/
+abbrev sexticTwist (X : ℕ) (n h : 𝒪) : ℂ :=
+  outsideSexticTwist excludedPrimes (reflectionExcludedPrimes_bad 1) X h n
 
 /-- The four visible ingredients: primaryness, Möbius, sextic twist, cutoff. -/
-def M (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ :=
+def M (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) : ℂ :=
   ∑ n ∈ columns X, if primary n then
-    (μ_K n : ℂ) * sexticTwist X n u * W ((𝒩 n : ℝ) / X) else 0
+    (μ_K n : ℂ) * sexticTwist X n h * W ((𝒩 n : ℝ) / X) else 0
 
 /-- The untwisted Möbius sum M(X) from the intro. -/
 def untwistedM (W : SmoothDyadicWeight ℂ) (X : ℕ) : ℂ :=
@@ -52,10 +52,10 @@ def untwistedM (W : SmoothDyadicWeight ℂ) (X : ℕ) : ℂ :=
 
 /-- The smoothly weighted finite second moment. -/
 def S (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) : ℝ :=
-  ∑ u ∈ rows H, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2
+  ∑ h ∈ rows H, V ((𝒩 h : ℝ) / H) * ‖M W h X‖ ^ 2
 
-theorem M_eq_outsideM (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) :
-    M W u X = outsideM excludedPrimes (reflectionExcludedPrimes_bad 1) W u X := rfl
+theorem M_eq_outsideM (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) :
+    M W h X = outsideM excludedPrimes (reflectionExcludedPrimes_bad 1) W h X := rfl
 
 theorem S_eq_outsideS (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) :
@@ -70,55 +70,55 @@ theorem M_one (W : SmoothDyadicWeight ℂ) (X : ℕ) :
 restriction. No prime-counting or asymptotic approximation is hidden here. -/
 theorem M_sixth_power (W : SmoothDyadicWeight ℂ) (b : 𝒪) (X : ℕ) :
     M W (b ^ 6) X =
-      ∑ I ∈ outsideIdealsUpTo excludedPrimes X with IsCoprime I (Ideal.span {b}),
-        (UniqueFactorizationMonoid.moebius I : ℂ) * W ((Ideal.absNorm I : ℝ) / X) := by
+      ∑ n ∈ outsideIdealsUpTo excludedPrimes X with IsCoprime n (Ideal.span {b}),
+        (UniqueFactorizationMonoid.moebius n : ℂ) * W ((Ideal.absNorm n : ℝ) / X) := by
   rw [M_eq_outsideM, outsideM_eq_idealRowSum,
     OAI.SixthPowerAverage.idealRowSum_sixth_eq_coprime_sum]
   apply Finset.sum_congr rfl
-  intro I hI
-  have hchi : (1 : DirichletCharacter ℂ 1) (Ideal.absNorm I) = 1 :=
+  intro n hI
+  have hchi : (1 : DirichletCharacter ℂ 1) (Ideal.absNorm n) = 1 :=
     MulChar.one_apply (isUnit_of_subsingleton _)
   simp only [baseChangeWeight, hchi, mul_one]
 
 /-- The finite-to-lattice boundary immediately before applying Poisson. -/
 theorem S_eq_tsum (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) :
-    S W V X H = ∑' u : 𝒪, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2 :=
+    S W V X H = ∑' h : 𝒪, V ((𝒩 h : ℝ) / H) * ‖M W h X‖ ^ 2 :=
   outsideS_eq_tsum excludedPrimes (reflectionExcludedPrimes_bad 1) W V X H
 
 /-- The column coefficient with its smooth cutoff, before twisting. -/
 def mobiusWeight (W : SmoothDyadicWeight ℂ) (X : ℕ) (n : 𝒪) : ℂ :=
   if primary n then (μ_K n : ℂ) * W ((𝒩 n : ℝ) / X) else 0
 
-theorem M_eq_sum (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) :
-    M W u X = ∑ n ∈ columns X, mobiusWeight W X n * sexticTwist X n u := by
+theorem M_eq_sum (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) :
+    M W h X = ∑ n ∈ columns X, mobiusWeight W X n * sexticTwist X n h := by
   apply Finset.sum_congr rfl
   intro n hn
   simp only [mobiusWeight]
   split_ifs <;> ring
 
-/-- Open the square and reverse the finite sums: u is now inside.
+/-- Open the square and reverse the finite sums: h is now inside.
 The complex cast on the real moment makes conjugation explicit. This is an
 exact identity, before diagonal removal or the coprime heuristic. -/
 theorem S_open_square (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) :
     (S W V X H : ℂ) =
-      ∑ n ∈ columns X, ∑ m ∈ columns X,
-        mobiusWeight W X n * star (mobiusWeight W X m) *
-          ∑ u ∈ rows H, (V ((𝒩 u : ℝ) / H) : ℂ) *
-            sexticTwist X n u * star (sexticTwist X m u) := by
+      ∑ n₁ ∈ columns X, ∑ n₂ ∈ columns X,
+        mobiusWeight W X n₁ * star (mobiusWeight W X n₂) *
+          ∑ h ∈ rows H, (V ((𝒩 h : ℝ) / H) : ℂ) *
+            sexticTwist X n₁ h * star (sexticTwist X n₂ h) := by
   conv_rhs => rw [Finset.sum_comm]
   simp only [S, Complex.ofReal_sum, Complex.ofReal_mul, Complex.ofReal_pow,
     ← Complex.mul_conj', M_eq_sum, map_sum, Finset.sum_mul, Finset.mul_sum,
     map_mul]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
-  intro n hn
+  intro n₁ hn
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
-  intro m hm
+  intro n₂ hm
   apply Finset.sum_congr rfl
-  intro u hu
+  intro h hu
   simp only [starRingEnd_apply]
   ring
 
@@ -128,9 +128,9 @@ theorem row_mean_square (W : SmoothDyadicWeight ℂ)
     (θ ε : ℝ) (hθ : 0 < θ) (hε : 0 < ε) :
     ∃ C : ℝ, 0 < C ∧ ∀ X : ℕ, 1 ≤ X →
       ∀ T : Finset 𝒪,
-      (∀ u ∈ T, (𝒩 u : ℝ) ≤ (X : ℝ) ^ (1 + θ)) →
-      (∀ u ∈ T, u ≠ 0) →
-      (∑ u ∈ T, ‖M W u X‖ ^ 2) ≤
+      (∀ h ∈ T, (𝒩 h : ℝ) ≤ (X : ℝ) ^ (1 + θ)) →
+      (∀ h ∈ T, h ≠ 0) →
+      (∑ h ∈ T, ‖M W h X‖ ^ 2) ≤
         C * X * (X : ℝ) ^ (1 + θ) * (X : ℝ) ^ ε := by
   obtain ⟨C, hC, hmean⟩ := outside_mean_square_of_theta_models_pos
     (1 : DirichletCharacter ℂ 1) excludedPrimes
@@ -158,15 +158,15 @@ theorem mean_square (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
   have hzero : V 0 = 0 :=
     V.toSmoothDyadicWeight.eq_zero_of_lt_half (by norm_num)
   have hremove : S W V X H =
-      ∑ u ∈ rowNormDisk H, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2 := by
+      ∑ h ∈ rowNormDisk H, V ((𝒩 h : ℝ) / H) * ‖M W h X‖ ^ 2 := by
     simp [S, rows, exactRowBall, Finset.sum_insert, mem_rowNormDisk, hzero]
   rw [hremove]
-  apply le_trans (Finset.sum_le_sum fun u hu ↦
+  apply le_trans (Finset.sum_le_sum fun h hu ↦
     mul_le_of_le_one_left (sq_nonneg _) (hV _))
   apply hmean X hX
-  · intro u hu
-    exact (show (𝒩 u : ℝ) ≤ H by exact_mod_cast (mem_rowNormDisk.mp hu).2).trans hH
-  · intro u hu hzero
+  · intro h hu
+    exact (show (𝒩 h : ℝ) ≤ H by exact_mod_cast (mem_rowNormDisk.mp hu).2).trans hH
+  · intro h hu hzero
     have := (mem_rowNormDisk.mp hu).1
     simp [hzero] at this
 

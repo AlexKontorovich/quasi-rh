@@ -88,10 +88,10 @@ theorem masked_pair_second_poisson {ι : Type*} [DecidableEq ι]
     (M S T : Finset ι) (hd : Disjoint S T)
     (W : 𝓢(ℝ, ℂ)) (Y : ℝ) (hY : 0 < Y) :
     let n := ∏ i : activeSupport T S, p i.val
-    (∑' z : O, rowCoprimeMask (fun i => Ideal.span {p i}) M z *
-      (star (finiteSquarefreeRow (fun i => Ideal.span {p i}) hg T z) *
-        finiteSquarefreeRow (fun i => Ideal.span {p i}) hg S z) *
-      W (‖eisEmbedding z‖ ^ 2 / Y)) =
+    (∑' y : O, rowCoprimeMask (fun i => Ideal.span {p i}) M y *
+      (star (finiteSquarefreeRow (fun i => Ideal.span {p i}) hg T y) *
+        finiteSquarefreeRow (fun i => Ideal.span {p i}) hg S y) *
+      W (‖eisEmbedding y‖ ^ 2 / Y)) =
     ((Y : ℂ) / (‖eisEmbedding n‖ : ℂ)) *
       ∑ E ∈ M.powerset,
         let e := primeSubsetGenerator (fun i => Ideal.span {p i}) E
@@ -108,7 +108,7 @@ theorem masked_pair_second_poisson {ι : Type*} [DecidableEq ι]
   let j := activeExponent T S
   let row := finiteSexticRow Q (fun i => hg i.val) j
   let n := ∏ i, q i
-  have hr (z : O) : star (finiteSquarefreeRow P hg T z) * finiteSquarefreeRow P hg S z = row z := by
+  have hr (y : O) : star (finiteSquarefreeRow P hg T y) * finiteSquarefreeRow P hg S y = row y := by
     rw [finiteSquarefreeRow_pair_activeSupport]
     simp [Finset.disjoint_iff_inter_eq_empty.mp hd.symm, rowCoprimeMask, row, Q, j]
   have h := canonical_masked_radial_poisson_collected P hinj M Q hQ
@@ -126,9 +126,9 @@ theorem masked_pair_second_poisson {ι : Type*} [DecidableEq ι]
     (fun E t => let e := primeSubsetGenerator P E
       paperRadialFourier W (Y * t / (‖eisEmbedding e‖ ^ 2 * ‖eisEmbedding n‖ ^ 2)))
   calc
-    _ = ∑' z : O, rowCoprimeMask P M z * row z * W (‖eisEmbedding z‖ ^ 2 / Y) := by
+    _ = ∑' y : O, rowCoprimeMask P M y * row y * W (‖eisEmbedding y‖ ^ 2 / Y) := by
       apply tsum_congr
-      intro z
+      intro y
       rw [hr]
     _ = ((Y : ℂ) / (‖eisEmbedding n‖ : ℂ)) *
         (canonicalNormalizedGauss Q hQ (fun i => hg i.val) j *

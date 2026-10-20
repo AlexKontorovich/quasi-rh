@@ -27,12 +27,12 @@ is proved only in `ElevenTwelfths.Unconditional`.
 ## The argument
 
 Let `W` and `V` be smooth weights supported in `[1 / 2, 1]`. For an
-Eisenstein integer `u`, the public family is
+Eisenstein integer `h`, the public family is
 
 \[
-  M_u(X)=
+  M_h(X)=
   \sum_{\substack{n\ \mathrm{primary}\\\mathcal N(n)\le X}}
-    \mu_K((n))\,\chi_{(n)}(u)\,
+    \mu_K((n))\,\chi_{(n)}(h)\,
     W\!\left(\frac{\mathcal N(n)}X\right).
 \]
 
@@ -41,8 +41,8 @@ sextic twist, and the smooth cutoff. The public second moment is defined as
 the finite sum
 
 \[
-  S(X,H)=\sum_{\mathcal N(u)\le H}
-    V\!\left(\frac{\mathcal N(u)}H\right)|M_u(X)|^2.
+  S(X,H)=\sum_{\mathcal N(h)\le H}
+    V\!\left(\frac{\mathcal N(h)}H\right)|M_h(X)|^2.
 \]
 
 Immediately before entering the Poisson-summation interface, compact support
@@ -58,8 +58,8 @@ parameterization of its finite descent gives, for every `theta > 0`, the
 schematic estimate
 
 \[
-  \sum_{\mathcal N(z)\le Z^{1+\theta}} |M_z(Z)|^2
-  \ll_{\theta,\varepsilon} Z^{2+\theta+\varepsilon}.
+  \sum_{\mathcal N(h)\le X^{1+\theta}} |M_h(X)|^2
+  \ll_{\theta,\varepsilon} X^{2+\theta+\varepsilon}.
 \]
 
 On a sixth-power row,
@@ -74,10 +74,10 @@ simplification: it keeps the same sixth-power amplification mechanism while
 avoiding a separate prime-number-theorem dependency. With
 
 \[
-  \alpha=\frac{1+\theta}{6},\qquad Y=Z^\alpha,
+  \alpha=\frac{1+\theta}{6},\qquad B=X^\alpha,
 \]
 
-the amplified rows have norm at most `Z ^ (1 + theta)`. Cauchy--Schwarz and
+the amplified rows have norm at most `X ^ (1 + theta)`. Cauchy--Schwarz and
 division by the mass of the amplifier give the exponent
 
 \[
@@ -123,7 +123,7 @@ specialization; the direct `11 / 12` assembly does not use it.
 | --- | --- |
 | Weights supported in `[1 / 2, 1]` | `ElevenTwelfths.SmoothDyadic` |
 | Eisenstein norm, primaryness, and `mu_K ((n))` | `ElevenTwelfths.Arithmetic` |
-| Explicit finite `M_u(X)` and `S(X,H)` | `ElevenTwelfths.ConcreteFamily` |
+| Explicit finite `M_h(X)` and `S(X,H)` | `ElevenTwelfths.ConcreteFamily` |
 | Finite-to-`tsum` boundary | `outsideS_eq_idealRowSum_tsum` |
 | Theta/reflection model built from branch decoding | `ElevenTwelfths.ActualFixedShellModels` |
 | Arbitrary-positive-radius mean square | `outside_mean_square_of_theta_models_pos` |

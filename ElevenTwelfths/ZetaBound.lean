@@ -20,24 +20,24 @@ open OAI.SixthPowerAverage
 open OAI.ConcretePrimeRowBridge
 open OAI.ShortDraftHeckeBridge
 
-/-- The density of amplifier elements coprime to I. -/
-abbrev density (I : Ideal 𝒪) : ℂ :=
-  ∏ P ∈ OAI.IdealMobiusDivisorSum.primeSupport I,
+/-- The density of amplifier elements coprime to n. -/
+abbrev density (n : Ideal 𝒪) : ℂ :=
+  ∏ P ∈ OAI.IdealMobiusDivisorSum.primeSupport n,
     (1 - (1 : ℂ) / (Ideal.absNorm P : ℂ))
 
 /-- The weighted Möbius sum actually produced by the smooth amplifier. -/
 def densityM (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
-  ∑' I : Ideal 𝒪, if ∀ P ∈ excludedPrimes, ¬ P ∣ I then
-    (UniqueFactorizationMonoid.moebius I : ℂ) * density I *
-      W ((Ideal.absNorm I : ℝ) / X) else 0
+  ∑' n : Ideal 𝒪, if ∀ P ∈ excludedPrimes, ¬ P ∣ n then
+    (UniqueFactorizationMonoid.moebius n : ℂ) * density n *
+      W ((Ideal.absNorm n : ℝ) / X) else 0
 
 theorem densityM_eq_outsideWeight (W : SmoothDyadicWeight ℂ) (X : ℝ) :
-    densityM W X = ∑' I : Ideal 𝒪,
-      outsideWeight (1 : DirichletCharacter ℂ 1) excludedPrimes I *
-        W ((Ideal.absNorm I : ℝ) / X) := by
+    densityM W X = ∑' n : Ideal 𝒪,
+      outsideWeight (1 : DirichletCharacter ℂ 1) excludedPrimes n *
+        W ((Ideal.absNorm n : ℝ) / X) := by
   apply tsum_congr
-  intro I
-  have hchi : (1 : DirichletCharacter ℂ 1) (Ideal.absNorm I) = 1 :=
+  intro n
+  have hchi : (1 : DirichletCharacter ℂ 1) (Ideal.absNorm n) = 1 :=
     MulChar.one_apply (isUnit_of_subsingleton _)
   simp only [outsideWeight, FiniteSFactor.outsideWeight, weightedMoebius,
     baseChangeWeight, hchi, mul_one, density, totientDensity]

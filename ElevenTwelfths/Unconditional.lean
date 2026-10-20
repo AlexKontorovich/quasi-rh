@@ -60,26 +60,26 @@ theorem smoothedWeightedMobiusBound_of_theta_models_pos
     outside_mean_square_of_theta_models_pos chi S hbad hSp
       rho rowBase levelBound hrho hrowBase hlevel hmodels
       W (1 / 2 : ℝ) 1 (by norm_num) hsupp hW theta epsilon htheta hepsilon
-  have hmean' : ∀ (D : ℕ) (Z : ℝ), 1 ≤ Z → 1 * Z ≤ D →
+  have hmean' : ∀ (D : ℕ) (X : ℝ), 1 ≤ X → 1 * X ≤ D →
       ∀ T : Finset O,
-      (∀ z ∈ T, (Ideal.absNorm (Ideal.span {z}) : ℝ) ≤
-        Z ^ (1 + theta : ℝ)) →
-      (∀ z ∈ T, z ≠ 0) →
-      (∑ z ∈ T,
+      (∀ h ∈ T, (Ideal.absNorm (Ideal.span {h}) : ℝ) ≤
+        X ^ (1 + theta : ℝ)) →
+      (∀ h ∈ T, h ≠ 0) →
+      (∑ h ∈ T,
         ‖idealRowSum (outsideIdealsUpTo S D)
           (outsideIdealsUpTo_ne_bot S D) (outside_good S D hbad)
-          chi (fun n ↦ W (n / Z)) z‖ ^ 2) ≤
-        Cmean * Z ^ ((2 + theta : ℝ) + 2 * averageLoss) := by
-    intro D Z hZ hD T hT hT0
-    have hZpos : 0 < Z := by linarith
-    apply (hmean D Z hZ hD T hT hT0).trans_eq
+          chi (fun n ↦ W (n / X)) h‖ ^ 2) ≤
+        Cmean * X ^ ((2 + theta : ℝ) + 2 * averageLoss) := by
+    intro D X hX hD T hT hT0
+    have hXpos : 0 < X := by linarith
+    apply (hmean D X hX hD T hT hT0).trans_eq
     calc
-      Cmean * Z * Z ^ (1 + theta : ℝ) * Z ^ epsilon =
-          Cmean * (Z ^ (1 : ℝ) * Z ^ (1 + theta : ℝ) *
-            Z ^ epsilon) := by rw [Real.rpow_one]; ring
-      _ = Cmean * Z ^ (1 + (1 + theta) + epsilon) := by
-        rw [← Real.rpow_add hZpos, ← Real.rpow_add hZpos]
-      _ = Cmean * Z ^ ((2 + theta : ℝ) + 2 * averageLoss) := by
+      Cmean * X * X ^ (1 + theta : ℝ) * X ^ epsilon =
+          Cmean * (X ^ (1 : ℝ) * X ^ (1 + theta : ℝ) *
+            X ^ epsilon) := by rw [Real.rpow_one]; ring
+      _ = Cmean * X ^ (1 + (1 + theta) + epsilon) := by
+        rw [← Real.rpow_add hXpos, ← Real.rpow_add hXpos]
+      _ = Cmean * X ^ ((2 + theta : ℝ) + 2 * averageLoss) := by
         congr 2
         dsimp only [averageLoss]
         ring
@@ -87,15 +87,15 @@ theorem smoothedWeightedMobiusBound_of_theta_models_pos
     chi S hbad W (1 / 2 : ℝ) 1 (by norm_num) hsupp hW
     theta averageLoss Cmean htheta.le haverageLoss hCmean hmean'
   apply IsBigO.of_bound C
-  filter_upwards [eventually_ge_atTop (1 : ℝ)] with Z hZ
-  have hZpos : 0 < Z := by linarith
-  let D : ℕ := ⌈Z⌉₊
-  have hD : 1 * Z ≤ (D : ℝ) := by
-    simpa only [one_mul, D] using (Nat.le_ceil Z)
-  rw [(ideal_weighted_hasSum chi S W 1 Z hZpos
-      (fun x hx ↦ (hsupp hx).2) D hD).tsum_eq,
-    Real.norm_of_nonneg (Real.rpow_nonneg hZpos.le _)]
-  have h := hfinite D Z hZ hD
+  filter_upwards [eventually_ge_atTop (1 : ℝ)] with X hX
+  have hXpos : 0 < X := by linarith
+  let D : ℕ := ⌈X⌉₊
+  have hD : 1 * X ≤ (D : ℝ) := by
+    simpa only [one_mul, D] using (Nat.le_ceil X)
+  rw [(ideal_weighted_hasSum chi S W 1 X hXpos
+      (fun n hx ↦ (hsupp hx).2) D hD).tsum_eq,
+    Real.norm_of_nonneg (Real.rpow_nonneg hXpos.le _)]
+  have h := hfinite D X hX hD
   convert h using 1
   all_goals
     dsimp only [theta, averageLoss]

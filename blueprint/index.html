@@ -170,6 +170,11 @@
     .status { padding: 15px 17px; border: 1px solid var(--line); border-radius: 13px; background: rgba(246,243,236,0.62); }
     .status strong { display: block; margin-bottom: 4px; font-size: 0.8rem; letter-spacing: 0.02em; }
     .status span { color: var(--muted); font-size: 0.82rem; }
+    .historical-remarks { margin: 30px 0; padding: 26px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,253,248,0.74); }
+    .historical-remarks h3 { margin-top: 0; }
+    .historical-remarks h4 { margin-bottom: 8px; }
+    .historical-remarks p { line-height: 1.65; }
+    .historical-remarks .plain-note { margin-top: 8px; padding-top: 0; border-top: 0; font-size: 0.95rem; }
     .route { margin: 30px 0 46px; padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(255,253,248,0.74); }
     .route-head { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; margin-bottom: 15px; }
     .route h3 { margin: 0; font-size: 0.9rem; }
@@ -360,6 +365,7 @@
         </ol>
       </nav>
       <div class="rail-links">
+        <a href="#historical-remarks">historical remarks</a>
         <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/README.md">README</a>
         <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/docs/argument.md">proof guide</a>
         <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/Unconditional.lean">final assembly</a>
@@ -383,7 +389,7 @@
             \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
             \(\zeta_K\) forces nonvanishing of both factors. We deform the
             Eisenstein Möbius sum by sextic characters:
-            <span class="hero-equation">\(\displaystyle M_h(X):=\sum_{\substack{n\in\mathcal O\\ n\asymp X}}\mu_K(n)\chi_n(h)\)</span>
+            <span class="hero-equation">\(\displaystyle M_h(X):=\sum_{\substack{n\in\mathcal O\\ n\asymp X}}\mu_K(n)\chi_x(h)\)</span>
             and take a second moment:
             <span class="hero-equation">\begin{equation}\label{eq:mean-square} S(X,H):=\sum_{\substack{h\in\mathcal O\\ h\asymp H}}|M_h(X)|^2 \end{equation}</span>
             We seek roughly square-root cancellation on average:
@@ -397,33 +403,33 @@
             Since there are very roughly \(H^{1/6}\) (again, ignoring epsilons) such, we get, roughly, that
             \(H^{1/6}|M(X)|^2\le S(X,H)\ll X H \), and hence \(M(X)\ll X^{1/2}H^{5/12}\), which gives the main result.
             </p><p class="hero-lede">
-            Opening the square in (1), first separate the diagonal \(n=m\): its contribution is \(O(HX)\), already of the required size.
-            To see the mechanism off the diagonal, ignore all but the other extreme, \((n,m)=1\).
+            Opening the square in (1), first separate the diagonal \(n_1=n_2\): its contribution is \(O(HX)\), already of the required size.
+            To see the mechanism off the diagonal, ignore all but the other extreme, \((n_1,n_2)=1\).
             Reversing orders and applying Poisson in \(h\) (write \(L=X^2/H\) for the dual length) gives schematically
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx \frac1L\sum_{\ell\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(\ell),\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx \frac1L\sum_{\ell\asymp L}\sum_{\substack{n_1,n_2\asymp X\\(n_1,n_2)=1}}\mu_K(n_1)\mu_K(n_2)\,\mathcal G_{n_1,n_2}(\ell),\)</span>
             where the unnormalized sextic Gauss factor has the shape
-            <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(\ell)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{\ell a}{nm}\right).\)</span>
+            <span class="hero-equation">\(\displaystyle \mathcal G_{n_1,n_2}(\ell)=\sum_{a\bmod n_1 n_2}\overline{\chi_{n_2}(a)}\chi_{n_1}(a)\,e_K\!\left(\frac{\ell a}{n_1 n_2}\right).\)</span>
             The Gauss–Jacobi identity absorbs the Möbius signs into the Gauss factors on both sides, leaving cubic Gauss sums and explicit phase factors. Write the resulting normalized cubic-Gauss coefficient as
-            <span class="hero-equation">\(\displaystyle c_3(m):=\widetilde g_3(m)\,\overline{\frac{m}{|m|}}.\)</span>
-            Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm, and \(m\) is the chosen primary generator. After rearranging the phases, the \(n\)- and \(m\)-sums recombine heuristically into an absolute square:
-            <span class="hero-equation">\(\displaystyle \begin{aligned} S(X,H)&\approx\frac{X}{L}\sum_{\ell\asymp L}\sum_{n,m\asymp X}\overline{\chi_m(\ell)c_3(m)}\,\chi_n(\ell)c_3(n)\\&=\frac{X}{L}\sum_{\ell\asymp L}\left|\sum_{m\asymp X}\chi_m(\ell)c_3(m)\right|^2.\end{aligned}\)</span>
-            Coprimality restrictions and the remaining phase separation are suppressed in this schematic. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(1/L\) to \(X/L=H/X\). We now recognize \(c_3(m)\) as the squarefree Fourier coefficients of Kubota’s cubic theta series.
+            <span class="hero-equation">\(\displaystyle c_3(n):=\widetilde g_3(n)\,\overline{\frac{n}{|n|}}.\)</span>
+            Here \(\widetilde g_3(n)\) is the cubic Gauss sum normalized by the square root of the norm, and \(n\) is the chosen primary generator. After rearranging the phases, the \(n_1\)- and \(n_2\)-sums recombine heuristically into an absolute square:
+            <span class="hero-equation">\(\displaystyle \begin{aligned} S(X,H)&\approx\frac{X}{L}\sum_{\ell\asymp L}\sum_{n_1,n_2\asymp X}\overline{\chi_{n_2}(\ell)c_3(n_2)}\,\chi_{n_1}(\ell)c_3(n_1)\\&=\frac{X}{L}\sum_{\ell\asymp L}\left|\sum_{n\asymp X}\chi_x(\ell)c_3(n)\right|^2.\end{aligned}\)</span>
+            Coprimality restrictions and the remaining phase separation are suppressed in this schematic. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(1/L\) to \(X/L=H/X\). We now recognize \(c_3(n)\) as the squarefree Fourier coefficients of Kubota’s cubic theta series.
             </p><p class="hero-lede">
             For each fixed \(\ell\), restore the cube multiples \(mj^3\) to obtain the completed twisted theta coefficients, which we denote schematically by
-            <span class="hero-equation">\(\displaystyle \tau_\ell(r):=\sum_{\substack{mj^3=r\\m\ {\rm squarefree}}}\chi_m(\ell)c_3(m)\,w_\ell(j).\)</span>
-            The cube weights \(w_\ell(j)\) include the required twists and normalizations. Completion replaces the inner squarefree sum by \(\sum_{r\asymp X}\tau_\ell(r)\); Möbius inversion in the cube factor recovers the original sum.
+            <span class="hero-equation">\(\displaystyle \tau_\ell(n):=\sum_{\substack{mj^3=n\\m\ {\rm squarefree}}}\chi_m(\ell)c_3(m)\,w_\ell(j).\)</span>
+            The cube weights \(w_\ell(j)\) include the required twists and normalizations. Completion replaces the inner squarefree sum by \(\sum_{n\asymp X}\tau_\ell(n)\); Möbius inversion in the cube factor recovers the original sum.
             Thus the completed sums enter our second moment in the schematic form
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{r\asymp X}\tau_\ell(r)\right|^2,\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{n\asymp X}\tau_\ell(n)\right|^2,\)</span>
             with the cube-inversion sums and their scale changes left implicit.
             The theta series is constructed as the residue of a metaplectic Eisenstein series, whose meromorphic continuation is obtained by Selberg’s resolvent/Fredholm method. Taking the residue preserves its automorphic transformation law, giving the theta series its modularity. This classical construction is an important component of the formalization.
             Modularity of the completed theta series gives a Voronoi-type summation identity, whose main shape in this normalization is
-            <span class="hero-equation">\(\displaystyle \sum_{r\asymp X}\tau_\ell(r)\ \approx\ \frac{X}{L}\sum_{m\asymp Y}\tau^\vee_\ell(m),\qquad Y=\frac{L^2}{X},\quad \ell\asymp L.\)</span>
-            Here \(\tau^\vee_\ell(m)\) denotes the normalized coefficients at the reflected cusps; the cusp sums and transformed smooth weights are implicit. The reflection kernel has scale \(X/\mathcal N(\ell)^2\), giving the dual norm length \(Y\). Substituting this transformation into the second moment gives
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}\left|\sum_{m\asymp Y}\tau^\vee_\ell(m)\right|^2.\)</span>
+            <span class="hero-equation">\(\displaystyle \sum_{n\asymp X}\tau_\ell(n)\ \approx\ \frac{X}{L}\sum_{y\asymp Y}\tau^\vee_\ell(y),\qquad Y=\frac{L^2}{X},\quad \ell\asymp L.\)</span>
+            Here \(\tau^\vee_\ell(y)\) denotes the normalized coefficients at the reflected cusps; the cusp sums and transformed smooth weights are implicit. The reflection kernel has scale \(X/\mathcal N(\ell)^2\), giving the dual norm length \(Y\). Substituting this transformation into the second moment gives
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}\left|\sum_{y\asymp Y}\tau^\vee_\ell(y)\right|^2.\)</span>
             We then reopen the cube completion and separate the phases. The resulting quadratic energies have the schematic form
-            <span class="hero-equation">\(\displaystyle S(X,H)\ \approx\ \frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2,\qquad Y=\frac{L^2}{X}.\)</span>
-            The stars indicate admissible squarefree rows and columns; \(a_m\) are fixed coefficients within each block, with \(|a_m|\le1\). The sextic characters now occur cubed, so they are quadratic! The sharp quadratic large sieve gives, ignoring epsilon losses,
-            <span class="hero-equation">\(\displaystyle \sum_{\ell\asymp L}^{*}\left|\sum_{m\asymp Y}^{*}a_m\,\overline{\chi_m(\ell)}^{\,3}\right|^2\ll(L+Y)\sum_m^{*}|a_m|^2\ll(L+Y)Y.\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\ \approx\ \frac{H}{X}\frac{X^2}{L^2}\sum_{\ell\asymp L}^{*}\left|\sum_{y\asymp Y}^{*}a_y\,\overline{\chi_y(\ell)}^{\,3}\right|^2,\qquad Y=\frac{L^2}{X}.\)</span>
+            The stars indicate admissible squarefree rows and columns; \(a_y\) are fixed coefficients within each block, with \(|a_y|\le1\). The sextic characters now occur cubed, so they are quadratic! The sharp quadratic large sieve gives, ignoring epsilon losses,
+            <span class="hero-equation">\(\displaystyle \sum_{\ell\asymp L}^{*}\left|\sum_{y\asymp Y}^{*}a_y\,\overline{\chi_y(\ell)}^{\,3}\right|^2\ll(L+Y)\sum_y^{*}|a_y|^2\ll(L+Y)Y.\)</span>
             Consequently, this heuristic gives
             <span class="hero-equation">\(\displaystyle S(X,H)\ll\frac{HX}{L^2}(L+Y)Y=H(L+Y)\ll HX,\)</span>
             since \(1\le Y\le L\le X\) when \(H\) is just above \(X\). This explains the target bound. The full proof organizes the extra phases, common divisors, cube scales, and non-squarefree rows through a second Poisson passage and finite descent, obtaining \(S(X,H)\ll_\varepsilon XH\,X^\varepsilon\) in the required range. Sixth-power amplification then yields \(M(X)\ll_\varepsilon X^{11/12+\varepsilon}\).
@@ -433,6 +439,35 @@
             <div class="status"><strong>Proof objects</strong><span>The linked declarations compile; proof bodies remain in source</span></div>
           </div>
         </header>
+        <section class="historical-remarks" id="historical-remarks" aria-labelledby="historical-title">
+          <h3 id="historical-title">Historical remarks</h3>
+          <p>The ingredients have several distinct lineages. The comparisons below distinguish direct inputs from methodological analogies; “new here” describes the particular assembly, not a claim that every related idea first appears here.</p>
+          <h4><a href="#beat-1">The Eisenstein lift</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> The Eisenstein setting begins with <a href="https://doi.org/10.1515/crll.1844.28.28">Eisenstein’s 1844 work on cubic reciprocity</a>; the ideal and \(L\)-function language comes from <a href="https://www.numdam.org/item/BSMA_1877_2_1_1_17_1/">Dedekind</a> and <a href="https://geodesic.mathdoc.fr/item/MZ_1920__6_167556/">Hecke</a>. The factorization \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\) is classical. <strong>Specific to this proof.</strong> The Eisenstein lift is the entrance to this \(11/12\) argument.</p>
+          <h4><a href="#beat-2">Families and amplification</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> Deforming a problem in a family has a geometric analogy in <a href="https://numdam.org/articles/10.1007/BF02684373/">Deligne’s proof of the Weil Riemann hypothesis</a>, through a Lefschetz pencil and monodromy; that is an analogy, not an input here. The modern amplification line runs through <a href="https://doi.org/10.1515/crll.1992.428.139">Iwaniec</a>, <a href="https://doi.org/10.1007/BF01232422">Duke–Friedlander–Iwaniec</a>, and <a href="https://annals.math.princeton.edu/1995/141-2/p03">Iwaniec–Sarnak</a>. <strong>New here.</strong> The specific sextic deformation and sixth-power rows that recover the original sum belong to this argument.</p>
+          <h4><a href="#beat-3">Prime sums and automorphic precedents</a></h4>
+          <p class="plain-note"><strong>Precedents.</strong> <a href="https://doi.org/10.1007/BF01453602">Duke–Iwaniec (1990)</a> pass from Poisson summation to Gauss–Ramanujan sums and bilinear estimates for half-integral-weight coefficients. Their <a href="https://doi.org/10.1090/conm/143/00999">1993 cubic exponential/Kloosterman identity</a> is another nearby precursor, but not an input here. A complementary automorphic model is Selberg’s Eisenstein-series proof of the prime number theorem: in the <a href="https://web.math.princeton.edu/sarnak/ShalikaBday2002.pdf">formulation recorded by Sarnak</a>, the index-1 Ramanujan coefficient is \(c_q(1)=\mu(q)\). Selberg originated that argument; Sarnak’s contribution is its effective version and quantitative zero-free region.</p>
+          <p class="plain-note"><strong>Duke–Iwaniec’s prime-sum cancellation.</strong> Bill Duke’s result here was joint with Henryk Iwaniec: their <a href="https://www.math.ucla.edu/~wdduke/preprints/bilinearprimes.pdf">1990 paper</a> proves, under its hypotheses on a fixed holomorphic half-integral-weight cusp form, a power saving for its normalized Fourier coefficients at primes:
+            \[
+              \sum_{p\le T} a_f(p)\ll_{f,\varepsilon}T^{155/156+\varepsilon}.
+            \]
+            Here \(a_f(n)=n^{-(k-1)/2}\widehat f(n)\) for weight \(k\). Their argument uses Vaughan’s identity and bilinear estimates, then Poincaré series, Kloosterman sums, Poisson summation, and Gauss–Ramanujan sums. They explicitly compare their result to Heath-Brown–Patterson’s cubic Gauss sums at primes, while distinguishing the techniques. Their <a href="https://numdam.org/item/AST_1991__198-199-200__121_0/">1991 exposition</a> also discusses a hoped-for sharp mean-square estimate analogous to the quadratic large sieve. This suggests a genuine methodological resemblance here: automorphic coefficients, bilinear or second-moment estimates, and Gauss-sum transforms. It is not a direct input to this proof, nor does it supply this argument’s sextic deformation and sixth-power amplifier.</p>
+          <h4><a href="#beat-4">Gauss–Jacobi algebra</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> The local cubic Gauss-sum algebra goes back to <a href="https://doi.org/10.1007/978-3-642-52795-1">Hasse’s 1950 treatment</a>, in the form foregrounded by equation (2) of <a href="https://doi.org/10.1007/s11856-000-1273-y">Heath-Brown’s 2000 cubic work</a>. <strong>New here.</strong> This proof derives the exact mixed sextic/cubic identity that absorbs the Möbius factor.</p>
+          <h4><a href="#beat-5">Cubic theta and completion</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> <a href="https://hdl.handle.net/2433/84907">Kubota</a> created the metaplectic framework and constructed theta functions as residues of metaplectic Eisenstein series. <a href="https://doi.org/10.1515/crll.1977.296.125">Patterson</a> made the cubic theta series explicit and computed its cubic-Gauss-sum Fourier coefficients; <a href="https://doi.org/10.1515/crll.1979.310.111">Heath-Brown–Patterson</a> used this connection for Kummer sums. The precise completion and cube-factor reopening used here follow <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł</a>, with precedents in Patterson and Heath-Brown.</p>
+          <h4><a href="#beat-6">Modularity and Voronoi</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> Meromorphic continuation uses <a href="https://cds.cern.ch/record/427143">Selberg’s 1956 resolvent/Fredholm method</a>. Kubota applied that machinery metaplectically; Patterson computed the cubic coefficients and cusps; <a href="https://doi.org/10.1017/S0027763000000817">Yoshimoto</a> developed the twisted functional equations. The explicit level-aspect cubic Voronoi transformation used here is <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł’s</a> extension of Patterson and Yoshimoto.</p>
+          <h4><a href="#beat-8">The quadratic large sieve</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> The large sieve originates with <a href="https://www.cambridge.org/core/journals/mathematika/article/abs/large-sieve/4DC1EC8072D840195F1EF81F5828BB0F">Linnik (1941)</a>. <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown</a> proved the sharp self-dual quadratic-character inequality over \(\mathbb Q\), and <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a> proved the number-field form used here over \(\mathbb Q(\omega)\).</p>
+          <h4><a href="#beat-9">Finite descent</a></h4>
+          <p class="plain-note"><strong>Lineage.</strong> The finite descent draws on <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown’s quadratic and cubic work</a>, the number-field development of <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a>, and the higher-order methods of <a href="https://doi.org/10.1093/imrn/rns257">Blomer–Goldmakher–Louvel</a>. <strong>New at \(11/12\).</strong> The formal assembly makes the descent reserve arbitrarily small.</p>
+          <h4><a href="#beat-10">The 11/12 assembly</a></h4>
+          <p class="plain-note"><strong>New at \(11/12\).</strong> The proof couples that movable descent scale to an all-element sixth-power amplifier; its totient density is then removed by an exact Euler correction.</p>
+          <h4><a href="#beat-11">The zero-free endpoint</a></h4>
+          <p class="plain-note"><strong>Classical endpoint principle.</strong> The passage from smoothed Möbius cancellation to zero-free regions follows the criterion of <a href="https://denisevellachemla.eu/transc-CRAS-1912-Littlewood-Redheffer.pdf">Littlewood (1912)</a>; here it is applied to the corrected Hecke \(L\)-function product.</p>
+        </section>
         <section class="route" aria-label="Twelve-beat route map">
           <div class="route-head">
             <h3>The whole route</h3>
@@ -459,7 +494,7 @@
               n\text{ primary}\iff n\equiv1\pmod{3}.
             \]</div>
             <p>For elements coprime to \(3\), the primary condition selects exactly one representative among the six unit associates.</p>
-            <p class="plain-note"><strong>Lineage.</strong> The Eisenstein setting begins with <a href="https://doi.org/10.1515/crll.1844.28.28">Eisenstein’s 1844 work on cubic reciprocity</a>; the ideal and \(L\)-function language comes from <a href="https://www.numdam.org/item/BSMA_1877_2_1_1_17_1/">Dedekind</a> and <a href="https://geodesic.mathdoc.fr/item/MZ_1920__6_167556/">Hecke</a>. The factorization \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\) is classical. <strong>Specific to this proof.</strong> The Eisenstein lift is the entrance to this \(11/12\) argument.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -492,13 +527,13 @@ noncomputable def μ_K (n : 𝒪) : ℤ :=
             <p>Now make every ingredient visible in the summand: primaryness, Möbius, the actual sextic twist, and a smooth cutoff supported in \([1/2,1]\). Thus only \(X/2\leq \mathcal N(n)\leq X\) contributes.</p>
             <div class="math-card">\[
               M_h(X)=\sum_{\substack{n\ {\rm primary}\\\mathcal N(n)\le X}}
-                \mu_K(n)\chi_n(h)W\!\left(\frac{\mathcal N(n)}X\right),
+                \mu_K(n)\chi_x(h)W\!\left(\frac{\mathcal N(n)}X\right),
               \quad
               S(X,H)=\sum_{\mathcal N(h)\le H}V\!\left(\frac{\mathcal N(h)}H\right)|M_h(X)|^2.
             \]</div>
             <p>The public \(S\) is deliberately a <em>finite</em> sum. At the precise boundary where Poisson is needed, compact support proves it equal to a whole-lattice <code>tsum</code>.</p>
             <p>This makes the intro’s dyadic notation precise. The target is square-root cancellation on average, \(S(X,H)\ll_\varepsilon XH X^\varepsilon\), with \(H\) a little larger than \(X\).</p>
-            <p class="plain-note"><strong>Lineage.</strong> Deforming a problem in a family has a geometric analogy in <a href="https://numdam.org/articles/10.1007/BF02684373/">Deligne’s proof of the Weil Riemann hypothesis</a>, through a Lefschetz pencil and monodromy; that is an analogy, not an input here. The modern amplification line runs through <a href="https://doi.org/10.1515/crll.1992.428.139">Iwaniec</a>, <a href="https://doi.org/10.1007/BF01232422">Duke–Friedlander–Iwaniec</a>, and <a href="https://annals.math.princeton.edu/1995/141-2/p03">Iwaniec–Sarnak</a>. <strong>New here.</strong> The specific sextic deformation and sixth-power rows that recover the original sum belong to this argument.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -516,19 +551,19 @@ abbrev rows (H : ℕ) : Finset 𝒪 := exactRowBall H
 
 abbrev rows (H : ℕ) : Finset 𝒪 := exactRowBall H
 
-abbrev sexticTwist (X : ℕ) (n u : 𝒪) : ℂ :=
-  outsideSexticTwist excludedPrimes (reflectionExcludedPrimes_bad 1) X u n
+abbrev sexticTwist (X : ℕ) (n h : 𝒪) : ℂ :=
+  outsideSexticTwist excludedPrimes (reflectionExcludedPrimes_bad 1) X h n
 
-def M (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ :=
+def M (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) : ℂ :=
   ∑ n ∈ columns X, if primary n then
-    (μ_K n : ℂ) * sexticTwist X n u * W ((𝒩 n : ℝ) / X) else 0
+    (μ_K n : ℂ) * sexticTwist X n h * W ((𝒩 n : ℝ) / X) else 0
 
 def untwistedM (W : SmoothDyadicWeight ℂ) (X : ℕ) : ℂ :=
   ∑ n ∈ columns X, if primary n then
     (μ_K n : ℂ) * W ((𝒩 n : ℝ) / X) else 0
 
 def S (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) : ℝ :=
-  ∑ u ∈ rows H, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2
+  ∑ h ∈ rows H, V ((𝒩 h : ℝ) / H) * ‖M W h X‖ ^ 2
 
 theorem M_one (W : SmoothDyadicWeight ℂ) (X : ℕ) :
     M W 1 X = untwistedM W X</code></pre>
@@ -547,19 +582,19 @@ noncomputable def outsidePrimaryBall
 noncomputable def outsideSexticTwist
     (S : Finset (Ideal 𝒪))
     (hbad : fixedBadPrimes ⊆ S) (X : ℕ)
-    (u n : 𝒪) : ℂ :=
+    (h n : 𝒪) : ℂ :=
   idealSexticRow (outsideIdealsUpTo S X)
     (outsideIdealsUpTo_ne_bot S X)
-    (outside_good S X hbad) (Ideal.span {n}) u
+    (outside_good S X hbad) (Ideal.span {n}) h
 
 noncomputable def outsideM
     (S : Finset (Ideal 𝒪))
     (hbad : fixedBadPrimes ⊆ S)
-    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ :=
+    (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) : ℂ :=
   ∑ n ∈ outsidePrimaryBall S X,
     if primary n then
       (μ_K n : ℂ) *
-        outsideSexticTwist S hbad X u n *
+        outsideSexticTwist S hbad X h n *
         W ((𝒩 n : ℝ) / (X : ℝ))
     else 0
 
@@ -567,35 +602,35 @@ noncomputable def outsideS
     (S : Finset (Ideal 𝒪)) (hbad : fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) : ℝ :=
-  ∑ u ∈ exactRowBall H,
-    V ((𝒩 u : ℝ) / (H : ℝ)) *
-      ‖outsideM S hbad W u X‖ ^ 2</code></pre>
+  ∑ h ∈ exactRowBall H,
+    V ((𝒩 h : ℝ) / (H : ℝ)) *
+      ‖outsideM S hbad W h X‖ ^ 2</code></pre>
             </details>
             <details>
               <summary>The exact element-to-ideal and finite-to-lattice statements</summary>
               <pre><code>theorem outsideM_eq_idealRowSum
     (S : Finset (Ideal 𝒪))
     (hbad : fixedBadPrimes ⊆ S)
-    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) :
-    outsideM S hbad W u X =
+    (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) :
+    outsideM S hbad W h X =
       idealRowSum (outsideIdealsUpTo S X)
         (outsideIdealsUpTo_ne_bot S X)
         (outside_good S X hbad)
         (1 : DirichletCharacter ℂ 1)
-        (fun n ↦ W ((n : ℝ) / (X : ℝ))) u
+        (fun n ↦ W ((n : ℝ) / (X : ℝ))) h
 
 theorem outsideS_eq_idealRowSum_tsum
     (S : Finset (Ideal 𝒪))
     (hbad : fixedBadPrimes ⊆ S)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) :
-    outsideS S hbad W V X H = ∑' u : 𝒪,
-      V ((𝒩 u : ℝ) / (H : ℝ)) *
+    outsideS S hbad W V X H = ∑' h : 𝒪,
+      V ((𝒩 h : ℝ) / (H : ℝ)) *
         ‖idealRowSum (outsideIdealsUpTo S X)
           (outsideIdealsUpTo_ne_bot S X)
           (outside_good S X hbad)
           (1 : DirichletCharacter ℂ 1)
-          (fun n ↦ W ((n : ℝ) / (X : ℝ))) u‖ ^ 2</code></pre>
+          (fun n ↦ W ((n : ℝ) / (X : ℝ))) h‖ ^ 2</code></pre>
             </details>
             <p class="formal-note">These theorems certify the readable \(M_h(X)\) and \(S(X,H)\) notation. The analytic assembly starts from the equal <code>idealRowSum</code> expression rather than invoking the public wrappers again.</p>
           </section>
@@ -615,7 +650,7 @@ theorem outsideS_eq_idealRowSum_tsum
               \sum_{\ell\in\mathcal O}\mathcal K_{I,J,D}(\ell).
             \]</div>
             <p>For coprime columns of norm about \(X\), the modulus has norm about \(X^2\). Thus Poisson gives dual norm length \(L=X^2/H\) and prefactor \(H/X^2=1/L\) when the Gauss sums are unnormalized. The displayed kernel \(\mathcal K\) includes the Fourier weight and its normalization; zero frequencies and tails are tracked separately.</p>
-            <p class="plain-note"><strong>Precedents.</strong> <a href="https://doi.org/10.1007/BF01453602">Duke–Iwaniec (1990)</a> pass from Poisson summation to Gauss–Ramanujan sums and bilinear estimates for half-integral-weight coefficients. Their <a href="https://doi.org/10.1090/conm/143/00999">1993 cubic exponential/Kloosterman identity</a> is another nearby precursor, but not an input here. A complementary automorphic model is Selberg’s Eisenstein-series proof of the prime number theorem: in the <a href="https://web.math.princeton.edu/sarnak/ShalikaBday2002.pdf">formulation recorded by Sarnak</a>, the index-1 Ramanujan coefficient is \(c_q(1)=\mu(q)\). Selberg originated that argument; Sarnak’s contribution is its effective version and quantitative zero-free region.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -632,14 +667,14 @@ theorem outsideS_eq_idealRowSum_tsum
 theorem S_open_square (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) :
     (S W V X H : ℂ) =
-      ∑ n ∈ columns X, ∑ m ∈ columns X,
-        mobiusWeight W X n * star (mobiusWeight W X m) *
-          ∑ u ∈ rows H, (V ((𝒩 u : ℝ) / H) : ℂ) *
-            sexticTwist X n u * star (sexticTwist X m u)
+      ∑ n₁ ∈ columns X, ∑ n₂ ∈ columns X,
+        mobiusWeight W X n₁ * star (mobiusWeight W X n₂) *
+          ∑ h ∈ rows H, (V ((𝒩 h : ℝ) / H) : ℂ) *
+            sexticTwist X n₁ h * star (sexticTwist X n₂ h)
 
 theorem S_eq_tsum (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
     (X H : ℕ) :
-    S W V X H = ∑' u : 𝒪, V ((𝒩 u : ℝ) / H) * ‖M W u X‖ ^ 2</code></pre>
+    S W V X H = ∑' h : 𝒪, V ((𝒩 h : ℝ) / H) * ‖M W h X‖ ^ 2</code></pre>
             <details>
               <summary>Underlying general-purpose interface</summary>
             <pre><code><span class="comment">-- Exact central equality; parameters encode the two columns.</span>
@@ -678,14 +713,14 @@ theorem canonicalPair_first_poisson
             <div class="beat-topline"><span class="beat-number">04</span><span class="phase transform">Transform</span></div>
             <h3>Use Gauss–Jacobi identities to expose cubic coefficients</h3>
             <p>The first Poisson summation produces sextic Gauss sums. The Gauss–Jacobi identity absorbs the squarefree Möbius signs on both sides into cubic Gauss coefficients. Explicit local phases and cross-character factors remain and must be separated.</p>
-            <p>Write \(c_3(m)=\widetilde g_3(m)\overline{m/|m|}\), where \(\widetilde g_3(m)\) is normalized by \(\sqrt{\mathcal N(m)}\). These are the squarefree cubic-theta coefficients. As in the intro, the separated \(n,m\) sums are modeled by an absolute square with inner sum \(\sum_{m\asymp X}\chi_m(\ell)c_3(m)\). Normalizing the two Gauss factors changes the outside factor from \(1/L\) to \(X/L=H/X\).</p>
+            <p>Write \(c_3(n)=\widetilde g_3(n)\overline{n/|n|}\), where \(\widetilde g_3(n)\) is normalized by \(\sqrt{\mathcal N(n)}\). These are the squarefree cubic-theta coefficients. As in the intro, the separated \(n_1,n_2\) sums are modeled by an absolute square with inner sum \(\sum_{n\asymp X}\chi_x(\ell)c_3(n)\). Normalizing the two Gauss factors changes the outside factor from \(1/L\) to \(X/L=H/X\).</p>
             <div class="math-card">\[
               \mu_K\!\left(\prod p_i\right)
               G\!\left(\prod \chi_{p_i}^{\,e_i}\right)
               =\left(\prod_{i\ne j}\chi_{p_i}^{\,e_i}(p_j)\right)
               \prod_i G_i^{\rm converted}.
             \]</div>
-            <p class="plain-note"><strong>Lineage.</strong> The local cubic Gauss-sum algebra goes back to <a href="https://doi.org/10.1007/978-3-642-52795-1">Hasse’s 1950 treatment</a>, in the form foregrounded by equation (2) of <a href="https://doi.org/10.1007/s11856-000-1273-y">Heath-Brown’s 2000 cubic work</a>. <strong>New here.</strong> This proof derives the exact mixed sextic/cubic identity that absorbs the Möbius factor.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -723,7 +758,7 @@ theorem canonicalPair_first_poisson
           <section class="story">
             <div class="beat-topline"><span class="beat-number">05</span><span class="phase transform">Transform</span></div>
             <h3>Complete to the full cubic theta series</h3>
-            <p>For each fixed \(\ell\), restore the cube multiples \(r=mj^3\) to the inner squarefree sum. This produces the completed twisted coefficients \(\tau_\ell(r)\) from the intro. The exact object is written over ideals, with the twist denoted by \(\Psi\):</p>
+            <p>For each fixed \(\ell\), restore the cube multiples \(n=mj^3\) to the inner squarefree sum. This produces the completed twisted coefficients \(\tau_\ell(n)\) from the intro. The exact object is written over ideals, with the twist denoted by \(\Psi\):</p>
             <div class="math-card">\[
               T_\Psi(W,X)=\sum_{I}\sum_J
               \frac{c_\Psi(I)}{\sqrt{\mathcal N(I)}}\,w_\Psi(J)\,
@@ -736,7 +771,7 @@ theorem canonicalPair_first_poisson
                 T_\Psi\!\left(W,\frac{X}{\mathcal N(J)^3}\right).
             \]</div>
             <p>Thus completion enters \(S(X,H)\) through a weighted family of completed sums at cube-divided scales. The intro suppresses this family to show the main transformation; its scales and weights are retained in the estimates.</p>
-            <p class="plain-note"><strong>Lineage.</strong> <a href="https://hdl.handle.net/2433/84907">Kubota</a> created the metaplectic framework and constructed theta functions as residues of metaplectic Eisenstein series. <a href="https://doi.org/10.1515/crll.1977.296.125">Patterson</a> made the cubic theta series explicit and computed its cubic-Gauss-sum Fourier coefficients; <a href="https://doi.org/10.1515/crll.1979.310.111">Heath-Brown–Patterson</a> used this connection for Kummer sums. The precise completion and cube-factor reopening used here follow <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł</a>, with precedents in Patterson and Heath-Brown.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -754,7 +789,7 @@ theorem c₃_eq (I : Ideal O) (hsq : Squarefree I)
     c₃ I = star (FiniteGaussPhase.angularFactor (primaryGenerator I)) * gaussTwo I hI
 
 def cubicSum (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
-  ∑' I : Ideal O, c₃ I * Ψ (primaryGenerator I) * W ((Ideal.absNorm I : ℝ) / X)
+  ∑' n : Ideal O, c₃ n * Ψ (primaryGenerator n) * W ((Ideal.absNorm n : ℝ) / X)
 
 def thetaSum (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
   ∑' I : Ideal O, ∑' J : Ideal O,
@@ -821,7 +856,7 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
             <h3>Prove modularity and reflect the cubic theta series</h3>
             <p>The cubic theta series is obtained as a residue of a metaplectic Eisenstein series. Selberg’s resolvent/Fredholm method supplies meromorphic continuation, and the residue inherits the automorphic transformation law. Its modularity then exchanges the completed coefficient sum for dual sums at reflected cusps.</p>
             <p>In the intro’s normalization, with \(\ell\asymp L\), the reflection kernel has scale \(X/\mathcal N(\ell)^2\). The basic dual length is \(Y=L^2/X\), and the squared transformation factor is \(X^2/L^2\). Thus the completed \(\tau_\ell\)-energy becomes a reflected \(\tau^\vee_\ell\)-energy with prefactor \(HX/L^2\). Individual branches also carry cusp, divisor, and cube scales.</p>
-            <p class="plain-note"><strong>Lineage.</strong> Meromorphic continuation uses <a href="https://cds.cern.ch/record/427143">Selberg’s 1956 resolvent/Fredholm method</a>. Kubota applied that machinery metaplectically; Patterson computed the cubic coefficients and cusps; <a href="https://doi.org/10.1017/S0027763000000817">Yoshimoto</a> developed the twisted functional equations. The explicit level-aspect cubic Voronoi transformation used here is <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł’s</a> extension of Patterson and Yoshimoto.</p>
+
             <p>The formal statement below packages this transformation for each fixed shell and twist. Its reflected fiber collects the cusp branches, weights, and local factors suppressed in the intro. The branch-decoding results supply this identity to the mean-square argument.</p>
             <div class="math-card">\[
               T_{\Psi_{\rm row}}(W,X)=
@@ -908,9 +943,9 @@ theorem completedT_eq_reflectedFiber_idealValue_local
             <h3>Read off the quadratic characters</h3>
             <p>The explicit reflected coefficients contain cubes of the sextic characters. After reopening the cube completion and separating the remaining factors, the intro illustrates the resulting quadratic energies by</p>
             <div class="math-card">\[
-              \overline{\chi_m(\ell)}^{\,3}=\chi_{2,m}(\ell),\qquad
+              \overline{\chi_y(\ell)}^{\,3}=\chi_{2,y}(\ell),\qquad
               \sum_{\ell\asymp L}^{*}
-              \left|\sum_{m\asymp Y}^{*}a_m\chi_{2,m}(\ell)\right|^2,
+              \left|\sum_{y\asymp Y}^{*}a_y\chi_{2,y}(\ell)\right|^2,
               \qquad Y=\frac{L^2}{X}.
             \]</div>
             <p>The stars indicate admissible squarefree indices. The coefficients must be fixed with respect to the row variable \(\ell\) within each sieve application. The reflected coefficient formulas already exhibit quadratic characters; the second Poisson summation is a separate operation on squared row sums in the sieve and descent argument.</p>
@@ -931,7 +966,7 @@ theorem χ₂_eq_sextic_cube (I : Ideal O) (hI : Admissible I) (u : O) :
         (singletonPositive I hI) (singletonGood I hI) I u) ^ 3
 
 def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :=
-  ∑ ℓ ∈ rows, ‖∑ m ∈ cols, a m * χ₂ m (primaryGenerator ℓ)‖ ^ 2</code></pre>
+  ∑ ℓ ∈ rows, ‖∑ y ∈ cols, a y * χ₂ y (primaryGenerator ℓ)‖ ^ 2</code></pre>
             <details>
               <summary>Underlying general-purpose interface</summary>
             <pre><code>theorem canonicalSextic_pow_three_quadratic
@@ -945,13 +980,13 @@ def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :
               <summary>Auxiliary Poisson identity used in the formal sieve argument</summary>
               <p class="formal-note">The repository also proves <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/SecondPoisson.lean#L83"><code>masked_pair_second_poisson</code></a>, used in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/CubicSieve/ChildTransfer.lean#L560"><code>ChildTransfer.lean</code></a>. This masked-pair identity is distinct from the elementary sextic-cube identity above.</p>
             <pre><code><span class="comment">-- Core shape of the exact theorem masked_pair_second_poisson.</span>
-(∑' z : O,
-  rowCoprimeMask (fun i => Ideal.span {p i}) M z *
+(∑' y : O,
+  rowCoprimeMask (fun i => Ideal.span {p i}) M y *
   (star (finiteSquarefreeRow
-      (fun i => Ideal.span {p i}) hg T z) *
+      (fun i => Ideal.span {p i}) hg T y) *
     finiteSquarefreeRow
-      (fun i => Ideal.span {p i}) hg S z) *
-  W (‖eisEmbedding z‖ ^ 2 / Y)) =
+      (fun i => Ideal.span {p i}) hg S y) *
+  W (‖eisEmbedding y‖ ^ 2 / Y)) =
 ((Y : ℂ) / (‖eisEmbedding n‖ : ℂ)) *
   ∑ E ∈ M.powerset,
     ((moebius (∏ i ∈ E, Ideal.span {p i}) : ℂ) /
@@ -973,11 +1008,11 @@ def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :
             <p>For admissible squarefree rows of norm about \(L\) and columns of norm about \(Y\), the sharp quadratic large sieve gives</p>
             <div class="math-card">\[
               \sum_{\ell\asymp L}^{*}
-                \left|\sum_{m\asymp Y}^{*}a_m\chi_{2,m}(\ell)\right|^2
-              \ \ll_\varepsilon\ (LY)^\varepsilon(L+Y)\sum_m^{*}|a_m|^2.
+                \left|\sum_{y\asymp Y}^{*}a_y\chi_{2,y}(\ell)\right|^2
+              \ \ll_\varepsilon\ (LY)^\varepsilon(L+Y)\sum_y^{*}|a_y|^2.
             \]</div>
-            <p class="plain-note"><strong>Lineage.</strong> The large sieve originates with <a href="https://www.cambridge.org/core/journals/mathematika/article/abs/large-sieve/4DC1EC8072D840195F1EF81F5828BB0F">Linnik (1941)</a>. <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown</a> proved the sharp self-dual quadratic-character inequality over \(\mathbb Q\), and <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a> proved the number-field form used here over \(\mathbb Q(\omega)\).</p>
-            <p>For \(|a_m|\le1\), the intro’s heuristic therefore gives \(S(X,H)\ll (HX/L^2)(L+Y)Y=H(L+Y)\ll HX\), ignoring epsilon losses. The full proof must sum the separate blocks with their weights and restrictions.</p>
+
+            <p>For \(|a_y|\le1\), the intro’s heuristic therefore gives \(S(X,H)\ll (HX/L^2)(L+Y)Y=H(L+Y)\ll HX\), ignoring epsilon losses. The full proof must sum the separate blocks with their weights and restrictions.</p>
             <p>The adjacent Lean statement now gives the sharp \(L+Y\) bound for the displayed finite quadratic energy. It is proved from <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/OAI/NumberTheory/DirichletL/QuadraticSieve/LogarithmicLoss.lean#L479"><code>finite_family_quadratic_large_sieve</code></a>; the initial \(M+N^2\) estimate remains available in the expandable implementation details.</p>
           </section>
           <section class="formal">
@@ -993,10 +1028,10 @@ def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :
     ∃ C : ℝ, 0 &lt; C ∧ ∀ L Y : ℝ, 1 ≤ L → 1 ≤ Y →
       ∀ rows cols : Finset (Ideal O),
       (∀ ℓ ∈ rows, Admissible ℓ ∧ (Ideal.absNorm ℓ : ℝ) ≤ L) →
-      (∀ m ∈ cols, Admissible m ∧ (Ideal.absNorm m : ℝ) ≤ Y) →
+      (∀ y ∈ cols, Admissible y ∧ (Ideal.absNorm y : ℝ) ≤ Y) →
       ∀ a : Ideal O → ℂ,
       quadraticEnergy rows cols a ≤
-        C * (L * Y) ^ ε * (L + Y) * ∑ m ∈ cols, ‖a m‖ ^ 2</code></pre>
+        C * (L * Y) ^ ε * (L + Y) * ∑ y ∈ cols, ‖a y‖ ^ 2</code></pre>
             <details>
               <summary>Underlying general-purpose interface</summary>
             <pre><code>theorem ideal_initial_quadratic_sieve
@@ -1034,7 +1069,7 @@ def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :
               \ \ll_{\theta,\varepsilon}\ X\cdot X^{1+\theta}\cdot X^\varepsilon.
             \]</div>
             <p>The checked interfaces below bound both finite sets of nonzero rows and the actual smooth moment \(S\), with \(0\le V\le1\). For \(H\) comparable to \(X^{1+\theta}\), this is the intro’s target \(S(X,H)\ll XH X^\varepsilon\). The bound is not asserted uniformly for arbitrarily small \(H\). Taking \(\theta\) arbitrarily small lets amplification reach \(11/12+\varepsilon\).</p>
-            <p class="plain-note"><strong>Lineage.</strong> The finite descent draws on <a href="https://doi.org/10.4064/aa-72-3-235-275">Heath-Brown’s quadratic and cubic work</a>, the number-field development of <a href="https://doi.org/10.1017/S0305004112000370">Goldmakher–Louvel</a>, and the higher-order methods of <a href="https://doi.org/10.1093/imrn/rns257">Blomer–Goldmakher–Louvel</a>. <strong>New at \(11/12\).</strong> The formal assembly makes the descent reserve arbitrarily small.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -1049,9 +1084,9 @@ def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :
     (θ ε : ℝ) (hθ : 0 &lt; θ) (hε : 0 &lt; ε) :
     ∃ C : ℝ, 0 &lt; C ∧ ∀ X : ℕ, 1 ≤ X →
       ∀ T : Finset 𝒪,
-      (∀ u ∈ T, (𝒩 u : ℝ) ≤ (X : ℝ) ^ (1 + θ)) →
-      (∀ u ∈ T, u ≠ 0) →
-      (∑ u ∈ T, ‖M W u X‖ ^ 2) ≤
+      (∀ h ∈ T, (𝒩 h : ℝ) ≤ (X : ℝ) ^ (1 + θ)) →
+      (∀ h ∈ T, h ≠ 0) →
+      (∑ h ∈ T, ‖M W h X‖ ^ 2) ≤
         C * X * (X : ℝ) ^ (1 + θ) * (X : ℝ) ^ ε
 
 theorem mean_square_dyadic (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
@@ -1132,7 +1167,7 @@ def CanonicalDescentScale.ofReserve
               |M_{\rm dens}(X)|\ll X^{(11+5\theta)/12+\eta}.
             \]</div>
             <p>Here \(B\) is the amplifier’s norm scale and \(M_{\rm dens}(X)\) is the smoothed admissible-ideal sum with coefficients \(\mu_K(I)d(I)\). Choose \(\theta=6\varepsilon/5\) and \(\eta=\varepsilon/2\); then \((11+5\theta)/12+\eta=11/12+\varepsilon\). The next step removes the density by an Euler correction.</p>
-            <p class="plain-note"><strong>New at \(11/12\).</strong> The proof couples that movable descent scale to an all-element sixth-power amplifier; its totient density is then removed by an exact Euler correction.</p>
+
           </section>
           <section class="formal">
             <div class="formal-head">
@@ -1145,22 +1180,22 @@ def CanonicalDescentScale.ofReserve
               </div>
             </div>
             <p class="formal-note">Checked interface in <a href="https://github.com/AlexKontorovich/quasi-rh/blob/main/ElevenTwelfths/ZetaFamily.lean">ZetaFamily.lean</a>. The declarations below are synchronized directly from the Lean source; theorem proofs are omitted.</p>
-            <pre data-lean-source="ElevenTwelfths/ZetaBound.lean" data-lean-decls="density,densityM,densityM_bound"><code>abbrev density (I : Ideal 𝒪) : ℂ :=
-  ∏ P ∈ OAI.IdealMobiusDivisorSum.primeSupport I,
+            <pre data-lean-source="ElevenTwelfths/ZetaBound.lean" data-lean-decls="density,densityM,densityM_bound"><code>abbrev density (n : Ideal 𝒪) : ℂ :=
+  ∏ P ∈ OAI.IdealMobiusDivisorSum.primeSupport n,
     (1 - (1 : ℂ) / (Ideal.absNorm P : ℂ))
 
 def densityM (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
-  ∑' I : Ideal 𝒪, if ∀ P ∈ excludedPrimes, ¬ P ∣ I then
-    (UniqueFactorizationMonoid.moebius I : ℂ) * density I *
-      W ((Ideal.absNorm I : ℝ) / X) else 0
+  ∑' n : Ideal 𝒪, if ∀ P ∈ excludedPrimes, ¬ P ∣ n then
+    (UniqueFactorizationMonoid.moebius n : ℂ) * density n *
+      W ((Ideal.absNorm n : ℝ) / X) else 0
 
 theorem densityM_bound (W : SmoothDyadicWeight ℂ) (ε : ℝ) (hε : 0 &lt; ε) :
     (fun X : ℝ ↦ densityM W X) =O[atTop]
       (fun X : ℝ ↦ X ^ ((11 / 12 : ℝ) + ε))</code></pre>
             <pre data-lean-source="ElevenTwelfths/ZetaFamily.lean" data-lean-decls="M_sixth_power"><code>theorem M_sixth_power (W : SmoothDyadicWeight ℂ) (b : 𝒪) (X : ℕ) :
     M W (b ^ 6) X =
-      ∑ I ∈ outsideIdealsUpTo excludedPrimes X with IsCoprime I (Ideal.span {b}),
-        (UniqueFactorizationMonoid.moebius I : ℂ) * W ((Ideal.absNorm I : ℝ) / X)</code></pre>
+      ∑ n ∈ outsideIdealsUpTo excludedPrimes X with IsCoprime n (Ideal.span {b}),
+        (UniqueFactorizationMonoid.moebius n : ℂ) * W ((Ideal.absNorm n : ℝ) / X)</code></pre>
             <details>
               <summary>Underlying general-purpose interface</summary>
             <pre><code>def totientDensity (I : Ideal O) : ℂ :=
@@ -1206,7 +1241,7 @@ let averageLoss : ℝ := epsilon / 2</code></pre>
             <h3>Use Mellin inversion and restore the Euler factors</h3>
             <p>The all-sixth-powers amplifier bounds the density-weighted sum \(M_{\rm dens}(X)\). Mellin inversion turns this bound into an analytic function in \(\Re(s)&gt;11/12\). The density <code>totientDensity</code> is then accounted for by an explicit Euler product.</p>
             <p>An absolutely convergent <code>eulerCorrection</code> removes the density, while <code>finiteEulerFactor</code> restores the finitely excluded bad primes. The public \([1/2,1]\) convention is converted to the upstream \([1,2]\) Mellin convention by the harmless dilation \(x\mapsto2x\).</p>
-            <p class="plain-note"><strong>Classical endpoint principle.</strong> The passage from smoothed Möbius cancellation to zero-free regions follows the criterion of <a href="https://denisevellachemla.eu/transc-CRAS-1912-Littlewood-Redheffer.pdf">Littlewood (1912)</a>; here it is applied to the corrected Hecke \(L\)-function product.</p>
+
             <div class="math-card">\[
               (\zeta(s)L(s,\chi_{-3}))\,
               (E_S(s)E_{\rm dens}(s)\,\mathcal M(s))

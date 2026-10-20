@@ -17,11 +17,11 @@ open scoped BigOperators
 /-- The actual smooth Mobius sum, with the arithmetic factors visible. -/
 noncomputable def eisensteinM
     (normBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) : ℂ := by
+    (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) : ℂ := by
   classical
   exact ∑ n ∈ normBall X,
     if primary n then
-      (μ_K n : ℂ) * sexticTwist u n *
+      (μ_K n : ℂ) * sexticTwist h n *
         W ((𝒩 n : ℝ) / (X : ℝ))
     else 0
 
@@ -29,15 +29,15 @@ noncomputable def eisensteinM
 noncomputable def eisensteinS
     (columnBall rowBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff) (X H : ℕ) : ℝ :=
-  ∑ u ∈ rowBall H,
-    V ((𝒩 u : ℝ) / (H : ℝ)) *
-      ‖eisensteinM columnBall sexticTwist W u X‖ ^ 2
+  ∑ h ∈ rowBall H,
+    V ((𝒩 h : ℝ) / (H : ℝ)) *
+      ‖eisensteinM columnBall sexticTwist W h X‖ ^ 2
 
 theorem eisensteinM_eq_M
     (normBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)
-    (W : SmoothDyadicWeight ℂ) (u : 𝒪) (X : ℕ) :
-    eisensteinM normBall sexticTwist W u X =
-      M 𝒩 normBall primary μ_K sexticTwist W u X := rfl
+    (W : SmoothDyadicWeight ℂ) (h : 𝒪) (X : ℕ) :
+    eisensteinM normBall sexticTwist W h X =
+      M 𝒩 normBall primary μ_K sexticTwist W h X := rfl
 
 theorem eisensteinS_eq_S
     (columnBall rowBall : ℕ → Finset 𝒪) (sexticTwist : 𝒪 → 𝒪 → ℂ)

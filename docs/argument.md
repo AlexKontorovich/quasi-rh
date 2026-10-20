@@ -24,8 +24,8 @@ requested epsilon, and derives `11 / 12` directly. It does not use a stronger
 
 Write `O` for the Eisenstein integers. The public weight structures in
 `ElevenTwelfths.SmoothDyadic` are smooth and supported in `[1 / 2, 1]`.
-Consequently `W (N(n) / N)` restricts the column variable to
-`N / 2 <= N(n) <= N`, and the analogous row cutoff has the clean upper bound
+Consequently `W (𝒩(n) / X)` restricts the column variable to
+`X / 2 <= 𝒩(n) <= X`, and the analogous row cutoff has the clean upper bound
 `H`, not `2 * H`.
 
 The arithmetic is concrete:
@@ -44,17 +44,17 @@ Thus the readable element sum and the ideal-indexed analytic core use
 literally the same Möbius coefficient. Primaryness selects the distinguished
 generator rather than summing over all six associates.
 
-For a finite set `S` of excluded bad prime ideals, `outsidePrimaryBall S N`
+For a finite set `S` of excluded bad prime ideals, `outsidePrimaryBall S X`
 contains the canonical primary generators of the admissible ideals of norm
-at most `N`. The actual twisted sum is
+at most `X`. The actual twisted sum is
 
 ```lean
 noncomputable def outsideM ... (W : SmoothDyadicWeight ℂ)
-    (u : 𝒪) (N : ℕ) : ℂ :=
-  ∑ n ∈ outsidePrimaryBall S N,
+    (h : 𝒪) (X : ℕ) : ℂ :=
+  ∑ n ∈ outsidePrimaryBall S X,
     if primary n then
-      (μ_K n : ℂ) * outsideSexticTwist S hbad N u n *
-        W ((𝒩 n : ℝ) / (N : ℝ))
+      (μ_K n : ℂ) * outsideSexticTwist S hbad X h n *
+        W ((𝒩 n : ℝ) / (X : ℝ))
     else 0
 ```
 
@@ -68,10 +68,10 @@ The public mean square is definitionally a `Finset` sum:
 ```lean
 noncomputable def outsideS ...
     (W : SmoothDyadicWeight ℂ) (V : SmoothDyadicCutoff)
-    (N H : ℕ) : ℝ :=
-  ∑ u ∈ exactRowBall H,
-    V ((𝒩 u : ℝ) / (H : ℝ)) *
-      ‖outsideM S hbad W u N‖ ^ 2
+    (X H : ℕ) : ℝ :=
+  ∑ h ∈ exactRowBall H,
+    V ((𝒩 h : ℝ) / (H : ℝ)) *
+      ‖outsideM S hbad W h X‖ ^ 2
 ```
 
 Columns and rows deliberately use different finite balls. Columns are
@@ -80,12 +80,12 @@ over every Eisenstein integer in the row lattice. The two bridge theorems are
 
 ```lean
 theorem outsideM_eq_idealRowSum ... :
-    outsideM S hbad W u N = idealRowSum ... u
+    outsideM S hbad W h X = idealRowSum ... h
 
 theorem outsideS_eq_idealRowSum_tsum ... :
-    outsideS S hbad W V N H = ∑' u : 𝒪,
-      V ((𝒩 u : ℝ) / (H : ℝ)) *
-        ‖idealRowSum ... u‖ ^ 2
+    outsideS S hbad W V X H = ∑' h : 𝒪,
+      V ((𝒩 h : ℝ) / (H : ℝ)) *
+        ‖idealRowSum ... h‖ ^ 2
 ```
 
 The second equality is used at the interface to Poisson summation. Compact
@@ -121,11 +121,11 @@ canonical theta models feed the mean-square endpoint
 ```lean
 theorem outside_mean_square_of_theta_models_pos ...
     (theta epsilon : ℝ) (htheta : 0 < theta) (hepsilon : 0 < epsilon) :
-    ∃ C > 0, ∀ D Z, 1 ≤ Z → ... → ∀ T : Finset 𝒪,
-      (∀ z ∈ T, N(z) ≤ Z ^ (1 + theta)) →
-      (∀ z ∈ T, z ≠ 0) →
-      ∑ z ∈ T, ‖idealRowSum ... z‖ ^ 2
-        ≤ C * Z * Z ^ (1 + theta) * Z ^ epsilon
+    ∃ C > 0, ∀ D X, 1 ≤ X → ... → ∀ T : Finset 𝒪,
+      (∀ h ∈ T, 𝒩(h) ≤ X ^ (1 + theta)) →
+      (∀ h ∈ T, h ≠ 0) →
+      ∑ h ∈ T, ‖idealRowSum ... h‖ ^ 2
+        ≤ C * X * X ^ (1 + theta) * X ^ epsilon
 ```
 
 The displayed signature suppresses only conductors, fixed bad primes, and
@@ -148,7 +148,7 @@ class CanonicalDescentScale where
 ```
 
 The last field is precisely the numerical budget needed by the short-cube
-argument: twenty-five factors of size `Z ^ (1 / denominator)` consume at most
+argument: twenty-five factors of size `X ^ (1 / denominator)` consume at most
 half of the reserve. For any `kappa > 0`,
 
 ```lean
@@ -176,8 +176,8 @@ It appears in Lean as `idealSexticRow_sixth_mask`. The public algebraic layer
 also records that `b ↦ b ^ 6` has fibers of size at most six:
 
 ```lean
-theorem sixthPowerFiber_card (s : Finset R) (z : R) :
-    (s.filter fun b ↦ b ^ 6 = z).card ≤ 6
+theorem sixthPowerFiber_card (s : Finset R) (h : R) :
+    (s.filter fun b ↦ b ^ 6 = h).card ≤ 6
 ```
 
 The final proof intentionally averages over all `b` in a smooth annulus,
@@ -189,18 +189,18 @@ argument.
 Put
 
 \[
-  Y=Z^\alpha,
+  B=X^\alpha,
   \qquad
   \alpha=\frac{1+\theta}{6}.
 \]
 
-Then `N(b ^ 6) <= Z ^ (1 + theta)`, so every amplified row lies inside the
+Then `𝒩(b ^ 6) <= X ^ (1 + theta)`, so every amplified row lies inside the
 mean-square range. Averaging the coprimality mask over `b` has the deliberate
 main term
 
 \[
   \operatorname{totientDensity}(I)
-  =\prod_{P\mid I}\left(1-\frac1{N(P)}\right).
+  =\prod_{P\mid I}\left(1-\frac1{𝒩(P)}\right).
 \]
 
 Accordingly, the theorem produced by the amplifier bounds the intentionally
@@ -209,10 +209,10 @@ the raw Möbius sum:
 
 ```lean
 theorem outside_totient_moebius_bound_of_mean_square ... :
-    ∃ C > 0, ∀ D Z, ... →
+    ∃ C > 0, ∀ D X, ... →
       ‖∑ I ∈ outsideIdealsUpTo S D,
-        baseChangeWeight chi I * W (N(I) / Z) * totientDensity I‖
-      ≤ C * Z ^ ((11 + 5 * theta) / 12 + eta)
+        baseChangeWeight chi I * W (𝒩(I) / X) * totientDensity I‖
+      ≤ C * X ^ ((11 + 5 * theta) / 12 + eta)
 ```
 
 ## 6. The exponent 11/12
@@ -220,20 +220,20 @@ theorem outside_totient_moebius_bound_of_mean_square ... :
 Suppose the mean square is written with loss `2 * eta`:
 
 \[
-  \sum_z |M_z(Z)|^2\ll Z^{2+\theta+2\eta}.
+  \sum_h |M_h(X)|^2\ll X^{2+\theta+2\eta}.
 \]
 
-Cauchy--Schwarz applied to an amplifier of mass `Y` gives a numerator bounded
+Cauchy--Schwarz applied to an amplifier of mass `B` gives a numerator bounded
 by
 
 \[
-  \sqrt{Y Z^{2+\theta+2\eta}}.
+  \sqrt{B X^{2+\theta+2\eta}}.
 \]
 
-Dividing by the main-term mass `Y` therefore gives
+Dividing by the main-term mass `B` therefore gives
 
 \[
-  Z^{(2+\theta-\alpha)/2+\eta}.
+  X^{(2+\theta-\alpha)/2+\eta}.
 \]
 
 Substituting `alpha = (1 + theta) / 6` yields
@@ -271,8 +271,8 @@ def SmoothedWeightedMobiusBound ... (sigma : ℝ) : Prop :=
   ∀ W, ContDiff ℝ ∞ W →
     Function.support W ⊆ Set.Icc (1 / 2 : ℝ) 1 →
     ∀ epsilon > 0,
-      (fun Z ↦ ∑' I, outsideWeight chi S I * W (N(I) / Z))
-        =O[atTop] (fun Z ↦ Z ^ (sigma + epsilon))
+      (fun X ↦ ∑' I, outsideWeight chi S I * W (𝒩(I) / X))
+        =O[atTop] (fun X ↦ X ^ (sigma + epsilon))
 ```
 
 Here `outsideWeight` contains the Möbius factor, the Dirichlet character, the
@@ -284,7 +284,7 @@ factors.
 
 The Mellin layer expects an auxiliary cutoff supported in `[1, 2]`. The
 public `[1 / 2, 1]` convention is converted by the explicit dilation
-`U x = W (2 * x)` and the simultaneous scale change `Z ↦ 2 * Z`; a fixed
+`U x = W (2 * x)` and the simultaneous scale change `X ↦ 2 * X`; a fixed
 dilation does not change the power exponent. Inverse Mellin then gives
 analytic continuation of the corrected reciprocal `L`-factor to
 `re s > sigma`.

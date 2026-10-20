@@ -36,6 +36,10 @@ arbitrary-positive-reserve mean square and the lower-level OpenAI components;
 its endpoint is assembled locally rather than obtained by weakening OpenAI's
 `7 / 8` result.
 
+The displayed `masked_pair_second_poisson` theorem also has a cosmetic local
+rename: its summation variable is `y`, matching its norm scale `Y`. This
+changes bound-variable names only, not its statement or proof mathematically.
+
 ## Dependency compatibility patch
 
 The build pins Rellich--Kondrachov commit

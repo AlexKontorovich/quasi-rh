@@ -29,7 +29,7 @@ theorem c₃_eq (I : Ideal O) (hsq : Squarefree I)
 
 /-- The squarefree coefficient sum, with the twist Ψ exposed. -/
 def cubicSum (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
-  ∑' I : Ideal O, c₃ I * Ψ (primaryGenerator I) * W ((Ideal.absNorm I : ℝ) / X)
+  ∑' n : Ideal O, c₃ n * Ψ (primaryGenerator n) * W ((Ideal.absNorm n : ℝ) / X)
 
 /-- Completion restores the cube multiples I J³, with their actual weights. -/
 def thetaSum (Ψ : O →* ℂ) (W : SmoothDyadicWeight ℂ) (X : ℝ) : ℂ :=
@@ -65,40 +65,40 @@ theorem χ₂_eq_sextic_cube (I : Ideal O) (hI : Admissible I) (u : O) :
 /-- A block of the quadratic energy. Its column coefficients do not depend
 on the row ℓ; obtaining such blocks from reflection is a separate step. -/
 def quadraticEnergy (rows cols : Finset (Ideal O)) (a : Ideal O → ℂ) : ℝ :=
-  ∑ ℓ ∈ rows, ‖∑ m ∈ cols, a m * χ₂ m (primaryGenerator ℓ)‖ ^ 2
+  ∑ ℓ ∈ rows, ‖∑ y ∈ cols, a y * χ₂ y (primaryGenerator ℓ)‖ ^ 2
 
 /-- The SHARP L+Y estimate, not the initial L+Y² bound. -/
 theorem quadratic_large_sieve (ε : ℝ) (hε : 0 < ε) :
     ∃ C : ℝ, 0 < C ∧ ∀ L Y : ℝ, 1 ≤ L → 1 ≤ Y →
       ∀ rows cols : Finset (Ideal O),
       (∀ ℓ ∈ rows, Admissible ℓ ∧ (Ideal.absNorm ℓ : ℝ) ≤ L) →
-      (∀ m ∈ cols, Admissible m ∧ (Ideal.absNorm m : ℝ) ≤ Y) →
+      (∀ y ∈ cols, Admissible y ∧ (Ideal.absNorm y : ℝ) ≤ Y) →
       ∀ a : Ideal O → ℂ,
       quadraticEnergy rows cols a ≤
-        C * (L * Y) ^ ε * (L + Y) * ∑ m ∈ cols, ‖a m‖ ^ 2 := by
+        C * (L * Y) ^ ε * (L + Y) * ∑ y ∈ cols, ‖a y‖ ^ 2 := by
   obtain ⟨C, hC, hsieve⟩ := finite_family_quadratic_large_sieve ε hε
   refine ⟨C, hC, ?_⟩
   intro L Y hL hY rows cols hrows hcols a
   have h := hsieve L Y hL hY
-    (fun ℓ : rows ↦ (ℓ : Ideal O)) (fun m : cols ↦ (m : Ideal O))
+    (fun ℓ : rows ↦ (ℓ : Ideal O)) (fun y : cols ↦ (y : Ideal O))
     Subtype.val_injective Subtype.val_injective
-    (fun ℓ ↦ hrows ℓ ℓ.property) (fun m ↦ hcols m m.property)
-    (fun m ↦ a m)
+    (fun ℓ ↦ hrows ℓ ℓ.property) (fun y ↦ hcols y y.property)
+    (fun y ↦ a y)
   have sum_rows (f : Ideal O → ℝ) :
-      (∑ i : rows, f i) = ∑ i ∈ rows, f i :=
+      (∑ ℓ : rows, f ℓ) = ∑ ℓ ∈ rows, f ℓ :=
     (Finset.sum_subtype rows (fun _ ↦ Iff.rfl) f).symm
   have sum_cols (f : Ideal O → ℂ) :
-      (∑ j : cols, f j) = ∑ j ∈ cols, f j :=
+      (∑ y : cols, f y) = ∑ y ∈ cols, f y :=
     (Finset.sum_subtype cols (fun _ ↦ Iff.rfl) f).symm
   have sum_norm :
-      (∑ j : cols, ‖a j‖ ^ 2) = ∑ j ∈ cols, ‖a j‖ ^ 2 :=
-    (Finset.sum_subtype cols (fun _ ↦ Iff.rfl) (fun j ↦ ‖a j‖ ^ 2)).symm
-  have inner (i : rows) :
-      (∑ j : cols, quadraticRow j (primaryGenerator i) * a j) =
-        ∑ j ∈ cols, quadraticRow j (primaryGenerator i) * a j :=
-    sum_cols (fun j ↦ quadraticRow j (primaryGenerator i) * a j)
+      (∑ y : cols, ‖a y‖ ^ 2) = ∑ y ∈ cols, ‖a y‖ ^ 2 :=
+    (Finset.sum_subtype cols (fun _ ↦ Iff.rfl) (fun y ↦ ‖a y‖ ^ 2)).symm
+  have inner (ℓ : rows) :
+      (∑ y : cols, quadraticRow y (primaryGenerator ℓ) * a y) =
+        ∑ y ∈ cols, quadraticRow y (primaryGenerator ℓ) * a y :=
+    sum_cols (fun y ↦ quadraticRow y (primaryGenerator ℓ) * a y)
   simp only [inner, sum_norm] at h
-  rw [sum_rows (fun i ↦ ‖∑ j ∈ cols, quadraticRow j (primaryGenerator i) * a j‖ ^ 2)] at h
+  rw [sum_rows (fun ℓ ↦ ‖∑ y ∈ cols, quadraticRow y (primaryGenerator ℓ) * a y‖ ^ 2)] at h
   simpa only [quadraticEnergy, χ₂, mul_comm (a _) (quadraticRow _ _)] using h
 
 /-- Algebra of the introductory sieve heuristic, conditional on its energy
