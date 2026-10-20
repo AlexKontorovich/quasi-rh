@@ -383,9 +383,9 @@
             \(\zeta_K(s)=\zeta(s)L(s,\chi_{-3})\), nonvanishing of
             \(\zeta_K\) forces nonvanishing of both factors. We deform the
             Eisenstein Möbius sum by sextic characters:
-            <span class="hero-equation">\(\displaystyle M_u(X):=\sum_{\substack{n\in\mathcal O\\ n\asymp X}}\mu_K(n)\chi_n(u)\)</span>
+            <span class="hero-equation">\(\displaystyle M_h(X):=\sum_{\substack{n\in\mathcal O\\ n\asymp X}}\mu_K(n)\chi_n(h)\)</span>
             and take a second moment:
-            <span class="hero-equation">\begin{equation}\label{eq:mean-square} S(X,H):=\sum_{\substack{u\in\mathcal O\\ u\asymp H}}|M_u(X)|^2 \end{equation}</span>
+            <span class="hero-equation">\begin{equation}\label{eq:mean-square} S(X,H):=\sum_{\substack{h\in\mathcal O\\ h\asymp H}}|M_h(X)|^2 \end{equation}</span>
             We seek roughly square-root cancellation on average:
             <span class="hero-equation">\(\displaystyle S(X,H)\ll XH,\)</span>
             ignoring epsilons.
@@ -399,16 +399,19 @@
             </p><p class="hero-lede">
             Opening the square in (1), first separate the diagonal \(n=m\): its contribution is \(O(HX)\), already of the required size.
             To see the mechanism off the diagonal, consider the other extreme, \((n,m)=1\). Intermediate common divisors are handled separately in the proof.
-            Reversing orders and applying Poisson in \(u\) (write \(L=X^2/H\) for the dual length) gives schematically
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx \sum_{h\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(h),\)</span>
+            Reversing orders and applying Poisson in \(h\) (write \(L=X^2/H\) for the dual length) gives schematically
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx \sum_{\ell\asymp L}\sum_{\substack{n,m\asymp X\\(n,m)=1}}\mu_K(n)\mu_K(m)\,\mathcal G_{n,m}(\ell),\)</span>
             where the unnormalized sextic Gauss factor has the shape
-            <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(h)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{ha}{nm}\right).\)</span>
+            <span class="hero-equation">\(\displaystyle \mathcal G_{n,m}(\ell)=\sum_{a\bmod nm}\overline{\chi_m(a)}\chi_n(a)\,e_K\!\left(\frac{\ell a}{nm}\right).\)</span>
             Gauss–Jacobi absorbs the Möbius signs into the Gauss factors on both sides. After rearranging the phases and suppressing coprimality restrictions to reassemble a square, the heuristic becomes
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{h\asymp X^2/H}\left|\sum_{m\asymp X}\chi_m(h)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\sum_{\ell\asymp L}\left|\sum_{m\asymp X}\chi_m(\ell)\,\widetilde g_3(m)\frac{m}{|m|}\right|^2.\)</span>
             Here \(\widetilde g_3(m)\) is the cubic Gauss sum normalized by the square root of the norm. Normalizing the two Gauss factors contributes a factor \(X\), changing the prefactor \(H/X^2\) to \(H/X\).
             </p><p class="hero-lede">
-            It is now the inner sum that we complete into a twisted cubic theta series and transform using modularity. Schematically, the length \(X\) becomes \(L/X\), and the square picks up a factor \(X^2/L\):
-            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L}\sum_{h\asymp L}\left|\sum_{m\lesssim L/X}\overline{\chi_m(h)}^{\,3}\,\widetilde g(m)\right|^2.\)</span>
+            For each fixed \(\ell\), the inner sum contains only the squarefree part of the twisted cubic theta coefficients. To complete it, we restore the cube multiples \(mj^3\), schematically replacing
+            <span class="hero-equation">\(\displaystyle \sum_{m\asymp X}a_\ell(m)\quad\longrightarrow\quad\sum_{mj^3\asymp X}a_\ell(m)\,w_\ell(j),\qquad a_\ell(m)=\chi_m(\ell)\widetilde g_3(m)\frac{m}{|m|}.\)</span>
+            The cube weights \(w_\ell(j)\) include the required twists and normalizations. The completed coefficient index is \(mj^3\); Möbius inversion in the cube factor recovers the original squarefree sum.
+            We apply modularity to this completed theta sum and then reopen the cube completion. Schematically, the length \(X\) becomes \(L/X\), and the square picks up a factor \(X^2/L\):
+            <span class="hero-equation">\(\displaystyle S(X,H)\approx\frac{H}{X}\frac{X^2}{L}\sum_{\ell\asymp L}\left|\sum_{m\lesssim L/X}\overline{\chi_m(\ell)}^{\,3}\,\widetilde g(m)\right|^2.\)</span>
             Here \(\widetilde g(m)\) denotes the normalized transformed Gauss coefficient, with the accompanying phases included; smooth weights and completion terms are suppressed throughout this heuristic.
             The characters now occur cubed, so they are quadratic! The quadratic large sieve controls this final mean square. Together with the diagonal and the treatment of intermediate common divisors, this gives the desired bound \(S(X,H)\ll XH\), up to epsilon losses.
           </p>
@@ -472,13 +475,13 @@ noncomputable def μ_K (n : 𝒪) : ℤ :=
         <article class="beat" id="beat-2">
           <section class="story">
             <div class="beat-topline"><span class="beat-number">02</span><span class="phase">Set up</span></div>
-            <h3>Build \(M_u(X)\) and its finite second moment</h3>
+            <h3>Build \(M_h(X)\) and its finite second moment</h3>
             <p>Now make every ingredient visible in the summand: primaryness, Möbius, the actual sextic twist, and a smooth cutoff supported in \([1/2,1]\). Thus only \(X/2\leq \mathcal N(n)\leq X\) contributes.</p>
             <div class="math-card">\[
-              M_u(X)=\sum_{\substack{n\ {\rm primary}\\\mathcal N(n)\le X}}
-                \mu_K(n)\chi_n(u)W\!\left(\frac{\mathcal N(n)}X\right),
+              M_h(X)=\sum_{\substack{n\ {\rm primary}\\\mathcal N(n)\le X}}
+                \mu_K(n)\chi_n(h)W\!\left(\frac{\mathcal N(n)}X\right),
               \quad
-              S(X,H)=\sum_{\mathcal N(u)\le H}V\!\left(\frac{\mathcal N(u)}H\right)|M_u(X)|^2.
+              S(X,H)=\sum_{\mathcal N(h)\le H}V\!\left(\frac{\mathcal N(h)}H\right)|M_h(X)|^2.
             \]</div>
             <p>The public \(S\) is deliberately a <em>finite</em> sum. At the precise boundary where Poisson is needed, compact support proves it equal to a whole-lattice <code>tsum</code>.</p>
             <p class="plain-note"><strong>Lineage.</strong> Deforming a problem in a family has a geometric analogy in <a href="https://numdam.org/articles/10.1007/BF02684373/">Deligne’s proof of the Weil Riemann hypothesis</a>, through a Lefschetz pencil and monodromy; that is an analogy, not an input here. The modern amplification line runs through <a href="https://doi.org/10.1515/crll.1992.428.139">Iwaniec</a>, <a href="https://doi.org/10.1007/BF01232422">Duke–Friedlander–Iwaniec</a>, and <a href="https://annals.math.princeton.edu/1995/141-2/p03">Iwaniec–Sarnak</a>. <strong>New here.</strong> The specific sextic deformation and sixth-power rows that recover the original sum belong to this argument.</p>
@@ -553,7 +556,7 @@ theorem outsideS_eq_idealRowSum_tsum
           (1 : DirichletCharacter ℂ 1)
           (fun n ↦ W ((n : ℝ) / (X : ℝ))) u‖ ^ 2</code></pre>
             </details>
-            <p class="formal-note">These theorems certify the readable (M_u(X)) and (S(X,H)) notation. The analytic assembly starts from the equal <code>idealRowSum</code> expression rather than invoking the public wrappers again.</p>
+            <p class="formal-note">These theorems certify the readable \(M_h(X)\) and \(S(X,H)\) notation. The analytic assembly starts from the equal <code>idealRowSum</code> expression rather than invoking the public wrappers again.</p>
           </section>
         </article>
 
@@ -563,12 +566,12 @@ theorem outsideS_eq_idealRowSum_tsum
           <section class="story">
             <div class="beat-topline"><span class="beat-number">03</span><span class="phase transform">Transform</span></div>
             <h3>Open the square and apply the first Poisson summation</h3>
-            <p>Expand \(|M_u(X)|^2\) and separate the diagonal, which already contributes only \(O(HX)\). For the remaining pairs, reverse the row and column sums and run Poisson summation in \(u\). The coprime pairs illustrate the mechanism; common divisors and coprimality masks are retained in the full argument.</p>
+            <p>Expand \(|M_h(X)|^2\) and separate the diagonal, which already contributes only \(O(HX)\). For the remaining pairs, reverse the row and column sums and run Poisson summation in \(h\). The coprime pairs illustrate the mechanism; common divisors and coprimality masks are retained in the full argument.</p>
             <div class="math-card">\[
-              \sum_{u\in\mathcal O}W_u\,\overline{\chi_I(u)}\chi_J(u)
+              \sum_{h\in\mathcal O}W_h\,\overline{\chi_I(h)}\chi_J(h)
               \quad\stackrel{\rm Poisson}{\longrightarrow}\quad
               \sum_{D\mid{\rm mask}}\frac{\mu_K(D)}{N(D)}
-              \sum_{h\in\mathcal O}\mathcal K_{I,J,D}(h).
+              \sum_{\ell\in\mathcal O}\mathcal K_{I,J,D}(\ell).
             \]</div>
             <p>The zero frequency and the nonzero tail are tracked separately. The important structural fact is that the original moment has become a dual-frequency sum carrying finite Gauss factors.</p>
             <p class="plain-note"><strong>Precedents.</strong> <a href="https://doi.org/10.1007/BF01453602">Duke–Iwaniec (1990)</a> pass from Poisson summation to Gauss–Ramanujan sums and bilinear estimates for half-integral-weight coefficients. Their <a href="https://doi.org/10.1090/conm/143/00999">1993 cubic exponential/Kloosterman identity</a> is another nearby precursor, but not an input here. A complementary automorphic model is Selberg’s Eisenstein-series proof of the prime number theorem: in the <a href="https://web.math.princeton.edu/sarnak/ShalikaBday2002.pdf">formulation recorded by Sarnak</a>, the index-1 Ramanujan coefficient is \(c_q(1)=\mu(q)\). Selberg originated that argument; Sarnak’s contribution is its effective version and quantitative zero-free region.</p>
@@ -616,7 +619,7 @@ theorem canonicalPair_first_poisson
             <div class="beat-topline"><span class="beat-number">04</span><span class="phase transform">Transform</span></div>
             <h3>Use Gauss–Jacobi identities to expose cubic coefficients</h3>
             <p>First Poisson produces sextic Gauss sums. Cubic reciprocity and the normalized Gauss–Jacobi relation absorb the squarefree Möbius sign into those local factors.</p>
-            <p>In the coprime heuristic, the conversion acts on both column factors. Rearranging their phases reassembles a square whose inner sum has coefficients \(\chi_m(h)\widetilde g_3(m)m/|m|\). Normalizing the two Gauss factors changes the outside factor from \(H/X^2\) to \(H/X\).</p>
+            <p>In the coprime heuristic, the conversion acts on both column factors. Rearranging their phases reassembles a square whose inner sum has coefficients \(\chi_m(\ell)\widetilde g_3(m)m/|m|\). Normalizing the two Gauss factors changes the outside factor from \(H/X^2\) to \(H/X\).</p>
             <div class="math-card">\[
               \mu_K\!\left(\prod p_i\right)
               G\!\left(\prod \chi_{p_i}^{\,e_i}\right)
@@ -661,7 +664,7 @@ theorem canonicalPair_first_poisson
           <section class="story">
             <div class="beat-topline"><span class="beat-number">05</span><span class="phase transform">Transform</span></div>
             <h3>Complete to the full cubic theta series</h3>
-            <p>For each fixed \(h\), complete the inner cubic-Gauss sum in the square into a twisted theta sum. The coefficients first appear with squarefree, divisor, unit, and ray restrictions; completion restores the cube multiples and the required local pieces.</p>
+            <p>For each fixed \(\ell\), complete the inner cubic-Gauss sum in the square into a twisted theta sum. The coefficients first appear with squarefree, divisor, unit, and ray restrictions; completion restores the cube multiples and the required local pieces.</p>
             <div class="math-card">\[
               T_\Psi(W,X)=\sum_{I}\sum_J
               \frac{c_\Psi(I)}{\sqrt{N(I)}}\,w_\Psi(J)\,
@@ -727,7 +730,7 @@ def completedT (Ψ : O →* ℂ) (W : ℝ → ℂ)
           <section class="story">
             <div class="beat-topline"><span class="beat-number">06</span><span class="phase transform">Transform</span></div>
             <h3>Prove modularity and reflect the cubic theta series</h3>
-            <p>Apply modularity to the completed inner sum, with \(h\) fixed. In the introductory heuristic, \(h\asymp L=X^2/H\): the length \(X\) becomes \(L/X\), and the squared transformation factor is \(X^2/L\). The reflected coefficients carry \(\overline{\chi_m(h)}^{\,3}\), leading to a quadratic-character mean square.</p>
+            <p>Apply modularity to the completed inner sum, with \(\ell\) fixed. In the introductory heuristic, \(\ell\asymp L\): the length \(X\) becomes \(L/X\), and the squared transformation factor is \(X^2/L\). The reflected coefficients carry \(\overline{\chi_m(\ell)}^{\,3}\), leading to a quadratic-character mean square.</p>
             <p class="plain-note"><strong>Lineage.</strong> Meromorphic continuation uses <a href="https://cds.cern.ch/record/427143">Selberg’s 1956 resolvent/Fredholm method</a>. Kubota applied that machinery metaplectically; Patterson computed the cubic coefficients and cusps; <a href="https://doi.org/10.1017/S0027763000000817">Yoshimoto</a> developed the twisted functional equations. The explicit level-aspect cubic Voronoi transformation used here is <a href="https://doi.org/10.4007/annals.2024.200.3.3">Dunn–Radziwiłł’s</a> extension of Patterson and Yoshimoto.</p>
             <p>In this repository the fixed-shell identity is constructed from the Poisson, Gauss-sum, and branch-decoding layers. It is then promoted to the canonical theta-model interface needed by the density argument.</p>
             <div class="math-card">\[
@@ -791,7 +794,7 @@ theorem completedT_eq_reflectedFiber_idealValue_local
           <section class="story">
             <div class="beat-topline"><span class="beat-number">07</span><span class="phase transform">Transform</span></div>
             <h3>Apply Poisson a second time</h3>
-            <p>The introductory theta transformation summarizes the reflected side as a square with characters \(\overline{\chi_m(h)}^{\,3}\). The detailed argument uses a second Poisson passage to organize the reflected rows, retaining their masks and Gauss factors. The resulting characters are quadratic because the original sextic characters occur cubed.</p>
+            <p>The introductory theta transformation summarizes the reflected side as a square with characters \(\overline{\chi_m(\ell)}^{\,3}\). The detailed argument uses a second Poisson passage to organize the reflected rows, retaining their masks and Gauss factors. The resulting characters are quadratic because the original sextic characters occur cubed.</p>
             <p class="plain-note"><strong>New bridge here.</strong> The identity \(\chi_6^3=\chi_2\) is elementary. The new move is arranging theta reflection and the second Poisson transform so the surviving sextic characters occur through their cubes, placing the result in the quadratic large-sieve regime.</p>
             <div class="math-card">\[
               \chi_6^3=\chi_2,\qquad
@@ -961,7 +964,7 @@ def CanonicalDescentScale.ofReserve
           <section class="story">
             <div class="beat-topline"><span class="beat-number">10</span><span class="phase close">Close</span></div>
             <h3>Amplify with sixth powers and extract \(11/12\)</h3>
-            <p>Put \(u=b^6\). A sextic character evaluated at a sixth power is exactly the indicator that \(b\) is coprime to the column. We average over all \(b\) in a smooth annulus, not just primes. Its main term is the density \(\prod_{P\mid I}(1-1/N(P))\).</p>
+            <p>Put \(h=b^6\). A sextic character evaluated at a sixth power is exactly the indicator that \(b\) is coprime to the column. We average over all \(b\) in a smooth annulus, not just primes. Its main term is the density \(\prod_{P\mid I}(1-1/N(P))\).</p>
             <div class="math-card">\[
               \chi_I(b^6)=\mathbf 1_{(b,I)=1},\quad
               Y=Z^{(1+\theta)/6},\quad
