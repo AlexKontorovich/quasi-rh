@@ -1,4 +1,11 @@
 /* The original page remains the visual shell; Verso supplies semantic code. */
+.verso-code-panel {
+  --verso-code-color: #e7eee9;
+  --verso-code-keyword-color: #e5b888;
+  --verso-code-const-color: #b4d9e9;
+  --verso-code-var-color: #e7eee9;
+  --verso-code-hover-bg-color: #344a48;
+}
 .verso-code-panel { background: var(--code); color: var(--code-ink); border-radius: 12px; margin: 14px 0; overflow: auto; padding: 18px; }
 .verso-declaration + .verso-declaration { margin-top: 22px; }
 .verso-source { display: block; width: fit-content; margin-bottom: 8px; color: #9fc8bd; font: 11px ui-sans-serif, sans-serif; text-decoration: none; }
