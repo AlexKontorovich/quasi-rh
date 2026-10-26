@@ -197,6 +197,7 @@ for (const note of document.querySelectorAll('.formal-note')) {
     'Rendered from checked Lean by Verso. Hover over identifiers for types; click through to definitions and full proofs.');
 }
 writeFileSync('_site/blueprint-verso.css', readFileSync('blueprint/verso.css'));
+writeFileSync('_site/blueprint-theme.css', readFileSync('blueprint/theme.css'));
 const result = '<!doctype html>\n' + document.documentElement.outerHTML;
 writeFileSync('_site/index.html', result);
 writeFileSync('blueprint/index.html', result);

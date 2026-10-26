@@ -8,6 +8,9 @@ from an elaborated source module, not syntax-colored text or invented hovers.
 No mathematical source was changed for this migration.
 
 Author prose/layout in blueprint/page.html, not generated index.html.
+Author colors, spacing, typography, and responsive layout in blueprint/theme.css;
+Lean-panel styling lives in blueprint/verso.css. Keeping cosmetic edits in these
+files enables the fastest deployment path.
 Author Lean in its original .lean file. Run scripts/sync-blueprint.mjs after
 editing declarations displayed by a source-synchronized panel. Other panels
 are resolved by declaration name at site build time; ambiguous names fail.
@@ -27,7 +30,14 @@ styles, search data, and shared hover table. Serve the WHOLE directory over
 HTTP; opening just index.html as a file cannot load the JSON hover database.
 The generated index is also saved to blueprint/index.html for review.
 
-The Pages workflow has a Node-only fast path for prose, layout, and CSS edits.
+The Pages workflow first checks an exact finished-site cache. CSS-only edits
+restore that validated site and copy the two current CSS files into it, skipping
+Node setup, npm, Lean, composition, and tests. Upload and Pages rollout remain.
+New pushes cancel superseded workflow runs instead of waiting behind them.
+The finished-site key includes prose, Lean, dependencies, renderer, and tests,
+but not CSS. Cache misses fall back to the normal validated rendering pipeline.
+
+The Pages workflow also has a Node-only fast path for prose and HTML edits.
 It restores raw Verso pages and compiler declaration metadata from a small
 presentation cache, then composes, validates, and deploys the current page.
 It does not install Lean, restore oleans, or run Lake on a presentation-cache hit.

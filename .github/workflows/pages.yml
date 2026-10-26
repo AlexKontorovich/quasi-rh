@@ -23,7 +23,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -41,16 +41,29 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+      # CSS is deliberately excluded: overlay current styles on validated HTML.
+      # All statement/prose/renderer inputs must match exactly; no fallback key.
+      - name: Restore finished site for instant styling updates
+        id: finished
+        uses: actions/cache/restore@v4
+        with:
+          path: _site
+          key: blueprint-finished-v1-${{ runner.os }}-${{ hashFiles('**/*.lean', 'lake-manifest.json', 'lean-toolchain', 'blueprint/page.html', 'package*.json', 'scripts/*.mjs', 'tests/*.mjs') }}
       - uses: actions/setup-node@v4
+        if: steps.finished.outputs.cache-hit != 'true'
         with:
           node-version: '22'
           cache: npm
       - run: npm ci --ignore-scripts
+        if: steps.finished.outputs.cache-hit != 'true'
       - name: Check Lean excerpts against source
+        if: steps.finished.outputs.cache-hit != 'true'
         run: node scripts/sync-blueprint.mjs --check
       - name: Check excerpt declaration boundaries
+        if: steps.finished.outputs.cache-hit != 'true'
         run: node tests/sync-blueprint.test.mjs
       - name: Plan Verso source modules
+        if: steps.finished.outputs.cache-hit != 'true'
         id: plan
         run: |
           node scripts/build-blueprint.mjs --plan > /tmp/blueprint-modules
@@ -60,6 +73,7 @@ jobs:
       # not oleans or the Lean toolchain. Prose/CSS edits need only Node.
       # No fallback key: stale Lean statements must never be published.
       - name: Restore checked Lean presentation data
+        if: steps.finished.outputs.cache-hit != 'true'
         id: presentation
         uses: actions/cache/restore@v4
         with:
@@ -68,7 +82,7 @@ jobs:
             .lake/build/lib/lean/**/*.ilean
           key: blueprint-semantic-v1-${{ runner.os }}-${{ hashFiles('**/*.lean', 'lake-manifest.json', 'lean-toolchain') }}-${{ steps.plan.outputs.modules }}
       - name: Set up Lean, fetch Mathlib cache, and compile Verso source
-        if: steps.presentation.outputs.cache-hit != 'true'
+        if: steps.finished.outputs.cache-hit != 'true' && steps.presentation.outputs.cache-hit != 'true'
         uses: leanprover/lean-action@v1
         with:
           auto-config: 'false'
@@ -78,10 +92,10 @@ jobs:
           lint: 'false'
           use-mathlib-cache: 'true'
       - name: Generate raw Verso source pages
-        if: steps.presentation.outputs.cache-hit != 'true'
+        if: steps.finished.outputs.cache-hit != 'true' && steps.presentation.outputs.cache-hit != 'true'
         run: lake exe verso-html .lake/build/literate _site
       - name: Cache checked Lean presentation data
-        if: steps.presentation.outputs.cache-hit != 'true'
+        if: steps.finished.outputs.cache-hit != 'true' && steps.presentation.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
           path: |
@@ -89,9 +103,20 @@ jobs:
             .lake/build/lib/lean/**/*.ilean
           key: ${{ steps.presentation.outputs.cache-primary-key }}
       - name: Render interactive blueprint and linked Lean source
+        if: steps.finished.outputs.cache-hit != 'true'
         run: |
           node scripts/build-blueprint.mjs --render-only
           node tests/verso-blueprint.test.mjs
+      - name: Cache validated finished site
+        if: steps.finished.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: _site
+          key: ${{ steps.finished.outputs.cache-primary-key }}
+      - name: Apply current styles without rebuilding
+        run: |
+          cp blueprint/theme.css _site/blueprint-theme.css
+          cp blueprint/verso.css _site/blueprint-verso.css
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
