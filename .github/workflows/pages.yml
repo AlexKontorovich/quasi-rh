@@ -4,10 +4,17 @@ on:
   push:
     branches: [main]
     paths:
-      - 'blueprint/index.html'
+      - 'blueprint/**'
       - 'ElevenTwelfths/**'
+      - 'OAI/**'
+      - 'lakefile.lean'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - 'package*.json'
+      - 'scripts/build-blueprint.mjs'
       - 'scripts/sync-blueprint.mjs'
       - 'tests/sync-blueprint.test.mjs'
+      - 'tests/verso-blueprint.test.mjs'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -21,6 +28,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LEAN_NUM_THREADS: 2
     permissions:
       contents: read
       pages: write
@@ -31,16 +41,34 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
       - name: Check Lean excerpts against source
         run: node scripts/sync-blueprint.mjs --check
       - name: Check excerpt declaration boundaries
         run: node tests/sync-blueprint.test.mjs
+      - name: Plan Verso source modules
+        id: plan
+        run: echo "targets=$(node scripts/build-blueprint.mjs --plan | sed 's/$/:literate/' | paste -sd ' ' -) verso-html" >> "$GITHUB_OUTPUT"
+      - name: Set up Lean, fetch Mathlib cache, and compile Verso source
+        uses: leanprover/lean-action@v1
+        with:
+          auto-config: 'false'
+          build: 'true'
+          build-args: ${{ steps.plan.outputs.targets }}
+          test: 'false'
+          lint: 'false'
+          use-mathlib-cache: 'true'
+      - name: Render interactive blueprint and linked Lean source
+        run: |
+          lake exe verso-html .lake/build/literate _site
+          node scripts/build-blueprint.mjs --render-only
+          node tests/verso-blueprint.test.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Prepare standalone blueprint
-        run: |
-          mkdir -p _site
-          cp blueprint/index.html _site/index.html
       - name: Upload site
         uses: actions/upload-pages-artifact@v4
         with:

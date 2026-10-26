@@ -5,3 +5,5 @@
 *.ilean
 *.trace
 .DS_Store
+/node_modules/
+/_site/

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const html = readFileSync(new URL('../blueprint/index.html', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../blueprint/page.html', import.meta.url), 'utf8');
 let panels = 0;
 for (const match of html.matchAll(
   /<pre data-lean-source="[^"]+" data-lean-decls="([^"]+)"><code>([\s\S]*?)<\/code><\/pre>/g)) {

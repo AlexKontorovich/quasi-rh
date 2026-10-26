@@ -145,12 +145,17 @@ Lean checks. The [ideal-family notes](docs/ideal-family.md) preserve an earlier
 standalone prototype; they are not the proof spine shown in the blueprint.
 
 Read the [published blueprint](https://alexkontorovich.github.io/quasi-rh/index.html).
-GitHub Actions republishes it whenever `blueprint/index.html` or the Pages
-workflow changes on `main`; it can also be deployed manually from Actions.
-Only the standalone HTML is published. Source links require repository access.
+GitHub Actions builds and republishes the Verso-backed site when the blueprint,
+Lean sources, renderer, or build configuration changes on `main`. Lean panels
+have compiler-generated type/documentation hovers and definition links. The
+selected full source modules are published alongside the guide, including
+proof-state information; links to other repository files require repository access.
 
-Open `blueprint/index.html` directly, or run `python3 -m http.server 8000`
-and visit <http://localhost:8000/blueprint/>. MathJax requires internet access.
+Run `lake exe cache get`, `npm ci --ignore-scripts`, and
+`node scripts/build-blueprint.mjs`, then serve `_site/` over HTTP. For example,
+`python3 -m http.server 8000 --directory _site` serves it at
+<http://localhost:8000/>. The entire directory is needed for hover data and
+navigation. MathJax requires internet access. See [build instructions](blueprint/BUILDING.txt).
 The main readable interfaces are now:
 
 - `ElevenTwelfths.ZetaFamily`: concrete zeta-only `M`, `S`, opening the square,
@@ -175,8 +180,9 @@ node scripts/sync-blueprint.mjs
 node scripts/sync-blueprint.mjs --check
 ```
 
-Edit prose directly, but edit marked Lean excerpts in their source modules
-and regenerate them. Definitions are included in full; theorem statements
+Edit prose in `blueprint/page.html` (the custom design shell); do not hand-edit
+the generated `blueprint/index.html`. Edit Lean excerpts in their source modules
+and regenerate them. Verso renders all code panels. Definitions are included in full; theorem statements
 omit only their proofs. Use existing mathlib definitions where available, and keep the
 readable mathematical invariant separate from the longer formal interface.
 

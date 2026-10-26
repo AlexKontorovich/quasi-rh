@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": { "blueprint": "node scripts/build-blueprint.mjs" },
+  "dependencies": { "linkedom": "0.18.12" }
+}

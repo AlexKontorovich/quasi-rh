@@ -1,0 +1,38 @@
+Interactive blueprint
+=====================
+
+The site uses Verso's Lean-to-HTML renderer inside the original custom page
+design. This is a Verso-backed HTML composition, not a Verso Manual document:
+the mathematical prose and layout stay in page.html; every Lean panel comes
+from an elaborated source module, not syntax-colored text or invented hovers.
+No mathematical source was changed for this migration.
+
+Author prose/layout in blueprint/page.html, not generated index.html.
+Author Lean in its original .lean file. Run scripts/sync-blueprint.mjs after
+editing declarations displayed by a source-synchronized panel. Other panels
+are resolved by declaration name at site build time; ambiguous names fail.
+The two formerly schematic panels now show the actual complete statements.
+
+Build from the repository root:
+
+  lake exe cache get
+  npm ci --ignore-scripts
+  node scripts/sync-blueprint.mjs
+  node tests/sync-blueprint.test.mjs
+  node scripts/build-blueprint.mjs
+  node tests/verso-blueprint.test.mjs
+
+Output is _site/, including index.html, linked module pages, Verso's JavaScript,
+styles, search data, and shared hover table. Serve the WHOLE directory over
+HTTP; opening just index.html as a file cannot load the JSON hover database.
+The generated index is also saved to blueprint/index.html for review.
+
+The Pages workflow fetches Mathlib's cache before building project modules.
+It caches Lean artifacts, compiles the selected modules' literate facets,
+renders with the pinned verso-html executable, validates, and deploys _site/.
+The first CI build takes longer than the former HTML-only deployment.
+
+Theorem proofs are omitted from guide panels, but are present on linked
+module pages with Verso's proof-state interactions. Shared section context
+is preserved where explicitly requested. Other ambient variables can be
+inspected via semantic hovers and the complete source page.

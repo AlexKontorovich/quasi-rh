@@ -7,6 +7,11 @@ package ElevenTwelfths where
   fixedToolchain := true
   leanOptions := #[⟨`autoImplicit, false⟩]
 
+-- Pinned Verso renderer for the interactive blueprint (Lean 4.34 release).
+require verso from git
+  "https://github.com/leanprover/verso.git" @
+    "cad4b633e75ea769b851f12f9ca3b4f0dfcc625f"
+
 require «rellich-kondrachov» from git
   "https://github.com/abenenson/rellich-kondrachov.git" @
     "70f85d4c1bf99c6e7d61e8be4daa6f3664d08d23"
