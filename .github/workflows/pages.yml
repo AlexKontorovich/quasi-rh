@@ -52,8 +52,23 @@ jobs:
         run: node tests/sync-blueprint.test.mjs
       - name: Plan Verso source modules
         id: plan
-        run: echo "targets=$(node scripts/build-blueprint.mjs --plan | sed 's/$/:literate/' | paste -sd ' ' -) verso-html" >> "$GITHUB_OUTPUT"
+        run: |
+          node scripts/build-blueprint.mjs --plan > /tmp/blueprint-modules
+          echo "targets=$(sed 's/$/:literate/' /tmp/blueprint-modules | paste -sd ' ' -) verso-html" >> "$GITHUB_OUTPUT"
+          echo "modules=$(sort /tmp/blueprint-modules | sha256sum | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      # This small cache contains raw semantic HTML and declaration locations,
+      # not oleans or the Lean toolchain. Prose/CSS edits need only Node.
+      # No fallback key: stale Lean statements must never be published.
+      - name: Restore checked Lean presentation data
+        id: presentation
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            _site
+            .lake/build/lib/lean/**/*.ilean
+          key: blueprint-semantic-v1-${{ runner.os }}-${{ hashFiles('**/*.lean', 'lake-manifest.json', 'lean-toolchain') }}-${{ steps.plan.outputs.modules }}
       - name: Set up Lean, fetch Mathlib cache, and compile Verso source
+        if: steps.presentation.outputs.cache-hit != 'true'
         uses: leanprover/lean-action@v1
         with:
           auto-config: 'false'
@@ -62,9 +77,19 @@ jobs:
           test: 'false'
           lint: 'false'
           use-mathlib-cache: 'true'
+      - name: Generate raw Verso source pages
+        if: steps.presentation.outputs.cache-hit != 'true'
+        run: lake exe verso-html .lake/build/literate _site
+      - name: Cache checked Lean presentation data
+        if: steps.presentation.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            _site
+            .lake/build/lib/lean/**/*.ilean
+          key: ${{ steps.presentation.outputs.cache-primary-key }}
       - name: Render interactive blueprint and linked Lean source
         run: |
-          lake exe verso-html .lake/build/literate _site
           node scripts/build-blueprint.mjs --render-only
           node tests/verso-blueprint.test.mjs
       - name: Configure Pages

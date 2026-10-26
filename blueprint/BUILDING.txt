@@ -27,10 +27,16 @@ styles, search data, and shared hover table. Serve the WHOLE directory over
 HTTP; opening just index.html as a file cannot load the JSON hover database.
 The generated index is also saved to blueprint/index.html for review.
 
-The Pages workflow fetches Mathlib's cache before building project modules.
-It caches Lean artifacts, compiles the selected modules' literate facets,
-renders with the pinned verso-html executable, validates, and deploys _site/.
-The first CI build takes longer than the former HTML-only deployment.
+The Pages workflow has a Node-only fast path for prose, layout, and CSS edits.
+It restores raw Verso pages and compiler declaration metadata from a small
+presentation cache, then composes, validates, and deploys the current page.
+It does not install Lean, restore oleans, or run Lake on a presentation-cache hit.
+The exact cache key includes Lean sources, dependency pins, the toolchain,
+and the set of displayed modules. There is no stale-key fallback.
+On a cache miss it fetches Mathlib's cache, builds the selected literate facets,
+and runs the pinned verso-html executable. Raw output is cached BEFORE page
+composition. The first run with this workflow seeds that presentation cache;
+Lean changes, new displayed modules, or cache eviction can require a slow run.
 
 Theorem proofs are omitted from guide panels, but are present on linked
 module pages with Verso's proof-state interactions. Shared section context
